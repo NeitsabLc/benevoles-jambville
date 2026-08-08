@@ -26,6 +26,8 @@ final class ProfilControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Mon profil');
         self::assertSelectorNotExists('input[value="DEV-BENEVOLE"]');
         self::assertSelectorExists('input[name="telephone"]');
+        self::assertSelectorExists('input[name="telephone"][data-telephone-francais]');
+        self::assertSelectorExists('[data-erreur-telephone][hidden]');
         self::assertSelectorExists('input[name="vegetarien"]');
         self::assertSelectorExists('input[name="allergie_oeuf"]');
         self::assertSelectorExists('input[name="allergie_arachide"]');
@@ -74,11 +76,13 @@ final class ProfilControllerTest extends WebTestCase
         $client = self::createClient();
         $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
         self::assertNotNull($utilisateur);
+        $telephoneInitial = $utilisateur->getTelephone();
         $client->loginUser($utilisateur);
 
         $crawler = $client->request('GET', '/mon-profil');
         self::assertSelectorNotExists('input[name="foulard_remis"][disabled]');
         $client->submit($crawler->selectButton('Enregistrer mon profil')->form([
+            'telephone' => '',
             'foulard_remis' => true,
             'tenue_remise' => true,
         ]));
@@ -90,6 +94,14 @@ final class ProfilControllerTest extends WebTestCase
         self::assertTrue($utilisateur->isTenueRemise());
 
         $utilisateur->modifierRemiseEquipement(false, false);
+        $utilisateur->modifierProfil(
+            $telephoneInitial,
+            $utilisateur->isVegetarien(),
+            $utilisateur->hasAllergieOeuf(),
+            $utilisateur->hasAllergieArachide(),
+            $utilisateur->getRegimeAutre(),
+            $utilisateur->getBesoinCouchage(),
+        );
         self::getContainer()->get(EntityManagerInterface::class)->flush();
     }
 
@@ -119,5 +131,23 @@ final class ProfilControllerTest extends WebTestCase
         self::assertNotNull($ancienHash);
         $utilisateur->setPassword($ancienHash);
         self::getContainer()->get(EntityManagerInterface::class)->flush();
+    }
+
+    public function testUnNumeroDeTelephoneInvalideEstRefuse(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $telephoneInitial = $utilisateur->getTelephone();
+        $client->loginUser($utilisateur);
+
+        $crawler = $client->request('GET', '/mon-profil');
+        $client->submit($crawler->selectButton('Enregistrer mon profil')->form(['telephone' => '1234']));
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.alerte-erreur', 'numéro français valide');
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        self::assertSame($telephoneInitial, $utilisateur->getTelephone());
     }
 }

@@ -124,7 +124,30 @@ const initialiserSuppressionPresence = () => {
     });
 };
 
+const initialiserValidationTelephone = () => {
+    document.querySelectorAll('[data-telephone-francais]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        const erreur = document.querySelector('[data-erreur-telephone]');
+        const formatTelephoneFrancais = /^(?:(?:\+33|0033)[ .-]?[1-9]|0[1-9])(?:[ .-]?\d{2}){4}$/;
+
+        const valider = () => {
+            const invalide = champ.value.trim() !== '' && !formatTelephoneFrancais.test(champ.value.trim());
+            champ.setCustomValidity(invalide ? 'Indiquez un numéro français valide.' : '');
+            champ.setAttribute('aria-invalid', invalide ? 'true' : 'false');
+            if (erreur) erreur.hidden = !invalide;
+        };
+
+        champ.addEventListener('blur', valider);
+        champ.addEventListener('input', () => {
+            if (champ.getAttribute('aria-invalid') === 'true') valider();
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
 document.addEventListener('turbo:load', initialiserFormulairePresence);
 document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
 document.addEventListener('turbo:load', initialiserSuppressionPresence);
+document.addEventListener('DOMContentLoaded', initialiserValidationTelephone);
+document.addEventListener('turbo:load', initialiserValidationTelephone);

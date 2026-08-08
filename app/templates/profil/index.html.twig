@@ -26,7 +26,11 @@
                     <div class="champ"><label>Prénom</label><input value="{{ app.user.prenom }}" readonly></div>
                     <div class="champ"><label>Nom</label><input value="{{ app.user.nom }}" readonly></div>
                     <div class="champ"><label>Email</label><input type="email" value="{{ app.user.email }}" readonly></div>
-                    <div class="champ"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', app.user.telephone) }}" autocomplete="tel"></div>
+                    <div class="champ">
+                        <label for="telephone">Téléphone</label>
+                        <input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', app.user.telephone) }}" autocomplete="tel" inputmode="tel" aria-describedby="erreur-telephone" data-telephone-francais>
+                        <small id="erreur-telephone" class="erreur-champ" data-erreur-telephone hidden>Indiquez un numéro français valide, par exemple 06 12 34 56 78.</small>
+                    </div>
                 </div>
             </section>
 

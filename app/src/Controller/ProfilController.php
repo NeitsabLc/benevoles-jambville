@@ -37,6 +37,8 @@ final class ProfilController extends AbstractController
             $besoinCouchage = trim($request->request->getString('besoin_couchage')) ?: null;
             if ($telephone !== null && mb_strlen($telephone) > 30) {
                 $erreurs[] = 'Le numéro de téléphone ne peut pas dépasser 30 caractères.';
+            } elseif ($telephone !== null && !$this->telephoneEstValide($telephone)) {
+                $erreurs[] = 'Le numéro de téléphone doit être un numéro français valide, par exemple 06 12 34 56 78.';
             }
 
             $motDePasseActuel = $request->request->getString('mot_de_passe_actuel');
@@ -81,5 +83,10 @@ final class ProfilController extends AbstractController
         }
 
         return $this->render('profil/index.html.twig', ['erreurs' => $erreurs]);
+    }
+
+    private function telephoneEstValide(string $telephone): bool
+    {
+        return preg_match('/^(?:(?:\+33|0033)[ .-]?[1-9]|0[1-9])(?:[ .-]?\d{2}){4}$/', $telephone) === 1;
     }
 }

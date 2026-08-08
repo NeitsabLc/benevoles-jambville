@@ -223,8 +223,11 @@ body {
 .carte-profil h2 { margin: 0 0 .3rem; font-size: 1.25rem; }
 .carte-profil header p { margin: 0; color: var(--texte-secondaire); font-size: .85rem; line-height: 1.45; }
 .grille-profil { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grille-profil > .champ { align-content: start; }
 .carte-profil input[readonly] { color: #536b77; background: #f3f6f7; cursor: not-allowed; }
 .carte-profil textarea { resize: vertical; }
+.champ input[aria-invalid="true"] { border-color: var(--rouge-sgdf); box-shadow: 0 0 0 3px rgb(228 0 59 / 10%); }
+.erreur-champ { color: #a12b24 !important; font-weight: 700; }
 .choix-profil { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1.2rem; }
 .choix-profil:last-child { margin-bottom: 0; }
 .choix-profil label { display: flex; align-items: center; gap: .55rem; padding: .7rem .85rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: #173f53; background: #f7fafb; font-size: .88rem; font-weight: 700; }
