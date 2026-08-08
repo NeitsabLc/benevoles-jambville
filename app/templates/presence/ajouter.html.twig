@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ edition ? 'Modifier' : 'Ajouter' }} une présence · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+<main class="page-formulaire-presence">
+    <section class="carte-presence" data-presence-form data-mode="{{ mode }}">
+        <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
+        <header class="entete-formulaire-presence">
+            <h1>{{ edition ? 'Modifier' : 'Ajouter' }} une présence</h1>
+            <p>Renseignez les informations utiles pour préparer l’accueil.</p>
+        </header>
+
+        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+
+        <form method="post" class="formulaire-presence">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_intention) }}">
+            <input type="hidden" name="mode" value="{{ mode }}" data-mode-input>
+
+            {% if peut_ajouter_compa and not edition %}
+                <div class="choix-mode" aria-label="Type de présence">
+                    <button type="button" data-mode-button="benevole" class="{{ mode == 'benevole' ? 'actif' }}"><strong>J’inscris un bénévole</strong><small>Présence individuelle</small></button>
+                    <button type="button" data-mode-button="compa" class="{{ mode == 'compa' ? 'actif' }}"><strong>J’inscris une équipe compa</strong><small>Présence d’une équipe</small></button>
+                </div>
+            {% endif %}
+
+            <div class="champs-presence" data-mode-panel="benevole" {{ mode != 'benevole' ? 'hidden' }}>
+                {% if utilisateurs_selectionnables %}
+                    {% set utilisateur_selectionne = app.request.request.get('utilisateur', inscription and inscription.utilisateur ? inscription.utilisateur.id : app.user.id) %}
+                    <div class="champ champ-large">
+                        <label for="utilisateur">Bénévole</label>
+                        <select id="utilisateur" name="utilisateur" data-controller="searchable-select" data-search-placeholder="Rechercher un bénévole…" data-search-label="Rechercher un bénévole" data-empty-label="Aucun bénévole trouvé" {{ mode != 'benevole' ? 'disabled' }} required>
+                            {% for utilisateur in utilisateurs_selectionnables %}
+                                <option value="{{ utilisateur.id }}" {{ utilisateur_selectionne == utilisateur.id ? 'selected' }}>{{ utilisateur.nomComplet }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% else %}
+                    <div class="champ champ-large"><label>Bénévole</label><input value="{{ inscription and inscription.utilisateur ? inscription.utilisateur.nomComplet : app.user.nomComplet }}" disabled></div>
+                {% endif %}
+            </div>
+
+            {% if peut_ajouter_compa or mode == 'compa' %}
+                <div class="champs-presence" data-mode-panel="compa" {{ mode != 'compa' ? 'hidden' }}>
+                    <div class="champ"><label for="nom_equipe_compa">Nom de l’équipe compa</label><input id="nom_equipe_compa" name="nom_equipe_compa" value="{{ app.request.request.get('nom_equipe_compa', inscription ? inscription.nomEquipeCompa : '') }}" {{ mode != 'compa' ? 'disabled' }} required></div>
+                    <div class="champ"><label for="nombre_personnes">Nombre de personnes</label><input id="nombre_personnes" name="nombre_personnes" type="number" min="1" value="{{ app.request.request.get('nombre_personnes', inscription ? inscription.nombrePersonnes : 1) }}" {{ mode != 'compa' ? 'disabled' }} required></div>
+                </div>
+            {% endif %}
+
+            <div class="champs-presence">
+                {% set date_debut = app.request.request.get('date_debut', inscription ? inscription.dateDebut|date('Y-m-d') : '') %}
+                {% set date_fin = app.request.request.get('date_fin', inscription ? inscription.dateFin|date('Y-m-d') : '') %}
+                {% set couchage = app.request.request.get('type_couchage', inscription ? inscription.typeCouchage : '') %}
+                <div class="champ"><label for="date_debut">Du</label><input id="date_debut" name="date_debut" type="date" value="{{ date_debut }}" required></div>
+                <div class="champ"><label for="date_fin">Au</label><input id="date_fin" name="date_fin" type="date" value="{{ date_fin }}" required></div>
+            </div>
+
+            <div class="champs-presence">
+                <div class="champ" data-mode-detail="benevole" {{ mode != 'benevole' ? 'hidden' }}>
+                    <label for="thematique">Thématique</label>
+                    <select id="thematique" name="thematique" {{ mode != 'benevole' ? 'disabled' }} required>
+                        <option value="">Choisir une thématique</option>
+                        {% set thematique_selectionnee = app.request.request.get('thematique', inscription and inscription.thematique ? inscription.thematique.id : '') %}
+                        {% for thematique in thematiques %}<option value="{{ thematique.id }}" {{ thematique_selectionnee == thematique.id ? 'selected' }}>{{ thematique.nom }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="champ"><label for="type_couchage">Couchage</label><select id="type_couchage" name="type_couchage" required><option value="">Choisir</option><option value="DUR" {{ couchage == 'DUR' ? 'selected' }}>En dur</option><option value="TENTE" {{ couchage == 'TENTE' ? 'selected' }}>Sous tente</option></select></div>
+            </div>
+            <input type="hidden" name="nombre_enfants" value="{{ app.request.request.get('nombre_enfants', inscription ? inscription.nombreEnfants : 0) }}" data-mode-detail="benevole" {{ mode != 'benevole' ? 'disabled' }}>
+
+            <section class="selection-repas" data-selection-repas data-selectionnes="{{ repas_selectionnes|json_encode|e('html_attr') }}" data-configures="{{ repas_configures ? 'true' : 'false' }}">
+                <header>
+                    <div><h2>Repas</h2><p>Sélectionnez les repas pris à Jambville pendant la période.</p></div>
+                    <div class="actions-repas"><button type="button" data-repas-tous>Tout sélectionner</button><button type="button" data-repas-aucun>Tout désélectionner</button></div>
+                </header>
+                <div class="table-repas">
+                    <table>
+                        <thead><tr><th>Journée</th><th>Petit-déjeuner</th><th>Déjeuner</th><th>Dîner</th></tr></thead>
+                        <tbody data-repas-lignes><tr><td colspan="4" class="repas-vide">Choisissez les dates du séjour pour afficher les repas.</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="alimentation-compa" data-mode-detail="compa" {{ mode != 'compa' ? 'hidden' }}>
+                <header><h2>Régimes et allergènes</h2><p>Indiquez le nombre de personnes concernées dans l’équipe.</p></header>
+                <div class="champs-alimentation-compa">
+                    <div class="champ"><label for="nombre_vegetariens">Végétariens</label><input id="nombre_vegetariens" name="nombre_vegetariens" type="number" min="0" value="{{ app.request.request.get('nombre_vegetariens', inscription ? inscription.nombreVegetariens : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_allergie_oeuf">Allergie aux œufs</label><input id="nombre_allergie_oeuf" name="nombre_allergie_oeuf" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_oeuf', inscription ? inscription.nombreAllergieOeuf : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_allergie_arachide">Allergie aux arachides</label><input id="nombre_allergie_arachide" name="nombre_allergie_arachide" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_arachide', inscription ? inscription.nombreAllergieArachide : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                </div>
+            </section>
+
+            <div class="champ"><label for="commentaire">Commentaire <small>(facultatif)</small></label><textarea id="commentaire" name="commentaire" rows="3">{{ app.request.request.get('commentaire', inscription ? inscription.commentaire : '') }}</textarea></div>
+
+            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_accueil') }}">Annuler</a><button class="bouton-principal" type="submit">{{ edition ? 'Enregistrer les modifications' : 'Ajouter la présence' }}</button></div>
+        </form>
+    </section>
+</main>
+</div>
+{% endblock %}

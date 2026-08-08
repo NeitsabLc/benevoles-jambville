@@ -30,4 +30,14 @@ final class UtilisateurRepository extends ServiceEntityRepository implements Use
     {
         return $this->findOneBy(['jetonActivation' => hash('sha256', $token)]);
     }
+
+    /** @return list<Utilisateur> */
+    public function findActifsPourInscription(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.actif = true')
+            ->orderBy('u.nom', 'ASC')
+            ->addOrderBy('u.prenom', 'ASC')
+            ->getQuery()->getResult();
+    }
 }

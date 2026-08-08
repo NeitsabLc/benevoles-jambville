@@ -81,6 +81,36 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         return $this->prenom.' '.$this->nom;
     }
 
+    public function getPrenom(): string
+    {
+        return $this->prenom;
+    }
+
+    public function getNom(): string
+    {
+        return $this->nom;
+    }
+
+    public function getCodeAdherent(): string
+    {
+        return $this->codeAdherent;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getRoleMetier(): string
+    {
+        return $this->role;
+    }
+
+    public function isEquipePilote(): bool
+    {
+        return $this->role === 'EQUIPE_PILOTE';
+    }
+
     public function isActif(): bool
     {
         return $this->actif;

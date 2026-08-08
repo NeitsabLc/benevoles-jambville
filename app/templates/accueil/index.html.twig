@@ -1,13 +1,114 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-<main class="page-demarrage">
-    <section class="carte-demarrage">
-        <p class="surtitre">Scouts et Guides de France</p>
-        <h1>Bénévoles Jambville</h1>
-        <p>Le socle de l’application est opérationnel. Les profils, inscriptions et calendriers seront ajoutés progressivement.</p>
-        <small>Version {{ version_application }}</small>
-    </section>
-</main>
-{% endblock %}
+{% block title %}Calendrier des présences · Bénévoles Jambville{% endblock %}
 
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+
+    <main class="contenu-calendrier">
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        <section class="entete-calendrier">
+            <h1>Qui sera à Jambville&nbsp;?</h1>
+            {% if app.user.roleMetier != 'SALARIE_ACCUEIL' %}
+                <a class="bouton-principal" href="{{ path('app_presence_ajouter') }}">
+                    + {{ is_granted('ROLE_EQUIPE_PILOTE') ? 'Ajouter une présence' : 'Ajouter ma présence' }}
+                </a>
+            {% endif %}
+        </section>
+
+        <section class="outils-calendrier" aria-label="Navigation du calendrier">
+            <form method="get" action="{{ path('app_accueil') }}">
+                <input type="hidden" name="mois" value="{{ mois|date('Y-m') }}">
+                <select name="filtre" aria-label="Filtrer les présences" onchange="this.form.requestSubmit()">
+                    <option value="">Toutes les présences</option>
+                    <option value="compa" {{ filtre == 'compa' ? 'selected' }}>Compas</option>
+                    {% for thematique in thematiques %}
+                        <option value="{{ thematique.id }}" {{ filtre == thematique.id ? 'selected' }}>{{ thematique.nom }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            <nav class="navigation-mois" aria-label="Changer de mois">
+                <a href="{{ path('app_accueil', {mois: mois_precedent, filtre: filtre}) }}" aria-label="Mois précédent">‹</a>
+                <strong>{{ libelle_mois }}</strong>
+                <a href="{{ path('app_accueil', {mois: mois_suivant, filtre: filtre}) }}" aria-label="Mois suivant">›</a>
+            </nav>
+        </section>
+
+        {% if filtre and nombre_presences == 0 %}
+            <p class="etat-vide-filtre">
+                {% if filtre == 'compa' %}
+                    Aucune équipe compa n’est présente ce mois-ci.
+                {% else %}
+                    Aucune présence ne correspond à cette thématique ce mois-ci.
+                {% endif %}
+            </p>
+        {% endif %}
+
+        <section class="calendrier" aria-label="Présences en {{ libelle_mois }}">
+            <div class="jours-semaine" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+            <div class="grille-calendrier">
+                {% for jour in jours %}
+                    <article class="jour-calendrier {{ not jour.dans_mois ? 'jour-hors-mois' }}">
+                        <header class="entete-jour">
+                            <time datetime="{{ jour.date|date('Y-m-d') }}">{{ jour.date|date('j') }}</time>
+                            {% if jour.journee and jour.journee.personnePermanence %}<strong>{{ jour.journee.personnePermanence.nom|split(' ')|first }}</strong>{% endif %}
+                        </header>
+                        {% if jour.journee and jour.journee.commentaire %}<p class="commentaire-jour" title="{{ jour.journee.commentaire }}">{{ jour.journee.commentaire }}</p>{% endif %}
+                        <div class="presences-jour">
+                            {% for presence in jour.presences %}
+                                {% set est_ma_presence = presence.type == 'INDIVIDUELLE' and presence.utilisateur.id == app.user.id %}
+                                {% set peut_gerer = is_granted('ROLE_EQUIPE_PILOTE') or (app.user.roleMetier == 'BENEVOLE' and est_ma_presence) %}
+                                <div class="ligne-presence {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}">
+                                    <span class="identite-presence">
+                                        {% if presence.type == 'COMPAGNON' %}
+                                            <strong>{{ presence.nomEquipeCompa }}</strong>
+                                        {% else %}
+                                            <strong>{{ presence.utilisateur.prenom }} {{ presence.utilisateur.nom|first }}.</strong>
+                                        {% endif %}
+                                    </span>
+                                    {% if peut_gerer %}
+                                        <span class="actions-presence">
+                                            <a href="{{ path('app_presence_modifier', {id: presence.id}) }}" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}">✎</a>
+                                            <button
+                                                type="button"
+                                                aria-label="Supprimer {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"
+                                                data-suppression-presence
+                                                data-presence-nom="{{ (presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet)|e('html_attr') }}"
+                                                data-presence-periode="du {{ presence.dateDebut|date('d/m/Y') }} au {{ presence.dateFin|date('d/m/Y') }}"
+                                                data-suppression-url="{{ path('app_presence_supprimer', {id: presence.id}) }}"
+                                                data-suppression-token="{{ csrf_token('supprimer-presence-' ~ presence.id) }}"
+                                            ><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="legende-calendrier">
+            <span><i class="presence-moi"></i>Ma présence</span>
+            <span><i class="presence-autre"></i>Autres présences</span>
+        </div>
+
+        <dialog class="dialog-suppression-presence" data-dialog-suppression-presence>
+            <section aria-labelledby="titre-suppression-presence">
+                <div class="icone-suppression-presence" aria-hidden="true">!</div>
+                <h2 id="titre-suppression-presence">Supprimer cette présence&nbsp;?</h2>
+                <p>La présence de <strong data-nom-suppression-presence></strong>, <span data-periode-suppression-presence></span>, ne sera plus affichée dans le calendrier.</p>
+                <p class="avertissement-suppression-presence">Elle ne sera plus comptabilisée dans les repas et l’hébergement.</p>
+                <form method="post" data-form-suppression-presence>
+                    <input type="hidden" name="_csrf_token" data-token-suppression-presence>
+                    <div class="actions-dialog-suppression">
+                        <button class="annuler-suppression-presence" type="button" data-fermer-suppression-presence>Annuler</button>
+                        <button class="confirmer-suppression-presence" type="submit">Supprimer la présence</button>
+                    </div>
+                </form>
+            </section>
+        </dialog>
+    </main>
+</div>
+{% endblock %}

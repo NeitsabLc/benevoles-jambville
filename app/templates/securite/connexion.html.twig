@@ -27,10 +27,7 @@
                 <input id="email" name="email" type="email" value="{{ dernier_identifiant }}" autocomplete="email" required autofocus>
             </div>
             <div class="champ">
-                <div class="ligne-label">
-                    <label for="mot-de-passe">Mot de passe</label>
-                    <span class="aide-discrete">12 caractères minimum</span>
-                </div>
+                <label for="mot-de-passe">Mot de passe</label>
                 <input id="mot-de-passe" name="mot_de_passe" type="password" autocomplete="current-password" required>
             </div>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">

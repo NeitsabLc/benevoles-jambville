@@ -7,4 +7,124 @@ import './stimulus_bootstrap.js';
  */
 import './styles/app.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+const initialiserFormulairePresence = () => {
+    document.querySelectorAll('[data-presence-form]').forEach((formulaire) => {
+        if (formulaire.dataset.initialise === 'true') {
+            return;
+        }
+        formulaire.dataset.initialise = 'true';
+
+        const selectionRepas = formulaire.querySelector('[data-selection-repas]');
+        if (selectionRepas) {
+            const lignes = selectionRepas.querySelector('[data-repas-lignes]');
+            const dateDebut = formulaire.querySelector('#date_debut');
+            const dateFin = formulaire.querySelector('#date_fin');
+            const selectionInitiale = new Set(JSON.parse(selectionRepas.dataset.selectionnes || '[]'));
+            const repasConfigures = selectionRepas.dataset.configures === 'true';
+            const libelles = [
+                ['PETIT_DEJEUNER', 'Petit-déjeuner'],
+                ['DEJEUNER', 'Déjeuner'],
+                ['DINER', 'Dîner'],
+            ];
+            const marqueur = document.createElement('input');
+            marqueur.type = 'hidden';
+            marqueur.name = 'repas_configures';
+            marqueur.value = '1';
+            formulaire.querySelector('form').appendChild(marqueur);
+
+            const genererLignesRepas = () => {
+                const etatCourant = new Map([...lignes.querySelectorAll('input[type="checkbox"]')].map((caseRepas) => [caseRepas.dataset.cle, caseRepas.checked]));
+                lignes.replaceChildren();
+                if (!dateDebut.value || !dateFin.value || dateFin.value < dateDebut.value) {
+                    const ligne = document.createElement('tr');
+                    const cellule = document.createElement('td');
+                    cellule.colSpan = 4;
+                    cellule.className = 'repas-vide';
+                    cellule.textContent = 'Choisissez une période valide pour afficher les repas.';
+                    ligne.appendChild(cellule);
+                    lignes.appendChild(ligne);
+                    return;
+                }
+
+                let date = new Date(`${dateDebut.value}T12:00:00`);
+                const fin = new Date(`${dateFin.value}T12:00:00`);
+                while (date <= fin) {
+                    const dateIso = date.toISOString().slice(0, 10);
+                    const ligne = document.createElement('tr');
+                    const jour = document.createElement('th');
+                    jour.scope = 'row';
+                    jour.textContent = new Intl.DateTimeFormat('fr-FR', {weekday: 'short', day: 'numeric', month: 'short'}).format(date);
+                    ligne.appendChild(jour);
+                    libelles.forEach(([type, libelle]) => {
+                        const cellule = document.createElement('td');
+                        const caseRepas = document.createElement('input');
+                        const cle = `${dateIso}|${type}`;
+                        caseRepas.type = 'checkbox';
+                        caseRepas.name = `repas[${dateIso}][]`;
+                        caseRepas.value = type;
+                        caseRepas.dataset.cle = cle;
+                        caseRepas.checked = etatCourant.has(cle) ? etatCourant.get(cle) : (repasConfigures ? selectionInitiale.has(cle) : true);
+                        caseRepas.setAttribute('aria-label', `${libelle} du ${jour.textContent}`);
+                        cellule.appendChild(caseRepas);
+                        ligne.appendChild(cellule);
+                    });
+                    lignes.appendChild(ligne);
+                    date.setDate(date.getDate() + 1);
+                }
+            };
+
+            dateDebut.addEventListener('change', genererLignesRepas);
+            dateFin.addEventListener('change', genererLignesRepas);
+            selectionRepas.querySelector('[data-repas-tous]').addEventListener('click', () => lignes.querySelectorAll('input[type="checkbox"]').forEach((caseRepas) => { caseRepas.checked = true; }));
+            selectionRepas.querySelector('[data-repas-aucun]').addEventListener('click', () => lignes.querySelectorAll('input[type="checkbox"]').forEach((caseRepas) => { caseRepas.checked = false; }));
+            genererLignesRepas();
+        }
+
+        formulaire.querySelectorAll('[data-mode-button]').forEach((bouton) => {
+            bouton.addEventListener('click', () => {
+                const mode = bouton.dataset.modeButton;
+                formulaire.dataset.mode = mode;
+                formulaire.querySelector('[data-mode-input]').value = mode;
+                formulaire.querySelectorAll('[data-mode-button]').forEach((element) => element.classList.toggle('actif', element === bouton));
+                formulaire.querySelectorAll('[data-mode-panel]').forEach((panneau) => {
+                    const visible = panneau.dataset.modePanel === mode;
+                    panneau.hidden = !visible;
+                    panneau.querySelectorAll('input, select, textarea').forEach((champ) => { champ.disabled = !visible; });
+                });
+                formulaire.querySelectorAll('[data-mode-detail]').forEach((detail) => {
+                    const visible = detail.dataset.modeDetail === mode;
+                    detail.hidden = !visible;
+                    if (detail.matches('input, select, textarea')) detail.disabled = !visible;
+                    detail.querySelectorAll?.('input, select, textarea').forEach((champ) => { champ.disabled = !visible; });
+                });
+            });
+        });
+    });
+};
+
+const initialiserSuppressionPresence = () => {
+    const dialog = document.querySelector('[data-dialog-suppression-presence]');
+    if (!dialog || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    const formulaire = dialog.querySelector('[data-form-suppression-presence]');
+    const nom = dialog.querySelector('[data-nom-suppression-presence]');
+    const periode = dialog.querySelector('[data-periode-suppression-presence]');
+    const token = dialog.querySelector('[data-token-suppression-presence]');
+
+    document.querySelectorAll('[data-suppression-presence]').forEach((bouton) => bouton.addEventListener('click', () => {
+        nom.textContent = bouton.dataset.presenceNom;
+        periode.textContent = bouton.dataset.presencePeriode;
+        formulaire.action = bouton.dataset.suppressionUrl;
+        token.value = bouton.dataset.suppressionToken;
+        dialog.showModal();
+    }));
+    dialog.querySelector('[data-fermer-suppression-presence]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+};
+
+document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
+document.addEventListener('turbo:load', initialiserFormulairePresence);
+document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
+document.addEventListener('turbo:load', initialiserSuppressionPresence);
