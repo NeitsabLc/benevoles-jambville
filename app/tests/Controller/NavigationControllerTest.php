@@ -34,6 +34,7 @@ final class NavigationControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.navigation-laterale');
+        self::assertSelectorExists('button[data-menu-mobile][aria-controls="navigation-principale"]');
         self::assertSelectorExists('a[href="/synthese"]');
         self::assertSelectorExists('a[href="/administration/calendrier"]');
         self::assertSelectorExists('a[href="/administration/thematiques"]');
@@ -51,6 +52,7 @@ final class NavigationControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.navigation-laterale');
+        self::assertSelectorExists('button[data-menu-mobile][aria-controls="navigation-principale"]');
         self::assertSelectorExists('a[href="/synthese"]');
         self::assertSelectorExists('a[href="/administration/calendrier"]');
         self::assertSelectorNotExists('a[href="/administration/thematiques"]');

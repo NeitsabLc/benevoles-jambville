@@ -7,7 +7,9 @@
     {% include 'commun/_barre_application.html.twig' %}
 
     <main class="page-profil">
-        <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
+        {% if app.user.roleMetier == 'BENEVOLE' %}
+            <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
+        {% endif %}
 
         <header class="entete-profil">
             <h1>Mon profil</h1>

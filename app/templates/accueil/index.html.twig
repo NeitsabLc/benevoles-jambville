@@ -59,7 +59,7 @@
                             {% for presence in jour.presences %}
                                 {% set est_ma_presence = presence.type == 'INDIVIDUELLE' and presence.utilisateur.id == app.user.id %}
                                 {% set peut_gerer = is_granted('ROLE_EQUIPE_PILOTE') or (app.user.roleMetier == 'BENEVOLE' and est_ma_presence) %}
-                                <div class="ligne-presence {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}">
+                                <div class="ligne-presence {{ peut_gerer ? 'ligne-presence-cliquable' }} {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}"{% if peut_gerer %} data-modification-url="{{ path('app_presence_modifier', {id: presence.id}) }}" tabindex="0" role="link" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"{% endif %}>
                                     <span class="identite-presence">
                                         {% if presence.type == 'COMPAGNON' %}
                                             <strong>{{ presence.nomEquipeCompa }}</strong>
@@ -70,15 +70,7 @@
                                     {% if peut_gerer %}
                                         <span class="actions-presence">
                                             <a href="{{ path('app_presence_modifier', {id: presence.id}) }}" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}">✎</a>
-                                            <button
-                                                type="button"
-                                                aria-label="Supprimer {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"
-                                                data-suppression-presence
-                                                data-presence-nom="{{ (presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet)|e('html_attr') }}"
-                                                data-presence-periode="du {{ presence.dateDebut|date('d/m/Y') }} au {{ presence.dateFin|date('d/m/Y') }}"
-                                                data-suppression-url="{{ path('app_presence_supprimer', {id: presence.id}) }}"
-                                                data-suppression-token="{{ csrf_token('supprimer-presence-' ~ presence.id) }}"
-                                            ><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                                            <button type="button" aria-label="Supprimer {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}" data-suppression-presence data-presence-nom="{{ (presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet)|e('html_attr') }}" data-presence-periode="du {{ presence.dateDebut|date('d/m/Y') }} au {{ presence.dateFin|date('d/m/Y') }}" data-suppression-url="{{ path('app_presence_supprimer', {id: presence.id}) }}" data-suppression-token="{{ csrf_token('supprimer-presence-' ~ presence.id) }}"><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                                         </span>
                                     {% endif %}
                                 </div>
@@ -100,15 +92,10 @@
                 <h2 id="titre-suppression-presence">Supprimer cette présence&nbsp;?</h2>
                 <p>La présence de <strong data-nom-suppression-presence></strong>, <span data-periode-suppression-presence></span>, ne sera plus affichée dans le calendrier.</p>
                 <p class="avertissement-suppression-presence">Elle ne sera plus comptabilisée dans les repas et l’hébergement.</p>
-                <form method="post" data-form-suppression-presence>
-                    <input type="hidden" name="_csrf_token" data-token-suppression-presence>
-                    <div class="actions-dialog-suppression">
-                        <button class="annuler-suppression-presence" type="button" data-fermer-suppression-presence>Annuler</button>
-                        <button class="confirmer-suppression-presence" type="submit">Supprimer la présence</button>
-                    </div>
-                </form>
+                <form method="post" data-form-suppression-presence><input type="hidden" name="_csrf_token" data-token-suppression-presence><div class="actions-dialog-suppression"><button class="annuler-suppression-presence" type="button" data-fermer-suppression-presence>Annuler</button><button class="confirmer-suppression-presence" type="submit">Supprimer la présence</button></div></form>
             </section>
         </dialog>
+
     </main>
 </div>
 {% endblock %}

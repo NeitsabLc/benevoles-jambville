@@ -13,11 +13,11 @@
         <p>Renseignez les informations utiles pour préparer l’accueil.</p>
     </header>
 
-    <section class="carte-presence">
+    <form method="post" class="formulaire-presence">
+        <section class="carte-presence">
 
-        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+            {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
 
-        <form method="post" class="formulaire-presence">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_intention) }}">
             <input type="hidden" name="mode" value="{{ mode }}" data-mode-input>
 
@@ -96,9 +96,42 @@
 
             <div class="champ"><label for="commentaire">Commentaire <small>(facultatif)</small></label><textarea id="commentaire" name="commentaire" rows="3">{{ app.request.request.get('commentaire', inscription ? inscription.commentaire : '') }}</textarea></div>
 
-            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_accueil') }}">Annuler</a><button class="bouton-principal" type="submit">{{ edition ? 'Enregistrer les modifications' : 'Ajouter la présence' }}</button></div>
-        </form>
-    </section>
+        </section>
+
+        <div class="actions-formulaire actions-formulaire-presence">
+            {% if edition %}
+                <button class="bouton-supprimer-presence" type="button"
+                    data-suppression-presence
+                    data-presence-nom="{{ (inscription.type == 'COMPAGNON' ? inscription.nomEquipeCompa : inscription.utilisateur.nomComplet)|e('html_attr') }}"
+                    data-presence-periode="du {{ inscription.dateDebut|date('d/m/Y') }} au {{ inscription.dateFin|date('d/m/Y') }}"
+                    data-suppression-url="{{ path('app_presence_supprimer', {id: inscription.id}) }}"
+                    data-suppression-token="{{ csrf_token('supprimer-presence-' ~ inscription.id) }}"
+                >Supprimer la présence</button>
+            {% endif %}
+            <span class="actions-formulaire-principales">
+                <a class="bouton-secondaire" href="{{ path('app_accueil') }}">Annuler</a>
+                <button class="bouton-principal" type="submit">{{ edition ? 'Enregistrer les modifications' : 'Ajouter la présence' }}</button>
+            </span>
+        </div>
+    </form>
+
+        {% if edition %}
+            <dialog class="dialog-suppression-presence" data-dialog-suppression-presence>
+                <section aria-labelledby="titre-suppression-presence">
+                    <div class="icone-suppression-presence" aria-hidden="true">!</div>
+                    <h2 id="titre-suppression-presence">Supprimer cette présence&nbsp;?</h2>
+                    <p>La présence de <strong data-nom-suppression-presence></strong>, <span data-periode-suppression-presence></span>, ne sera plus affichée dans le calendrier.</p>
+                    <p class="avertissement-suppression-presence">Elle ne sera plus comptabilisée dans les repas et l’hébergement.</p>
+                    <form method="post" data-form-suppression-presence>
+                        <input type="hidden" name="_csrf_token" data-token-suppression-presence>
+                        <div class="actions-dialog-suppression">
+                            <button class="annuler-suppression-presence" type="button" data-fermer-suppression-presence>Annuler</button>
+                            <button class="confirmer-suppression-presence" type="submit">Supprimer la présence</button>
+                        </div>
+                    </form>
+                </section>
+            </dialog>
+        {% endif %}
 </main>
 </div>
 {% endblock %}

@@ -17,7 +17,13 @@
     </div>
 </header>
 {% else %}
-<aside class="navigation-laterale">
+<button class="bouton-menu-mobile" type="button" aria-controls="navigation-principale" aria-expanded="false" data-menu-mobile>
+    <span class="icone-menu-mobile" aria-hidden="true">☰</span>
+    <span class="texte-menu-mobile">Menu</span>
+</button>
+<button class="fond-menu-mobile" type="button" aria-label="Fermer le menu" data-fermer-menu-mobile></button>
+<aside class="navigation-laterale" id="navigation-principale" data-navigation-mobile>
+    <button class="fermer-menu-mobile" type="button" aria-label="Fermer le menu" data-fermer-menu-mobile>×</button>
     <div class="marque-navigation">{% include 'securite/_identite.html.twig' %}</div>
 
     <nav aria-label="Navigation principale">

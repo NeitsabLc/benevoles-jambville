@@ -124,6 +124,30 @@ const initialiserSuppressionPresence = () => {
     });
 };
 
+const initialiserMenuMobile = () => {
+    const bouton = document.querySelector('[data-menu-mobile]');
+    const navigation = document.querySelector('[data-navigation-mobile]');
+    if (!bouton || !navigation || bouton.dataset.initialise === 'true') return;
+    bouton.dataset.initialise = 'true';
+    const definirOuverture = (ouvert) => {
+        document.body.classList.toggle('menu-mobile-ouvert', ouvert);
+        bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+    };
+    bouton.addEventListener('click', () => definirOuverture(bouton.getAttribute('aria-expanded') !== 'true'));
+    document.querySelectorAll('[data-fermer-menu-mobile]').forEach((element) => element.addEventListener('click', () => definirOuverture(false)));
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') definirOuverture(false); });
+};
+
+const initialiserLignesPresence = () => {
+    document.querySelectorAll('[data-modification-url]').forEach((ligne) => {
+        if (ligne.dataset.initialise === 'true') return;
+        ligne.dataset.initialise = 'true';
+        const ouvrir = () => { if (window.matchMedia('(max-width: 760px)').matches) window.location.href = ligne.dataset.modificationUrl; };
+        ligne.addEventListener('click', (event) => { if (!event.target.closest('a, button')) ouvrir(); });
+        ligne.addEventListener('keydown', (event) => { if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button')) { event.preventDefault(); ouvrir(); } });
+    });
+};
+
 const initialiserValidationTelephone = () => {
     document.querySelectorAll('[data-telephone-francais]').forEach((champ) => {
         if (champ.dataset.initialise === 'true') return;
@@ -149,5 +173,9 @@ document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
 document.addEventListener('turbo:load', initialiserFormulairePresence);
 document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
 document.addEventListener('turbo:load', initialiserSuppressionPresence);
+document.addEventListener('DOMContentLoaded', initialiserMenuMobile);
+document.addEventListener('turbo:load', initialiserMenuMobile);
+document.addEventListener('DOMContentLoaded', initialiserLignesPresence);
+document.addEventListener('turbo:load', initialiserLignesPresence);
 document.addEventListener('DOMContentLoaded', initialiserValidationTelephone);
 document.addEventListener('turbo:load', initialiserValidationTelephone);

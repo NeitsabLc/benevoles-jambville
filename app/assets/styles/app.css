@@ -78,6 +78,7 @@ body {
 /* Calendrier authentifié */
 .application { min-height: 100vh; background: var(--fond); }
 .navigation-laterale { position: fixed; z-index: 10; inset: 0 auto 0 0; display: flex; width: 14.5rem; flex-direction: column; padding: 1.35rem .8rem 1rem; color: #fff; background: var(--bleu-sgdf); box-shadow: 8px 0 30px rgb(0 34 54 / 10%); }
+.bouton-menu-mobile, .fermer-menu-mobile, .fond-menu-mobile { display: none; }
 .marque-navigation { padding: 0 .65rem 1.35rem; border-bottom: 1px solid rgb(255 255 255 / 14%); }
 .navigation-laterale .identite-application { margin: 0; }
 .navigation-laterale .identite-symbole { color: var(--bleu-sgdf); background: #fff; }
@@ -133,6 +134,7 @@ body {
 .entete-jour strong { overflow: hidden; color: #087b67; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .commentaire-jour { overflow: hidden; margin: 0 0 .45rem; padding: .25rem .35rem; border-left: 3px solid var(--bleu-sgdf); color: var(--texte-secondaire); background: #f1f5f7; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
 .ligne-presence { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: .25rem; margin: .25rem 0; padding: .28rem .32rem .28rem .42rem; border-radius: .35rem; font-size: .72rem; }
+.ligne-presence-cliquable { cursor: pointer; }
 .presence-moi { color: #075d4b; background: #dff5ec; }
 .presence-autre { color: #284f68; background: #e4eef4; }
 .identite-presence { min-width: 0; overflow: hidden; }
@@ -209,6 +211,10 @@ body {
 .champs-alimentation-compa { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .champ label small { color: var(--texte-secondaire); font-weight: 400; }
 .actions-formulaire { display: flex; justify-content: flex-end; gap: .7rem; padding-top: .5rem; }
+.actions-formulaire-presence { justify-content: space-between; padding-top: 1rem; }
+.actions-formulaire-principales { display: flex; gap: .7rem; }
+.bouton-supprimer-presence { min-height: 3rem; padding: .7rem 1rem; border: 1px solid #d92d20; border-radius: .55rem; color: #b42318; background: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.bouton-supprimer-presence:hover { color: #fff; background: #b42318; }
 .bouton-secondaire { display: inline-flex; min-height: 3.25rem; align-items: center; padding: .75rem 1.2rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: var(--bleu-sgdf); background: #fff; font-weight: 700; text-decoration: none; }
 .alerte ul { margin: 0; padding-left: 1.2rem; }
 
@@ -278,15 +284,17 @@ body {
 .commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
 
 @media (max-width: 760px) {
-    .navigation-laterale { position: static; width: 100%; padding: .8rem; }
-    .marque-navigation { display: none; }
-    .navigation-laterale nav { display: flex; overflow-x: auto; padding: 0 0 .65rem; gap: .4rem; }
-    .groupe-navigation, .administration-navigation { display: flex; margin: 0; gap: .25rem; }
-    .administration-navigation > p { display: none; }
-    .lien-navigation { min-width: max-content; min-height: 2.5rem; padding: .55rem .7rem; font-size: .78rem; }
-    .lien-navigation.actif { box-shadow: inset 0 -3px 0 var(--menthe-sgdf); }
-    .compte-navigation { padding: .7rem .35rem 0; }
-    .application:has(> .navigation-laterale) > main { margin-left: 0; }
+    .page-formulaire-presence > .retour-calendrier, .page-profil > .retour-calendrier { display: none; }
+    .bouton-menu-mobile { position: fixed; z-index: 12; top: .75rem; left: .75rem; display: grid; width: 2.7rem; height: 2.7rem; padding: 0; border: 0; border-radius: .4rem; color: #fff; background: var(--bleu-sgdf); box-shadow: 0 4px 15px rgb(0 34 54 / 22%); font: inherit; cursor: pointer; place-items: center; }
+    .icone-menu-mobile { font-size: 1.55rem; line-height: 1; transform: translateY(-.08rem); }
+    .texte-menu-mobile { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .fond-menu-mobile { position: fixed; z-index: 13; inset: 0; width: 100%; height: 100%; border: 0; background: rgb(0 30 50 / 52%); }
+    .fermer-menu-mobile { position: absolute; top: .65rem; right: .65rem; display: grid; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: .45rem; color: #fff; background: rgb(255 255 255 / 10%); font: inherit; font-size: 1.8rem; cursor: pointer; place-items: center; }
+    .navigation-laterale { z-index: 14; width: min(18rem, 86vw); transform: translateX(-105%); transition: transform .22s ease; }
+    .menu-mobile-ouvert .navigation-laterale { transform: translateX(0); }
+    .menu-mobile-ouvert .fond-menu-mobile { display: block; }
+    .menu-mobile-ouvert { overflow: hidden; }
+    .application:has(> .navigation-laterale) > main { margin-left: 0; padding-top: 4.5rem; }
     .page-future { padding: 1.5rem 1rem; }
     .nom-utilisateur { display: none; }
     .contenu-calendrier { padding: 1.2rem .7rem 2rem; }
@@ -304,15 +312,19 @@ body {
     .entete-calendrier, .outils-calendrier { align-items: stretch; flex-direction: column; }
     .outils-calendrier form, .outils-calendrier select { width: 100%; }
     .navigation-mois { justify-content: space-between; }
-    .jours-semaine { font-size: .65rem; }
-    .jour-calendrier { min-height: 5.8rem; padding: .3rem; }
-    .ligne-presence { padding: .2rem; }
-    .identite-presence { width: .65rem; height: .65rem; border-radius: 50%; font-size: 0; }
-    .identite-presence small { display: none; }
-    .actions-presence { gap: .05rem; }
-    .actions-presence a, .actions-presence button { width: 1rem; height: 1rem; font-size: .72rem; }
+    .jours-semaine { display: none; }
+    .grille-calendrier { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .jour-calendrier { min-height: 7.5rem; padding: .4rem; }
+    .jour-calendrier:nth-child(7n) { border-right: 1px solid #d8e2e6; }
+    .jour-calendrier:nth-child(3n) { border-right: 0; }
+    .ligne-presence { padding: .3rem .38rem; font-size: .68rem; }
+    .actions-presence { display: none; }
     .commentaire-jour, .entete-jour strong { font-size: .62rem; }
     .champs-presence { grid-template-columns: 1fr; }
+    .actions-formulaire { align-items: stretch; flex-direction: column; }
+    .actions-formulaire .bouton-secondaire { justify-content: center; }
+    .actions-formulaire-presence { align-items: stretch; flex-direction: column-reverse; }
+    .actions-formulaire-principales { display: grid; }
     .champ-large { grid-column: auto; }
     .selection-repas > header { flex-direction: column; }
     .actions-repas { justify-content: flex-start; }

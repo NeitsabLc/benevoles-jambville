@@ -254,6 +254,8 @@ final class PresenceControllerTest extends WebTestCase
         $client->loginUser($proprietaire);
         $client->request('GET', '/presences/'.$inscription->getId().'/modifier');
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('button.bouton-supprimer-presence[data-suppression-presence]');
+        self::assertSelectorExists('dialog[data-dialog-suppression-presence]');
 
         $client->loginUser($salarie);
         $client->request('GET', '/presences/'.$inscription->getId().'/modifier');
