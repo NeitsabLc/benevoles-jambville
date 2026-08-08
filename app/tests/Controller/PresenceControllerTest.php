@@ -46,6 +46,8 @@ final class PresenceControllerTest extends WebTestCase
         $client->request('GET', '/presences/ajouter');
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.page-formulaire-presence > .entete-formulaire-presence');
+        self::assertSelectorNotExists('.carte-presence .entete-formulaire-presence');
         self::assertSelectorCount(8, 'select[name="thematique"] option');
         self::assertSelectorNotExists('[data-mode-button="compa"]');
         self::assertSelectorNotExists('select[data-controller="searchable-select"]');

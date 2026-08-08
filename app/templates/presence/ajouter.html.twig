@@ -5,13 +5,15 @@
 {% block body %}
 <div class="application">
     {% include 'commun/_barre_application.html.twig' %}
-<main class="page-formulaire-presence">
-    <section class="carte-presence" data-presence-form data-mode="{{ mode }}">
-        <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
-        <header class="entete-formulaire-presence">
-            <h1>{{ edition ? 'Modifier' : 'Ajouter' }} une présence</h1>
-            <p>Renseignez les informations utiles pour préparer l’accueil.</p>
-        </header>
+<main class="page-formulaire-presence" data-presence-form data-mode="{{ mode }}">
+    <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
+
+    <header class="entete-formulaire-presence">
+        <h1>{{ edition ? 'Modifier' : 'Ajouter' }} une présence</h1>
+        <p>Renseignez les informations utiles pour préparer l’accueil.</p>
+    </header>
+
+    <section class="carte-presence">
 
         {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
 

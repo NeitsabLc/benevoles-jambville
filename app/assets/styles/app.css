@@ -160,10 +160,10 @@ body {
 
 /* Ajout d'une présence */
 .page-formulaire-presence { width: min(100%, 96rem); min-height: calc(100vh - 5rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); background: var(--fond); }
-.carte-presence { width: 100%; margin: auto; padding: clamp(1.5rem, 4vw, 3rem); border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 15px 45px rgb(0 58 93 / 10%); }
+.carte-presence { width: 100%; margin: auto; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 8px 25px rgb(0 58 93 / 5%); }
 .retour-calendrier { color: var(--texte-secondaire); font-size: .86rem; font-weight: 700; text-decoration: none; }
-.entete-formulaire-presence { margin: 1.6rem 0 1.7rem; }
-.entete-formulaire-presence h1 { margin: 0 0 .4rem; font-size: clamp(2rem, 5vw, 2.7rem); letter-spacing: -.035em; }
+.entete-formulaire-presence { margin: 1.5rem 0 2rem; }
+.entete-formulaire-presence h1 { margin: .35rem 0 .45rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.04em; }
 .entete-formulaire-presence p { margin: 0; color: var(--texte-secondaire); }
 .choix-mode { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: 1.5rem; }
 .choix-mode button { padding: .8rem; border: 1px solid #c7d2d8; border-radius: .6rem; color: var(--bleu-sgdf); background: #f7fafb; font: inherit; text-align: left; cursor: pointer; }
