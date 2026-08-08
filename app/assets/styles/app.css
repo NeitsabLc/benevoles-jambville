@@ -1,6 +1,7 @@
 :root {
     --bleu-sgdf: #003a5d;
     --menthe-sgdf: #48b994;
+    --rouge-sgdf: #e4003b;
     --fond: #f1f5f7;
     --texte-secondaire: #5f7480;
 }
@@ -73,3 +74,14 @@ body {
     .identite-application { margin-bottom: 3rem; }
     .illustration-authentification { display: none; }
 }
+
+/* En-tête authentifié */
+.barre-application { display: flex; min-height: 5rem; align-items: center; justify-content: space-between; gap: 2rem; padding: 1rem clamp(1rem, 4vw, 3rem); border-bottom: 1px solid #d8e2e6; background: #fff; }
+.barre-application .identite-application { margin: 0; }
+.utilisateur-connecte { display: flex; align-items: center; gap: .7rem; color: var(--bleu-sgdf); font-size: .9rem; font-weight: 700; }
+.avatar { display: grid; width: 2.3rem; height: 2.3rem; border-radius: 50%; color: #fff; background: var(--menthe-sgdf); font-size: .78rem; place-items: center; }
+.bouton-texte { padding: .35rem; border: 0; color: var(--texte-secondaire); background: transparent; font: inherit; font-weight: 600; cursor: pointer; }
+.utilisateur-connecte form { display: flex; margin: 0; }
+.bouton-deconnexion { display: grid; width: 2.3rem; height: 2.3rem; padding: .45rem; border-radius: .5rem; color: var(--rouge-sgdf); place-items: center; transition: color .15s, background .15s; }
+.bouton-deconnexion:hover { color: #b5002f; background: rgb(228 0 59 / 8%); }
+.bouton-deconnexion:focus-visible { outline: 2px solid var(--menthe-sgdf); outline-offset: 2px; }

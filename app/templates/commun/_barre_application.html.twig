@@ -1,0 +1,15 @@
+<header class="barre-application">
+    {% include 'securite/_identite.html.twig' %}
+    <div class="utilisateur-connecte">
+        <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nomComplet|split(' ')|last|first }}</span>
+        <span>{{ app.user.nomComplet }}</span>
+        <form action="{{ path('app_deconnexion') }}" method="post">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+            <button class="bouton-texte bouton-deconnexion" type="submit" aria-label="Se déconnecter" title="Se déconnecter">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H9"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+</header>
