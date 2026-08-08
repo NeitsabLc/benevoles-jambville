@@ -1,0 +1,12 @@
+<fieldset class="periode-configuration-calendrier">
+    <legend>Période d’affichage</legend>
+    <div class="dates-configuration-calendrier">
+        <div class="champ"><label for="{{ prefixe }}_date_debut">Du</label><input id="{{ prefixe }}_date_debut" type="date" name="date_debut" value="{{ date_debut|date('Y-m-d') }}" required></div>
+        <div class="champ"><label for="{{ prefixe }}_date_fin">Au</label><input id="{{ prefixe }}_date_fin" type="date" name="date_fin" value="{{ date_fin|date('Y-m-d') }}" required></div>
+    </div>
+</fieldset>
+<fieldset class="mode-application-calendrier">
+    <legend>Si certains jours sont déjà renseignés</legend>
+    <label><input type="radio" name="mode" value="completer" checked><span><strong>Compléter les jours vides</strong><small>Les informations déjà présentes sont conservées.</small></span></label>
+    <label><input type="radio" name="mode" value="remplacer"><span><strong>Remplacer l’existant</strong><small>La nouvelle valeur s’applique à toute la période.</small></span></label>
+</fieldset>

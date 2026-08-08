@@ -234,6 +234,52 @@ const initialiserGlissieresThematiques = () => {
     });
 };
 
+const initialiserGlissieresBenevoles = () => {
+    document.querySelectorAll('[data-glissiere-benevole]').forEach((glissiere) => {
+        if (glissiere.dataset.initialise === 'true') return;
+        glissiere.dataset.initialise = 'true';
+        const ligne = glissiere.querySelector('.ligne-benevole');
+        if (!ligne || !glissiere.querySelector('.action-glissee-benevole')) return;
+        let departX = 0;
+        let departY = 0;
+        let glissementHorizontal = false;
+
+        ligne.addEventListener('pointerdown', (event) => {
+            if (!window.matchMedia('(max-width: 760px)').matches) return;
+            departX = event.clientX;
+            departY = event.clientY;
+            glissementHorizontal = false;
+        });
+        ligne.addEventListener('pointermove', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            const deltaY = event.clientY - departY;
+            if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) glissementHorizontal = true;
+        });
+        ligne.addEventListener('pointerup', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            if (glissementHorizontal && deltaX < -45) {
+                document.querySelectorAll('[data-glissiere-benevole].ouverte').forEach((autre) => { if (autre !== glissiere) autre.classList.remove('ouverte'); });
+                glissiere.classList.add('ouverte');
+                ligne.dataset.glissement = 'true';
+            } else if (glissementHorizontal && deltaX > 35) {
+                glissiere.classList.remove('ouverte');
+                ligne.dataset.glissement = 'true';
+            }
+            departX = 0;
+            departY = 0;
+        });
+        ligne.addEventListener('pointercancel', () => { departX = 0; departY = 0; glissementHorizontal = false; });
+        ligne.addEventListener('click', (event) => {
+            if (ligne.dataset.glissement === 'true') {
+                event.preventDefault();
+                delete ligne.dataset.glissement;
+            }
+        });
+    });
+};
+
 const initialiserValidationTelephone = () => {
     document.querySelectorAll('[data-telephone-francais]').forEach((champ) => {
         if (champ.dataset.initialise === 'true') return;
@@ -255,6 +301,29 @@ const initialiserValidationTelephone = () => {
     });
 };
 
+const initialiserConfirmationImport = () => {
+    const dialog = document.querySelector('[data-dialog-confirmation-import]');
+    const ouvrir = document.querySelector('[data-ouvrir-confirmation-import]');
+    if (!dialog || !ouvrir || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    ouvrir.addEventListener('click', () => dialog.showModal());
+    dialog.querySelector('[data-fermer-confirmation-import]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+};
+
+const initialiserConfirmationCalendrier = () => {
+    document.querySelectorAll('[data-confirmation-remplacement]').forEach((formulaire) => {
+        if (formulaire.dataset.initialise === 'true') return;
+        formulaire.dataset.initialise = 'true';
+        formulaire.addEventListener('submit', (event) => {
+            if (formulaire.querySelector('input[name="mode"]:checked')?.value === 'remplacer'
+                && !window.confirm('Les informations déjà renseignées sur cette période seront remplacées. Continuer ?')) {
+                event.preventDefault();
+            }
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
 document.addEventListener('turbo:load', initialiserFormulairePresence);
 document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
@@ -267,3 +336,9 @@ document.addEventListener('DOMContentLoaded', initialiserGlissieresThematiques);
 document.addEventListener('turbo:load', initialiserGlissieresThematiques);
 document.addEventListener('DOMContentLoaded', initialiserValidationTelephone);
 document.addEventListener('turbo:load', initialiserValidationTelephone);
+document.addEventListener('DOMContentLoaded', initialiserConfirmationImport);
+document.addEventListener('turbo:load', initialiserConfirmationImport);
+document.addEventListener('DOMContentLoaded', initialiserConfirmationCalendrier);
+document.addEventListener('turbo:load', initialiserConfirmationCalendrier);
+document.addEventListener('DOMContentLoaded', initialiserGlissieresBenevoles);
+document.addEventListener('turbo:load', initialiserGlissieresBenevoles);

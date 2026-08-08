@@ -252,6 +252,139 @@ body {
 .carte-future h2 { margin: 0; font-size: 1.35rem; }
 .carte-future p { max-width: 32rem; margin: .6rem 0 1.5rem; color: var(--texte-secondaire); line-height: 1.55; }
 
+/* Configuration du calendrier */
+.page-configuration-calendrier { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-configuration-calendrier { margin-bottom: 1.75rem; }
+.entete-configuration-calendrier h1 { margin: .3rem 0 .35rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.035em; }
+.entete-configuration-calendrier > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.grille-configuration-calendrier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.25rem; }
+.carte-configuration-calendrier { padding: clamp(1.25rem, 3vw, 1.75rem); border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 8px 25px rgb(0 58 93 / 6%); }
+.carte-commentaire-calendrier { border-top-color: var(--bleu-sgdf); }
+.titre-carte-calendrier { display: flex; align-items: flex-start; gap: .85rem; margin-bottom: 1.5rem; }
+.titre-carte-calendrier h2 { margin: .05rem 0 .25rem; font-size: 1.25rem; }
+.titre-carte-calendrier p { margin: 0; color: var(--texte-secondaire); font-size: .84rem; line-height: 1.45; }
+.numero-configuration { display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; border-radius: 50%; color: #fff; background: var(--menthe-sgdf); font-weight: 800; place-items: center; }
+.carte-commentaire-calendrier .numero-configuration { background: var(--bleu-sgdf); }
+.formulaire-configuration-calendrier { display: grid; gap: 1.15rem; }
+.formulaire-configuration-calendrier select, .formulaire-configuration-calendrier input[type="date"], .formulaire-configuration-calendrier textarea, .ajout-personne-permanence input { width: 100%; min-height: 2.85rem; padding: .7rem .8rem; border: 1px solid #b8c8cf; border-radius: .35rem; color: var(--bleu-sgdf); background: #fff; font: inherit; }
+.formulaire-configuration-calendrier textarea { min-height: 6.5rem; resize: vertical; }
+.formulaire-configuration-calendrier .champ small { color: var(--texte-secondaire); font-size: .74rem; line-height: 1.4; }
+.indication-optionnelle { color: var(--texte-secondaire); font-size: .75rem; font-weight: 500; }
+.periode-configuration-calendrier, .mode-application-calendrier { margin: 0; padding: 0; border: 0; }
+.periode-configuration-calendrier legend, .mode-application-calendrier legend { margin-bottom: .7rem; padding: 0; font-size: .88rem; font-weight: 800; }
+.dates-configuration-calendrier { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.mode-application-calendrier { display: grid; gap: .55rem; }
+.mode-application-calendrier label { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem; border: 1px solid #d4dfe3; border-radius: .45rem; cursor: pointer; }
+.mode-application-calendrier label:has(input:checked) { border-color: var(--menthe-sgdf); background: #eef8f5; }
+.mode-application-calendrier input { margin-top: .2rem; accent-color: var(--menthe-sgdf); }
+.mode-application-calendrier strong, .mode-application-calendrier small { display: block; }
+.mode-application-calendrier strong { font-size: .82rem; }
+.mode-application-calendrier small { margin-top: .12rem; color: var(--texte-secondaire); font-size: .72rem; line-height: 1.35; }
+.formulaire-configuration-calendrier > .bouton-principal { width: 100%; justify-content: center; }
+.liste-permanence-vide { padding: .85rem; border-radius: .45rem; color: #71550b; background: #fff4cc; font-size: .82rem; }
+.ajout-personne-permanence { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e0e7ea; }
+.ajout-personne-permanence summary { font-size: .82rem; font-weight: 800; cursor: pointer; }
+.ajout-personne-permanence form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: .65rem; margin-top: .85rem; }
+.ajout-personne-permanence .bouton-secondaire { min-height: 2.85rem; }
+
+@media (max-width: 900px) {
+    .grille-configuration-calendrier { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+    .dates-configuration-calendrier, .ajout-personne-permanence form { grid-template-columns: 1fr; }
+}
+
+/* Administration des bénévoles */
+.page-benevoles { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-benevoles { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.75rem; }
+.entete-benevoles h1 { margin: 0 0 .35rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.035em; }
+.entete-benevoles p:last-child { margin: 0; color: var(--texte-secondaire); }
+.bouton-importer-benevoles { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .55rem; text-decoration: none; }
+.bouton-importer-benevoles svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.carte-liste-benevoles { overflow: hidden; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.carte-liste-benevoles > header { padding: 1rem 1.4rem; border-bottom: 1px solid #d8e2e6; }
+.carte-liste-benevoles > header p { margin: 0; color: var(--texte-secondaire); font-size: .88rem; font-weight: 700; }
+.entete-table-benevoles, .ligne-benevole { display: grid; grid-template-columns: 1.25fr 1.15fr 1.2fr .9fr .9fr; align-items: center; gap: 1rem; padding: 0 1.4rem; }
+.entete-table-benevoles { min-height: 2.75rem; color: var(--texte-secondaire); background: #f7fafb; font-size: .74rem; font-weight: 800; text-transform: uppercase; }
+.entete-table-benevoles { padding-right: 8rem; }
+.ligne-benevole { min-height: 4rem; color: var(--bleu-sgdf); text-decoration: none; transition: background .15s; }
+.conteneur-ligne-benevole { position: relative; }
+.conteneur-ligne-benevole + .conteneur-ligne-benevole { border-top: 1px solid #e3eaed; }
+.conteneur-ligne-benevole.inactive .ligne-benevole > * { opacity: .58; }
+.ligne-benevole { position: relative; z-index: 1; padding-right: 8rem; background: #fff; transition: background .15s, transform .18s ease; touch-action: pan-y; }
+.ligne-benevole:hover, .ligne-benevole:focus-visible { outline: 0; background: #eef8f5; }
+.ligne-benevole strong, .ligne-benevole span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ligne-benevole strong small { display: inline-block; margin-left: .4rem; padding: .12rem .4rem; border-radius: 1rem; color: #596970; background: #e5e9eb; font-size: .65rem; vertical-align: middle; }
+.telephone-benevole { color: var(--texte-secondaire); }
+.equipement-benevole { display: inline-flex; align-items: center; gap: .45rem; font-size: .8rem; }
+.pastille-equipement { width: .55rem; height: .55rem; flex: 0 0 auto; border-radius: 50%; background: #b8c2c7; }
+.pastille-equipement.remis { background: var(--menthe-sgdf); }
+.actions-ligne-benevole { position: absolute; z-index: 2; top: 50%; right: 1.25rem; display: flex; align-items: center; gap: .55rem; transform: translateY(-50%); }
+.formulaire-activation-benevole { margin: 0; }
+.bouton-edition-benevole { display: grid; width: 2.65rem; height: 2.65rem; border: 1px solid #c7d2d8; border-radius: .3rem; color: var(--bleu-sgdf); background: #fff; place-items: center; }
+.bouton-edition-benevole:hover { border-color: var(--bleu-sgdf); background: #f7fbfd; }
+.bouton-edition-benevole svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.bouton-activation-benevole { display: grid; width: 2.65rem; height: 2.65rem; padding: 0; border: 1px solid #e7aaa6; border-radius: .3rem; color: #b42318; background: #fff; cursor: pointer; place-items: center; }
+.bouton-activation-benevole.reactiver { border-color: #9ed8c5; color: #17614e; }
+.bouton-activation-benevole:hover { color: #fff; background: #b42318; }
+.bouton-activation-benevole.reactiver:hover { background: #17614e; }
+.bouton-activation-benevole svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.action-glissee-benevole { display: none; }
+.liste-benevoles-vide { margin: 0; padding: 3rem 1.4rem; color: var(--texte-secondaire); text-align: center; }
+
+/* Import CSV des bénévoles */
+.page-import-benevoles { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-import-benevoles { margin: 1.25rem 0 1.75rem; }
+.entete-import-benevoles h1 { margin: .25rem 0 .4rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.035em; }
+.entete-import-benevoles > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.carte-import-benevoles, .carte-apercu-import { margin-bottom: 1.25rem; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 8px 25px rgb(0 58 93 / 5%); }
+.instructions-import { display: flex; align-items: flex-start; gap: .9rem; margin-bottom: 1.4rem; }
+.numero-etape { display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; border-radius: 50%; color: #fff; background: var(--menthe-sgdf); font-weight: 800; place-items: center; }
+.instructions-import h2 { margin: .15rem 0 .25rem; font-size: 1.25rem; }
+.instructions-import p { margin: 0; color: var(--texte-secondaire); font-size: .86rem; line-height: 1.45; }
+.zone-depot-csv { display: grid; min-height: 13rem; padding: 2rem; border: 2px dashed #a9c4cf; border-radius: .7rem; color: var(--bleu-sgdf); background: #f7fafb; cursor: pointer; text-align: center; place-items: center; align-content: center; transition: border-color .15s, background .15s; }
+.zone-depot-csv:hover, .zone-depot-csv:focus-within { border-color: var(--menthe-sgdf); background: #eef8f5; }
+.zone-depot-csv svg { width: 2.5rem; height: 2.5rem; margin-bottom: .65rem; fill: none; stroke: var(--menthe-sgdf); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.zone-depot-csv strong { font-size: 1.05rem; }
+.zone-depot-csv span { margin-top: .25rem; color: var(--texte-secondaire); font-size: .8rem; }
+.zone-depot-csv input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.format-import-csv { margin-top: 1rem; padding: .85rem 1rem; border-radius: .5rem; background: #eef3f5; }
+.format-import-csv strong, .format-import-csv code { display: block; }
+.format-import-csv strong { margin-bottom: .3rem; font-size: .78rem; }
+.format-import-csv code { overflow-x: auto; color: #284f68; font-size: .76rem; white-space: nowrap; }
+.actions-import-benevoles { margin-top: 1.25rem; }
+.resume-import { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem; margin-bottom: 1.25rem; }
+.resume-import span { padding: .8rem; border-radius: .55rem; color: #28546a; background: #eef5f8; font-size: .78rem; text-align: center; }
+.resume-import b { display: block; margin-bottom: .1rem; color: var(--bleu-sgdf); font-size: 1.35rem; }
+.resume-import .resume-erreurs { color: #9b2c24; background: #feeceb; }
+.table-apercu-import { overflow-x: auto; border: 1px solid #d8e2e6; border-radius: .55rem; }
+.table-apercu-import table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.table-apercu-import th, .table-apercu-import td { padding: .7rem .8rem; border-bottom: 1px solid #e1e8eb; text-align: left; white-space: nowrap; }
+.table-apercu-import th { color: var(--texte-secondaire); background: #f7fafb; font-size: .7rem; text-transform: uppercase; }
+.statut-import { display: inline-block; padding: .2rem .5rem; border-radius: 1rem; color: #17614e; background: #e5f6f0; font-size: .68rem; font-weight: 800; }
+.statut-mise_a_jour { color: #71550b; background: #fff4cc; }
+.statut-inchange { color: #596970; background: #e8edef; }
+.statut-erreur { color: #9b2c24; background: #fee4e2; }
+.note-apercu-import { margin: 1rem 0 0; color: var(--texte-secondaire); font-size: .8rem; font-style: italic; }
+.actions-validation-import { display: flex; justify-content: flex-end; gap: .7rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid #d8e2e6; }
+.import-bloque { margin: 1rem 0 0; padding: .8rem 1rem; border-radius: .5rem; color: #9b2c24; background: #feeceb; font-size: .82rem; font-weight: 700; }
+.carte-resultat-import { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding: 1.5rem; border: 1px solid #9ed8c5; border-radius: .75rem; background: #f0faf6; }
+.icone-resultat-import { display: grid; width: 2.8rem; height: 2.8rem; border-radius: 50%; color: #fff; background: #17614e; font-size: 1.4rem; place-items: center; }
+.carte-resultat-import h2, .carte-resultat-import p { margin: 0; }
+.carte-resultat-import p { margin-top: .25rem; color: var(--texte-secondaire); font-size: .84rem; }
+.actions-resultat-import { display: flex; grid-column: 3; grid-row: 1; justify-content: flex-end; gap: .7rem; }
+.alerte-email-import { grid-column: 1 / -1; padding: .8rem 1rem; border-radius: .5rem; color: #9b2c24; background: #feeceb; font-size: .82rem; font-weight: 700; }
+.dialog-confirmation-import { width: min(100% - 2rem, 32rem); padding: 0; border: 0; border-radius: .7rem; color: var(--bleu-sgdf); background: #fff; box-shadow: 0 24px 70px rgb(0 30 50 / 30%); }
+.dialog-confirmation-import::backdrop { background: rgb(0 30 50 / 58%); backdrop-filter: blur(2px); }
+.dialog-confirmation-import > section { padding: 2rem; text-align: center; }
+.icone-confirmation-import { display: grid; width: 3rem; height: 3rem; margin: 0 auto 1rem; border-radius: 50%; color: #8a5a00; background: #fff0c2; font-size: 1.4rem; font-weight: 800; place-items: center; }
+.dialog-confirmation-import h2 { margin: 0; font-size: 1.45rem; }
+.dialog-confirmation-import p { margin: .7rem 0 0; color: var(--texte-secondaire); line-height: 1.5; }
+.dialog-confirmation-import .information-email-import { margin-top: 1rem; padding: .85rem; border-radius: .5rem; color: #17614e; background: #eaf8f2; font-weight: 700; }
+.actions-dialog-import { display: flex; justify-content: center; gap: .75rem; margin-top: 1.5rem; }
+.actions-dialog-import form { margin: 0; }
+
 /* Administration des thématiques */
 .page-thematiques { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
 .page-formulaire-thematique { width: min(100%, 52rem); }
@@ -356,6 +489,31 @@ body {
     .page-profil { padding: 1.2rem .7rem 2rem; }
     .page-synthese { padding: 1.2rem .7rem 2rem; }
     .page-thematiques { padding: 1.2rem .7rem 5.5rem; }
+    .page-benevoles { padding: 1.2rem .7rem 5.5rem; }
+    .page-import-benevoles { padding: 1.2rem .7rem 2rem; }
+    .page-import-benevoles > .retour-calendrier { display: none; }
+    .carte-import-benevoles, .carte-apercu-import { margin-inline: -.7rem; padding: 1.25rem; border-inline: 0; border-radius: 0; box-shadow: none; }
+    .zone-depot-csv { min-height: 11rem; padding: 1.25rem; }
+    .resume-import { grid-template-columns: 1fr 1fr; }
+    .actions-validation-import { align-items: stretch; flex-direction: column-reverse; }
+    .actions-validation-import .bouton-secondaire { justify-content: center; }
+    .actions-resultat-import { align-items: stretch; flex-direction: column; }
+    .carte-resultat-import { grid-template-columns: auto minmax(0, 1fr); }
+    .actions-resultat-import { grid-column: 1 / -1; grid-row: auto; padding-top: 1rem; border-top: 1px solid #b9ded1; }
+    .actions-resultat-import .bouton-secondaire, .actions-resultat-import .bouton-principal { justify-content: center; }
+    .entete-benevoles { align-items: stretch; flex-direction: column; }
+    .bouton-importer-benevoles { display: none; }
+    .carte-liste-benevoles { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .entete-table-benevoles, .ligne-benevole { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(7rem, 1.15fr); gap: .65rem; padding-inline: 1.25rem; }
+    .entete-table-benevoles, .ligne-benevole { padding-right: 1.25rem; }
+    .ligne-benevole strong small { display: block; width: fit-content; margin: .2rem 0 0; }
+    .actions-ligne-benevole { display: none; }
+    .conteneur-ligne-benevole { overflow: hidden; }
+    .conteneur-ligne-benevole.ouverte .ligne-benevole { transform: translateX(-7.5rem); }
+    .action-glissee-benevole { position: absolute; z-index: 0; inset: 0 0 0 auto; display: block; width: 7.5rem; margin: 0; }
+    .action-glissee-benevole button { width: 100%; height: 100%; padding: .75rem; border: 0; color: #fff; background: #b42318; font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; }
+    .action-glissee-benevole.reactiver button { background: #17614e; }
+    .entete-table-benevoles span:nth-child(n+4), .ligne-benevole .equipement-benevole { display: none; }
     .page-formulaire-thematique { width: 100%; padding-bottom: 2rem; }
     .grille-thematique { grid-template-columns: 1fr; }
     .entete-liste-thematiques { align-items: stretch; flex-direction: column; }

@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Inscription;
+use App\Entity\Journee;
+use App\Entity\PersonnePermanence;
+use App\Entity\Utilisateur;
 use App\Repository\InscriptionRepository;
+use App\Repository\JourneeRepository;
+use App\Repository\PersonnePermanenceRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class EspacePriveController extends AbstractController
 {
@@ -91,19 +97,105 @@ final class EspacePriveController extends AbstractController
         ]);
     }
 
-    #[Route('/administration/calendrier', name: 'app_admin_calendrier', methods: ['GET'])]
-    public function calendrier(): Response
+    #[Route('/administration/calendrier', name: 'app_admin_calendrier', methods: ['GET', 'POST'])]
+    public function calendrier(
+        Request $request,
+        PersonnePermanenceRepository $personnes,
+        JourneeRepository $journees,
+        EntityManagerInterface $entityManager,
+    ): Response
     {
         $this->garantirAccesEquipe();
+        $utilisateur = $this->getUser();
+        if (!$utilisateur instanceof Utilisateur) throw $this->createAccessDeniedException();
 
-        return $this->page('Configuration du calendrier', 'Administration', 'La gestion des permanences et des journées sera prochainement disponible.');
+        if ($request->isMethod('POST')) {
+            $action = $request->request->getString('action');
+            if (!$this->isCsrfTokenValid('configurer-calendrier', $request->request->getString('_csrf_token'))) {
+                $this->addFlash('erreur', 'Le formulaire a expiré. Veuillez réessayer.');
+                return $this->redirectToRoute('app_admin_calendrier');
+            }
+
+            if ($action === 'ajouter_personne') {
+                $nom = trim($request->request->getString('nom_personne'));
+                if ($nom === '' || mb_strlen($nom) > 150) {
+                    $this->addFlash('erreur', 'Le nom est obligatoire et limité à 150 caractères.');
+                } else {
+                    try {
+                        $entityManager->persist(new PersonnePermanence($nom));
+                        $entityManager->flush();
+                        $this->addFlash('succes', 'La personne a été ajoutée à la liste.');
+                    } catch (UniqueConstraintViolationException) {
+                        $this->addFlash('erreur', 'Cette personne figure déjà dans la liste.');
+                    }
+                }
+                return $this->redirectToRoute('app_admin_calendrier');
+            }
+
+            $debut = $this->lireDate($request->request->getString('date_debut'));
+            $fin = $this->lireDate($request->request->getString('date_fin'));
+            if ($debut === null || $fin === null || $fin < $debut || $fin > $debut->modify('+366 days')) {
+                $this->addFlash('erreur', 'Choisissez une période valide, limitée à un an.');
+                return $this->redirectToRoute('app_admin_calendrier');
+            }
+
+            $mode = $request->request->getString('mode') === 'remplacer' ? 'remplacer' : 'completer';
+            $joursExistants = [];
+            foreach ($journees->findEntre($debut, $fin) as $journee) {
+                $joursExistants[$journee->getDateJournee()->format('Y-m-d')] = $journee;
+            }
+
+            if ($action === 'permanence') {
+                $personne = $personnes->find($request->request->getString('personne'));
+                if (!$personne instanceof PersonnePermanence || !$personne->isActif()) {
+                    $this->addFlash('erreur', 'Choisissez une personne de permanence.');
+                    return $this->redirectToRoute('app_admin_calendrier');
+                }
+                $modifies = $this->appliquerPeriode($debut, $fin, $joursExistants, $entityManager, $utilisateur, $mode, 'permanence', $personne);
+                $this->addFlash('succes', $modifies.' jour'.($modifies > 1 ? 's ont' : ' a').' été mis à jour pour la permanence.');
+            } elseif ($action === 'commentaire') {
+                $commentaire = trim($request->request->getString('commentaire'));
+                if (mb_strlen($commentaire) > 1000) {
+                    $this->addFlash('erreur', 'Le commentaire est limité à 1 000 caractères.');
+                    return $this->redirectToRoute('app_admin_calendrier');
+                }
+                $modifies = $this->appliquerPeriode($debut, $fin, $joursExistants, $entityManager, $utilisateur, $mode, 'commentaire', $commentaire);
+                $this->addFlash('succes', $commentaire === '' ? 'Les commentaires de la période ont été retirés.' : $modifies.' jour'.($modifies > 1 ? 's ont' : ' a').' été mis à jour avec ce commentaire.');
+            }
+
+            $entityManager->flush();
+            return $this->redirectToRoute('app_admin_calendrier');
+        }
+
+        $aujourdhui = new \DateTimeImmutable('today');
+
+        return $this->render('espace_prive/calendrier.html.twig', [
+            'personnes' => $personnes->findActives(),
+            'date_debut' => $aujourdhui,
+            'date_fin' => $aujourdhui->modify('+6 days'),
+            'journees' => $journees->findEntre($aujourdhui, $aujourdhui->modify('+41 days')),
+        ]);
     }
 
-    #[Route('/administration/benevoles', name: 'app_admin_benevoles', methods: ['GET'])]
-    #[IsGranted('ROLE_EQUIPE_PILOTE')]
-    public function benevoles(): Response
+    /** @param array<string, Journee> $existants */
+    private function appliquerPeriode(\DateTimeImmutable $debut, \DateTimeImmutable $fin, array $existants, EntityManagerInterface $entityManager, Utilisateur $utilisateur, string $mode, string $champ, mixed $valeur): int
     {
-        return $this->page('Bénévoles', 'Administration', 'La liste des utilisateurs et la gestion des bénévoles seront prochainement disponibles.');
+        $modifies = 0;
+        for ($date = $debut; $date <= $fin; $date = $date->modify('+1 day')) {
+            $journee = $existants[$date->format('Y-m-d')] ?? new Journee($date, $utilisateur);
+            $dejaRenseigne = $champ === 'permanence' ? $journee->getPersonnePermanence() !== null : $journee->getCommentaire() !== null;
+            if ($mode === 'completer' && $dejaRenseigne) continue;
+            if ($champ === 'permanence') $journee->definirPermanence($valeur, $utilisateur);
+            else $journee->definirCommentaire($valeur, $utilisateur);
+            if ($journee->estVide()) {
+                if (isset($existants[$date->format('Y-m-d')])) $entityManager->remove($journee);
+            } else {
+                $entityManager->persist($journee);
+            }
+            ++$modifies;
+        }
+
+        return $modifies;
     }
 
     private function page(string $titre, string $surtitre, string $message): Response
