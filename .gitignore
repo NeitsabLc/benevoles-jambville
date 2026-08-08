@@ -1,6 +1,10 @@
 /.idea/
-/app/.env.local
-/app/.env.*.local
+/.env
+/.env.*
+!/.env.example
+/app/.env
+/app/.env.*
+!/app/.env.example
 /app/.phpunit.cache/
 /app/public/assets/
 /app/var/
