@@ -8,7 +8,25 @@ security:
             security: false
         main:
             lazy: true
+            provider: utilisateurs
+            user_checker: App\Security\UtilisateurChecker
+            form_login:
+                login_path: app_connexion
+                check_path: app_connexion
+                enable_csrf: true
+                username_parameter: email
+                password_parameter: mot_de_passe
+                default_target_path: app_accueil
+            logout:
+                path: app_deconnexion
+                target: app_connexion
+
+    providers:
+        utilisateurs:
+            entity:
+                class: App\Entity\Utilisateur
 
     access_control:
-        - { path: ^/, roles: PUBLIC_ACCESS }
-
+        - { path: ^/connexion$, roles: PUBLIC_ACCESS }
+        - { path: ^/premiere-connexion/, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

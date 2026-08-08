@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<main class="page-authentification">
+    <section class="panneau-authentification" aria-labelledby="titre-connexion">
+        {% include 'securite/_identite.html.twig' %}
+
+        <div class="entete-formulaire">
+            <p class="surtitre">Espace bénévole</p>
+            <h1 id="titre-connexion">Ravi de vous revoir</h1>
+            <p>Connectez-vous pour gérer vos disponibilités et préparer votre accueil à Jambville.</p>
+        </div>
+
+        {% for message in app.flashes('succes') %}
+            <div class="alerte alerte-succes" role="status">{{ message }}</div>
+        {% endfor %}
+
+        {% if erreur %}
+            <div class="alerte alerte-erreur" role="alert">{{ erreur.messageKey|trans(erreur.messageData, 'security') }}</div>
+        {% endif %}
+
+        <form method="post" class="formulaire-authentification">
+            <div class="champ">
+                <label for="email">Adresse e-mail</label>
+                <input id="email" name="email" type="email" value="{{ dernier_identifiant }}" autocomplete="email" required autofocus>
+            </div>
+            <div class="champ">
+                <div class="ligne-label">
+                    <label for="mot-de-passe">Mot de passe</label>
+                    <span class="aide-discrete">12 caractères minimum</span>
+                </div>
+                <input id="mot-de-passe" name="mot_de_passe" type="password" autocomplete="current-password" required>
+            </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <button class="bouton-principal" type="submit">Se connecter</button>
+        </form>
+
+        <p class="note-authentification">Première visite ? Utilisez le lien personnel reçu dans votre e-mail d’activation.</p>
+    </section>
+    <aside class="illustration-authentification" aria-hidden="true">
+        <div class="message-accueil">
+            <p class="surtitre surtitre-clair">Bienvenue à Jambville</p>
+            <p>« Un lieu vivant grâce à l’engagement de chacun. »</p>
+        </div>
+    </aside>
+</main>
+{% endblock %}

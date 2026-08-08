@@ -52,6 +52,10 @@ db-sql: ## Afficher le SQL Liquibase sans l'appliquer
 db-update: ## Appliquer les changements de base de données
 	$(LIQUIBASE) update
 
+.PHONY: db-dev-update
+db-dev-update: ## Appliquer les changements et les données de démonstration
+	$(LIQUIBASE) update --context-filter=dev
+
 .PHONY: db-shell
 db-shell: ## Ouvrir une console PostgreSQL
 	$(DOCKER_COMPOSE) exec database psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
@@ -59,4 +63,3 @@ db-shell: ## Ouvrir une console PostgreSQL
 .PHONY: test
 test: ## Exécuter les tests
 	$(PHP) php bin/phpunit
-

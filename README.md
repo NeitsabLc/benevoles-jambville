@@ -32,4 +32,10 @@ make db-sql
 make db-update
 ```
 
+Pour charger aussi les comptes et données réservés au développement :
+
+```bash
+make db-dev-update
+```
+
 Doctrine ne doit jamais créer ni modifier le schéma.

@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Première connexion · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<main class="page-authentification page-activation">
+    <section class="panneau-authentification" aria-labelledby="titre-activation">
+        {% include 'securite/_identite.html.twig' %}
+        <div class="etapes" aria-label="Étape 1 sur 1"><span></span></div>
+        <div class="entete-formulaire">
+            <p class="surtitre">Première connexion</p>
+            <h1 id="titre-activation">Bienvenue, {{ utilisateur.nomComplet }}</h1>
+            <p>Choisissez votre mot de passe pour activer définitivement votre espace.</p>
+        </div>
+
+        {% if erreurs %}
+            <div class="alerte alerte-erreur" role="alert">
+                {% for erreur in erreurs %}<div>{{ erreur }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{{ path('app_premiere_connexion', {token: token}) }}" class="formulaire-authentification">
+            <div class="champ">
+                <label for="mot-de-passe">Créer un mot de passe</label>
+                <input id="mot-de-passe" name="mot_de_passe" type="password" minlength="12" autocomplete="new-password" required autofocus>
+                <small>Utilisez au moins 12 caractères. Une phrase facile à retenir fonctionne très bien.</small>
+            </div>
+            <div class="champ">
+                <label for="confirmation">Confirmer le mot de passe</label>
+                <input id="confirmation" name="confirmation" type="password" minlength="12" autocomplete="new-password" required>
+            </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-' ~ utilisateur.id) }}">
+            <button class="bouton-principal" type="submit">Activer mon espace</button>
+        </form>
+    </section>
+    <aside class="illustration-authentification" aria-hidden="true">
+        <div class="message-accueil">
+            <p class="surtitre surtitre-clair">Presque terminé</p>
+            <p>Votre espace bénévole sera prêt dans quelques secondes.</p>
+        </div>
+    </aside>
+</main>
+{% endblock %}
