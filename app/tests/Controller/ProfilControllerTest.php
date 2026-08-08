@@ -33,8 +33,9 @@ final class ProfilControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="allergie_arachide"]');
         self::assertSelectorExists('textarea[name="regime_autre"]');
         self::assertSelectorExists('textarea[name="besoin_couchage"]');
-        self::assertSelectorExists('input[name="foulard_remis"][disabled]');
-        self::assertSelectorExists('input[name="tenue_remise"][disabled]');
+        self::assertSelectorNotExists('#equipement-titre');
+        self::assertSelectorNotExists('input[name="foulard_remis"]');
+        self::assertSelectorNotExists('input[name="tenue_remise"]');
         self::assertSelectorExists('input[name="mot_de_passe_actuel"]');
         self::assertSelectorExists('input[name="nouveau_mot_de_passe"][minlength="12"]');
         self::assertSelectorExists('input[name="confirmation_mot_de_passe"]');
@@ -48,15 +49,18 @@ final class ProfilControllerTest extends WebTestCase
         $client->loginUser($utilisateur);
 
         $crawler = $client->request('GET', '/mon-profil');
-        $formulaire = $crawler->selectButton('Enregistrer mon profil')->form([
+        $jeton = $crawler->filter('.formulaire-profil input[name="_csrf_token"]')->attr('value');
+        self::assertNotNull($jeton);
+        $client->request('POST', '/mon-profil', [
+            '_csrf_token' => $jeton,
             'telephone' => '06 12 34 56 78',
-            'vegetarien' => true,
-            'allergie_oeuf' => true,
+            'vegetarien' => '1',
+            'allergie_oeuf' => '1',
             'regime_autre' => 'Test sans lactose',
             'besoin_couchage' => 'Test lit bas',
+            'foulard_remis' => '1',
+            'tenue_remise' => '1',
         ]);
-        $formulaire->setValues(['foulard_remis' => '1', 'tenue_remise' => '1']);
-        $client->submit($formulaire);
 
         self::assertResponseRedirects('/mon-profil');
         $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);

@@ -49,13 +49,15 @@
                 <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', app.user.besoinCouchage) }}</textarea></div>
             </section>
 
+            {% if app.user.equipePilote %}
             <section class="carte-profil" aria-labelledby="equipement-titre">
-                <header><h2 id="equipement-titre">Équipement bénévole</h2><p>{{ app.user.equipePilote ? 'Vous pouvez mettre à jour la remise de votre équipement.' : 'La remise de ces éléments est enregistrée par l’équipe pilote.' }}</p></header>
+                <header><h2 id="equipement-titre">Équipement bénévole</h2><p>Vous pouvez mettre à jour la remise de votre équipement.</p></header>
                 <div class="choix-profil">
-                    <label class="{{ not app.user.equipePilote ? 'choix-verrouille' }}"><input type="checkbox" name="foulard_remis" value="1" {{ app.user.foulardRemis ? 'checked' }} {{ not app.user.equipePilote ? 'disabled' }}> Foulard remis</label>
-                    <label class="{{ not app.user.equipePilote ? 'choix-verrouille' }}"><input type="checkbox" name="tenue_remise" value="1" {{ app.user.tenueRemise ? 'checked' }} {{ not app.user.equipePilote ? 'disabled' }}> Tenue remise</label>
+                    <label><input type="checkbox" name="foulard_remis" value="1" {{ app.user.foulardRemis ? 'checked' }}> Foulard remis</label>
+                    <label><input type="checkbox" name="tenue_remise" value="1" {{ app.user.tenueRemise ? 'checked' }}> Tenue remise</label>
                 </div>
             </section>
+            {% endif %}
 
             <section class="carte-profil" aria-labelledby="mot-de-passe-titre">
                 <header><h2 id="mot-de-passe-titre">Mot de passe</h2><p>Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.</p></header>
