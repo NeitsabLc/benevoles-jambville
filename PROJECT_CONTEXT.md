@@ -66,6 +66,18 @@ journaux applicatifs ou les détails du journal d’audit.
 
 ## 4. Inscriptions et présences
 
+Les thématiques peuvent être permanentes ou événementielles. Une thématique
+événementielle possède une période inclusive et est proposée en tête de liste
+quand toute la présence demandée est comprise dans cette période. Lorsqu’elle
+est marquée « Thématique exclusive sur cette période », elle remplace tous les
+autres choix pour une présence compatible. Une présence qui chevauche même
+partiellement une période exclusive doit être entièrement ramenée dans cette
+période et utiliser la thématique de l’événement ; sinon l’inscription est
+refusée avec un message explicite. Une thématique n’est jamais supprimée
+si elle a été utilisée : elle peut être désactivée puis réactivée.
+Une thématique événementielle est automatiquement désactivée 24 heures après
+la fin de sa dernière journée, soit à minuit le surlendemain de sa date de fin.
+
 ### 4.1 Inscription individuelle
 
 Un utilisateur peut uniquement s’inscrire lui-même. Il renseigne :

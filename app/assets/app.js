@@ -15,6 +15,41 @@ const initialiserFormulairePresence = () => {
         formulaire.dataset.initialise = 'true';
 
         const selectionRepas = formulaire.querySelector('[data-selection-repas]');
+        const selectThematique = formulaire.querySelector('select[name="thematique"]');
+        const dateDebutThematique = formulaire.querySelector('#date_debut');
+        const dateFinThematique = formulaire.querySelector('#date_fin');
+        if (selectThematique && dateDebutThematique && dateFinThematique) {
+            const invitation = selectThematique.options[0];
+            const options = [...selectThematique.options].slice(1);
+            const erreurExclusive = formulaire.querySelector('[data-erreur-periode-exclusive]');
+            const actualiserThematiques = () => {
+                const debut = dateDebutThematique.value;
+                const fin = dateFinThematique.value;
+                const periodeValide = debut && fin && fin >= debut;
+                const exclusivesChevauchantes = options.filter((option) => option.dataset.exclusive === 'true' && periodeValide && debut <= option.dataset.fin && fin >= option.dataset.debut);
+                const compatibles = options.filter((option) => option.dataset.evenement !== 'true' || (periodeValide && debut >= option.dataset.debut && fin <= option.dataset.fin));
+                const visibles = exclusivesChevauchantes.length > 0
+                    ? exclusivesChevauchantes.filter((option) => debut >= option.dataset.debut && fin <= option.dataset.fin)
+                    : compatibles;
+                const valeur = selectThematique.value;
+                const ordonnees = [...visibles].sort((a, b) => (b.dataset.evenement === 'true') - (a.dataset.evenement === 'true'));
+                selectThematique.replaceChildren(invitation, ...ordonnees);
+                selectThematique.value = ordonnees.some((option) => option.value === valeur) ? valeur : '';
+                if (erreurExclusive) {
+                    const exclusivePartielle = exclusivesChevauchantes.find((option) => debut < option.dataset.debut || fin > option.dataset.fin);
+                    erreurExclusive.hidden = !exclusivePartielle;
+                    if (exclusivePartielle) {
+                        const formaterDate = (dateIso) => new Intl.DateTimeFormat('fr-FR').format(new Date(`${dateIso}T12:00:00`));
+                        erreurExclusive.textContent = `Inscription impossible : les dates chevauchent la période exclusive de l’événement « ${exclusivePartielle.textContent} ». Choisissez uniquement des dates comprises dans sa période (du ${formaterDate(exclusivePartielle.dataset.debut)} au ${formaterDate(exclusivePartielle.dataset.fin)}).`;
+                    } else {
+                        erreurExclusive.textContent = '';
+                    }
+                }
+            };
+            dateDebutThematique.addEventListener('change', actualiserThematiques);
+            dateFinThematique.addEventListener('change', actualiserThematiques);
+            actualiserThematiques();
+        }
         if (selectionRepas) {
             const lignes = selectionRepas.querySelector('[data-repas-lignes]');
             const dateDebut = formulaire.querySelector('#date_debut');
@@ -142,9 +177,60 @@ const initialiserLignesPresence = () => {
     document.querySelectorAll('[data-modification-url]').forEach((ligne) => {
         if (ligne.dataset.initialise === 'true') return;
         ligne.dataset.initialise = 'true';
-        const ouvrir = () => { if (window.matchMedia('(max-width: 760px)').matches) window.location.href = ligne.dataset.modificationUrl; };
-        ligne.addEventListener('click', (event) => { if (!event.target.closest('a, button')) ouvrir(); });
+        const ouvrir = () => { if (ligne.hasAttribute('data-carte-thematique') || window.matchMedia('(max-width: 760px)').matches) window.location.href = ligne.dataset.modificationUrl; };
+        ligne.addEventListener('click', (event) => {
+            if (ligne.dataset.glissement === 'true') {
+                ligne.dataset.glissement = 'false';
+                event.preventDefault();
+                return;
+            }
+            if (!event.target.closest('a, button')) ouvrir();
+        });
         ligne.addEventListener('keydown', (event) => { if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button')) { event.preventDefault(); ouvrir(); } });
+    });
+};
+
+const initialiserGlissieresThematiques = () => {
+    document.querySelectorAll('[data-glissiere-thematique]').forEach((glissiere) => {
+        if (glissiere.dataset.initialise === 'true') return;
+        glissiere.dataset.initialise = 'true';
+        const ligne = glissiere.querySelector('[data-carte-thematique]');
+        if (!ligne) return;
+        let departX = 0;
+        let departY = 0;
+        let glissementHorizontal = false;
+
+        ligne.addEventListener('pointerdown', (event) => {
+            if (!window.matchMedia('(max-width: 760px)').matches || event.target.closest('a, button')) return;
+            departX = event.clientX;
+            departY = event.clientY;
+            glissementHorizontal = false;
+        });
+        ligne.addEventListener('pointermove', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            const deltaY = event.clientY - departY;
+            if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) glissementHorizontal = true;
+        });
+        ligne.addEventListener('pointerup', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            if (glissementHorizontal && deltaX < -45) {
+                document.querySelectorAll('[data-glissiere-thematique].ouverte').forEach((autre) => { if (autre !== glissiere) autre.classList.remove('ouverte'); });
+                glissiere.classList.add('ouverte');
+                ligne.dataset.glissement = 'true';
+            } else if (glissementHorizontal && deltaX > 35) {
+                glissiere.classList.remove('ouverte');
+                ligne.dataset.glissement = 'true';
+            }
+            departX = 0;
+            departY = 0;
+        });
+        ligne.addEventListener('pointercancel', () => {
+            departX = 0;
+            departY = 0;
+            glissementHorizontal = false;
+        });
     });
 };
 
@@ -177,5 +263,7 @@ document.addEventListener('DOMContentLoaded', initialiserMenuMobile);
 document.addEventListener('turbo:load', initialiserMenuMobile);
 document.addEventListener('DOMContentLoaded', initialiserLignesPresence);
 document.addEventListener('turbo:load', initialiserLignesPresence);
+document.addEventListener('DOMContentLoaded', initialiserGlissieresThematiques);
+document.addEventListener('turbo:load', initialiserGlissieresThematiques);
 document.addEventListener('DOMContentLoaded', initialiserValidationTelephone);
 document.addEventListener('turbo:load', initialiserValidationTelephone);

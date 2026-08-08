@@ -40,12 +40,10 @@
 
         <div class="groupe-navigation administration-navigation">
             <p>Administration</p>
-            {% if is_granted('ROLE_EQUIPE_PILOTE') %}
-                <a class="lien-navigation {{ app.current_route == 'app_admin_thematiques' ? 'actif' }}" href="{{ path('app_admin_thematiques') }}">
+                <a class="lien-navigation {{ app.current_route starts with 'app_admin_thematique' ? 'actif' }}" href="{{ path('app_admin_thematiques') }}">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/></svg>
                     <span>Thématiques</span>
                 </a>
-            {% endif %}
             <a class="lien-navigation {{ app.current_route == 'app_admin_calendrier' ? 'actif' }}" href="{{ path('app_admin_calendrier') }}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
                 <span>Configuration calendrier</span>

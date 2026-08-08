@@ -74,6 +74,11 @@ final class PresenceController extends AbstractController
                 $nombreEnfants = $request->request->getInt('nombre_enfants');
                 if ($thematique === null || !$thematique->isActif()) {
                     $erreurs[] = 'Choisissez une thématique active.';
+                } elseif ($dateDebut !== null && $dateFin !== null && !in_array($thematique, $thematiques->findDisponiblesPour($dateDebut, $dateFin), true)) {
+                    $exclusives = $thematiques->findExclusivesChevauchant($dateDebut, $dateFin);
+                    $erreurs[] = $exclusives !== []
+                        ? sprintf('Inscription impossible : les dates chevauchent la période exclusive de l’événement « %s ». Choisissez uniquement des dates comprises dans sa période (du %s au %s).', $exclusives[0]->getNom(), $exclusives[0]->getDateDebutEvenement()?->format('d/m/Y'), $exclusives[0]->getDateFinEvenement()?->format('d/m/Y'))
+                        : 'Cette thématique n’est pas disponible pour la période choisie.';
                 }
                 if ($nombreEnfants < 0) {
                     $erreurs[] = 'Le nombre d’enfants ne peut pas être négatif.';
@@ -181,6 +186,11 @@ final class PresenceController extends AbstractController
                 $nombreEnfants = $request->request->getInt('nombre_enfants');
                 if ($thematique === null || !$thematique->isActif()) {
                     $erreurs[] = 'Choisissez une thématique active.';
+                } elseif ($dateDebut !== null && $dateFin !== null && !in_array($thematique, $thematiques->findDisponiblesPour($dateDebut, $dateFin), true)) {
+                    $exclusives = $thematiques->findExclusivesChevauchant($dateDebut, $dateFin);
+                    $erreurs[] = $exclusives !== []
+                        ? sprintf('Inscription impossible : les dates chevauchent la période exclusive de l’événement « %s ». Choisissez uniquement des dates comprises dans sa période (du %s au %s).', $exclusives[0]->getNom(), $exclusives[0]->getDateDebutEvenement()?->format('d/m/Y'), $exclusives[0]->getDateFinEvenement()?->format('d/m/Y'))
+                        : 'Cette thématique n’est pas disponible pour la période choisie.';
                 }
                 if ($nombreEnfants < 0) {
                     $erreurs[] = 'Le nombre d’enfants ne peut pas être négatif.';

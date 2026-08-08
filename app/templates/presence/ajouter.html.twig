@@ -65,8 +65,9 @@
                     <select id="thematique" name="thematique" {{ mode != 'benevole' ? 'disabled' }} required>
                         <option value="">Choisir une thématique</option>
                         {% set thematique_selectionnee = app.request.request.get('thematique', inscription and inscription.thematique ? inscription.thematique.id : '') %}
-                        {% for thematique in thematiques %}<option value="{{ thematique.id }}" {{ thematique_selectionnee == thematique.id ? 'selected' }}>{{ thematique.nom }}</option>{% endfor %}
+                        {% for thematique in thematiques %}<option value="{{ thematique.id }}" data-evenement="{{ thematique.evenement ? 'true' : 'false' }}" data-debut="{{ thematique.dateDebutEvenement ? thematique.dateDebutEvenement|date('Y-m-d') : '' }}" data-fin="{{ thematique.dateFinEvenement ? thematique.dateFinEvenement|date('Y-m-d') : '' }}" data-exclusive="{{ thematique.exclusiveSurPeriode ? 'true' : 'false' }}" {{ thematique_selectionnee == thematique.id ? 'selected' }}>{{ thematique.nom }}</option>{% endfor %}
                     </select>
+                    <small class="erreur-champ" data-erreur-periode-exclusive hidden></small>
                 </div>
                 <div class="champ"><label for="type_couchage">Couchage</label><select id="type_couchage" name="type_couchage" required><option value="">Choisir</option><option value="DUR" {{ couchage == 'DUR' ? 'selected' }}>En dur</option><option value="TENTE" {{ couchage == 'TENTE' ? 'selected' }}>Sous tente</option></select></div>
             </div>
@@ -98,7 +99,7 @@
 
         </section>
 
-        <div class="actions-formulaire actions-formulaire-presence">
+        <div class="actions-formulaire actions-formulaire-presence {{ not edition ? 'sans-suppression' }}">
             {% if edition %}
                 <button class="bouton-supprimer-presence" type="button"
                     data-suppression-presence

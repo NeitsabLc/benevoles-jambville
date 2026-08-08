@@ -99,13 +99,6 @@ final class EspacePriveController extends AbstractController
         return $this->page('Configuration du calendrier', 'Administration', 'La gestion des permanences et des journées sera prochainement disponible.');
     }
 
-    #[Route('/administration/thematiques', name: 'app_admin_thematiques', methods: ['GET'])]
-    #[IsGranted('ROLE_EQUIPE_PILOTE')]
-    public function thematiques(): Response
-    {
-        return $this->page('Thématiques', 'Administration', 'La gestion des thématiques sera prochainement disponible.');
-    }
-
     #[Route('/administration/benevoles', name: 'app_admin_benevoles', methods: ['GET'])]
     #[IsGranted('ROLE_EQUIPE_PILOTE')]
     public function benevoles(): Response

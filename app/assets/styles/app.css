@@ -176,6 +176,8 @@ body {
 .formulaire-presence [hidden] { display: none !important; }
 .champs-presence { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .champs-presence[hidden] { display: none; }
+.champs-presence > .champ { align-self: start; align-content: start; }
+.carte-presence > .champs-presence { margin-bottom: 1rem; }
 .champ-large { grid-column: 1 / -1; }
 .champ textarea, .champ select { width: 100%; padding: .75rem .9rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: #173f53; background: #fff; font: inherit; outline: none; }
 .champ textarea:focus, .champ select:focus { border-color: var(--menthe-sgdf); box-shadow: 0 0 0 3px rgb(72 185 148 / 18%); }
@@ -212,6 +214,7 @@ body {
 .champ label small { color: var(--texte-secondaire); font-weight: 400; }
 .actions-formulaire { display: flex; justify-content: flex-end; gap: .7rem; padding-top: .5rem; }
 .actions-formulaire-presence { justify-content: space-between; padding-top: 1rem; }
+.actions-formulaire-presence.sans-suppression { justify-content: flex-end; }
 .actions-formulaire-principales { display: flex; gap: .7rem; }
 .bouton-supprimer-presence { min-height: 3rem; padding: .7rem 1rem; border: 1px solid #d92d20; border-radius: .55rem; color: #b42318; background: #fff; font: inherit; font-weight: 800; cursor: pointer; }
 .bouton-supprimer-presence:hover { color: #fff; background: #b42318; }
@@ -248,6 +251,57 @@ body {
 .carte-future > span { display: grid; width: 3.5rem; height: 3.5rem; margin-bottom: 1rem; border-radius: 1rem 1rem 1rem .25rem; color: #fff; background: var(--menthe-sgdf); font-weight: 800; place-items: center; }
 .carte-future h2 { margin: 0; font-size: 1.35rem; }
 .carte-future p { max-width: 32rem; margin: .6rem 0 1.5rem; color: var(--texte-secondaire); line-height: 1.55; }
+
+/* Administration des thématiques */
+.page-thematiques { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.page-formulaire-thematique { width: min(100%, 52rem); }
+.entete-thematiques { margin: 0 0 1.75rem; }
+.entete-liste-thematiques { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; }
+.entete-thematiques h1 { margin: 0 0 .35rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.035em; }
+.entete-thematiques > p:last-child, .entete-thematiques > div > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.fil-ariane-thematique { display: flex; align-items: center; gap: .55rem; margin-bottom: 1rem; color: var(--texte-secondaire); font-size: .88rem; font-weight: 700; }
+.fil-ariane-thematique a { color: var(--bleu-sgdf); text-decoration: none; }
+.fil-ariane-thematique a:hover { text-decoration: underline; }
+.bouton-ajouter-thematique { flex: 0 0 auto; gap: .4rem; }
+.bouton-ajouter-thematique > span[aria-hidden="true"] { font-size: 1.35rem; line-height: 1; }
+.carte-thematique { padding: 1.75rem; border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .5rem; background: #fff; box-shadow: 0 8px 28px rgb(0 58 93 / 9%); }
+.carte-thematique > h2 { margin: 0 0 1.35rem; font-size: 1.35rem; }
+.formulaire-thematique { display: grid; gap: 1.25rem; }
+.formulaire-thematique .champ input { min-height: 3rem; border-radius: .3rem; }
+.actions-thematique-formulaire { justify-content: flex-end; padding: 0; }
+.grille-thematique { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.periode-thematique { margin: 0 0 1rem; padding: 1rem; border: 1px solid #d8e2e6; border-radius: .6rem; }
+.periode-thematique legend { padding: 0 .4rem; font-weight: 800; }
+.periode-thematique > p { margin: 0 0 1rem; color: var(--texte-secondaire); font-size: .82rem; }
+.choix-exclusivite { display: flex; align-items: start; gap: .7rem; cursor: pointer; }
+.choix-exclusivite input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; accent-color: var(--menthe-sgdf); }
+.choix-exclusivite span, .choix-exclusivite small { display: block; }
+.choix-exclusivite small { margin-top: .2rem; color: var(--texte-secondaire); }
+.carte-liste-thematiques { overflow: hidden; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.resume-thematiques { min-height: 4rem; padding: 1rem 1.4rem; border-bottom: 1px solid #d8e2e6; }
+.resume-thematiques p { margin: 0; color: var(--texte-secondaire); font-size: .88rem; font-weight: 700; }
+.liste-thematiques { padding: 0 1.4rem; }
+.glissiere-thematique + .glissiere-thematique { border-top: 1px solid #d8e2e6; }
+.ligne-thematique { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 6rem auto; align-items: center; gap: 1.25rem; padding: 1.2rem 0; background: #fff; cursor: pointer; transition: transform .18s ease; touch-action: pan-y; }
+.ligne-thematique:focus-visible { outline: 3px solid rgb(72 185 148 / 35%); outline-offset: -3px; }
+.ligne-thematique h2 { margin: 0; font-size: 1.05rem; }
+.ligne-thematique p { margin: .3rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.ligne-thematique p span { color: #9b3a19; font-weight: 800; }
+.ligne-thematique.inactive .contenu-thematique { opacity: .62; }
+.actions-thematique { display: flex; align-items: center; gap: .55rem; }
+.actions-thematique form { margin: 0; }
+.statut-thematique { padding: .2rem .55rem; border-radius: 1rem; color: #17614e; background: #eaf8f2; font-size: .72rem; font-weight: 800; }
+.colonne-statut-thematique { justify-self: start; }
+.inactive .statut-thematique { color: #596970; background: #e5e9eb; }
+.bouton-modifier-thematique { display: grid; width: 2.65rem; height: 2.65rem; place-items: center; border: 1px solid #c7d2d8; border-radius: .3rem; color: var(--bleu-sgdf); background: #fff; }
+.bouton-modifier-thematique svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.bouton-modifier-thematique:hover { border-color: var(--bleu-sgdf); background: #f7fbfd; }
+.bouton-activation-thematique { display: grid; width: 2.65rem; height: 2.65rem; padding: 0; border: 1px solid #e7aaa6; border-radius: .3rem; color: #b42318; background: #fff; cursor: pointer; place-items: center; }
+.bouton-activation-thematique.reactiver { border-color: #9ed8c5; color: #17614e; }
+.bouton-activation-thematique svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bouton-activation-thematique:hover { color: #fff; background: #b42318; }
+.bouton-activation-thematique.reactiver:hover { background: #17614e; }
+.action-glissee-thematique { display: none; }
 
 /* Synthèse accueil et hôtellerie */
 .page-synthese { width: min(100%, 96rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
@@ -301,6 +355,31 @@ body {
     .page-formulaire-presence { padding: 1.2rem .7rem 2rem; }
     .page-profil { padding: 1.2rem .7rem 2rem; }
     .page-synthese { padding: 1.2rem .7rem 2rem; }
+    .page-thematiques { padding: 1.2rem .7rem 5.5rem; }
+    .page-formulaire-thematique { width: 100%; padding-bottom: 2rem; }
+    .grille-thematique { grid-template-columns: 1fr; }
+    .entete-liste-thematiques { align-items: stretch; flex-direction: column; }
+    .bouton-ajouter-thematique { position: fixed; z-index: 11; right: max(1.25rem, env(safe-area-inset-right)); bottom: max(1.25rem, env(safe-area-inset-bottom)); display: grid; width: 3.75rem; height: 3.75rem; min-height: 3.75rem; padding: 0; border-radius: 50%; box-shadow: 0 8px 24px rgb(0 58 93 / 28%); place-items: center; }
+    .bouton-ajouter-thematique > span[aria-hidden="true"] { font-size: 2rem; font-weight: 400; }
+    .libelle-ajout-thematique { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .carte-liste-thematiques { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .resume-thematiques { padding-inline: 1.25rem; }
+    .liste-thematiques { padding-inline: 0; }
+    .glissiere-thematique { position: relative; overflow: hidden; }
+    .ligne-thematique { grid-template-columns: minmax(0, 1fr) auto; align-items: start; padding-inline: 1.25rem; }
+    .contenu-thematique { grid-column: 1; grid-row: 1; }
+    .colonne-statut-thematique { grid-column: 2; grid-row: 1; justify-self: end; }
+    .actions-thematique { grid-column: 1 / -1; }
+    .glissiere-thematique.ouverte .ligne-thematique { transform: translateX(-7.5rem); }
+    .action-glissee-thematique { position: absolute; z-index: 0; inset: 0 0 0 auto; display: block; width: 7.5rem; margin: 0; }
+    .action-glissee-thematique button { width: 100%; height: 100%; padding: .75rem; border: 0; color: #fff; background: #b42318; font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; }
+    .action-glissee-thematique.reactiver button { background: #17614e; }
+    .actions-thematique { width: 100%; }
+    .actions-thematique .bouton-secondaire, .actions-thematique form { display: none; }
+    .actions-thematique .bouton-modifier-thematique { display: none; }
+    .page-formulaire-thematique .carte-thematique { margin-inline: -.7rem; padding: 1.25rem; border-inline: 0; border-radius: 0; box-shadow: none; }
+    .actions-thematique-formulaire { align-items: stretch; flex-direction: column-reverse; }
+    .actions-thematique-formulaire .bouton-secondaire { justify-content: center; }
     .filtre-synthese { align-items: stretch; flex-direction: column; }
     .filtre-synthese .champ { min-width: 0; }
     .jour-synthese { grid-template-columns: 1fr; }

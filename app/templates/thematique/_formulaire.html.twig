@@ -1,0 +1,14 @@
+{% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+<div class="grille-thematique">
+    <div class="champ"><label for="nom">Nom</label><input id="nom" name="nom" maxlength="120" value="{{ app.request.request.get('nom', thematique ? thematique.nom : '') }}" required></div>
+    <div class="champ"><label for="ordre_affichage">Ordre d’affichage</label><input id="ordre_affichage" name="ordre_affichage" type="number" min="0" value="{{ app.request.request.get('ordre_affichage', thematique ? thematique.ordreAffichage : 0) }}"></div>
+</div>
+<fieldset class="periode-thematique">
+    <legend>Événement <small>(facultatif)</small></legend>
+    <p>Une thématique événementielle est proposée en premier lorsque toute la présence est comprise dans cette période.</p>
+    <div class="grille-thematique">
+        <div class="champ"><label for="date_debut_evenement">Du</label><input id="date_debut_evenement" name="date_debut_evenement" type="date" value="{{ app.request.request.get('date_debut_evenement', thematique and thematique.dateDebutEvenement ? thematique.dateDebutEvenement|date('Y-m-d') : '') }}"></div>
+        <div class="champ"><label for="date_fin_evenement">Au</label><input id="date_fin_evenement" name="date_fin_evenement" type="date" value="{{ app.request.request.get('date_fin_evenement', thematique and thematique.dateFinEvenement ? thematique.dateFinEvenement|date('Y-m-d') : '') }}"></div>
+    </div>
+    <label class="choix-exclusivite"><input name="exclusive_sur_periode" type="checkbox" value="1" {{ app.request.request.has('exclusive_sur_periode') or (not app.request.isMethod('POST') and thematique and thematique.exclusiveSurPeriode) ? 'checked' }}> <span><strong>Thématique exclusive sur cette période</strong><small>Si la période de présence est compatible, aucune autre thématique ne sera proposée.</small></span></label>
+</fieldset>
