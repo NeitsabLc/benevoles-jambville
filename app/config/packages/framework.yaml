@@ -1,0 +1,14 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    router:
+        utf8: true
+    csrf_protection: true
+    http_method_override: false
+    session: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file
+

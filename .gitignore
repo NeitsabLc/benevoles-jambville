@@ -1,0 +1,7 @@
+/.idea/
+/app/.env.local
+/app/.env.*.local
+/app/.phpunit.cache/
+/app/public/assets/
+/app/var/
+/app/vendor/

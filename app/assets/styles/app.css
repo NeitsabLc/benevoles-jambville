@@ -1,0 +1,37 @@
+:root {
+    --bleu-sgdf: #003a5d;
+    --menthe-sgdf: #48b994;
+    --fond: #f1f5f7;
+    --texte-secondaire: #5f7480;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    color: var(--bleu-sgdf);
+    background: var(--fond);
+    font-family: "Sarabun", system-ui, sans-serif;
+}
+
+.page-demarrage {
+    display: grid;
+    min-height: 100vh;
+    padding: 1.5rem;
+    place-items: center;
+}
+
+.carte-demarrage {
+    width: min(100%, 44rem);
+    padding: clamp(2rem, 6vw, 4rem);
+    border-top: .4rem solid var(--menthe-sgdf);
+    border-radius: .5rem;
+    background: white;
+    box-shadow: 0 10px 35px rgb(0 58 93 / 10%);
+}
+
+.carte-demarrage h1 { margin: .4rem 0 1rem; font-size: clamp(2.2rem, 7vw, 3.5rem); }
+.carte-demarrage p { line-height: 1.6; }
+.carte-demarrage small { color: var(--texte-secondaire); }
+.surtitre { margin: 0; color: #087b67; font-size: .8rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+
