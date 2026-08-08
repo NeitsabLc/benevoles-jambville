@@ -243,6 +243,40 @@ body {
 .carte-future h2 { margin: 0; font-size: 1.35rem; }
 .carte-future p { max-width: 32rem; margin: .6rem 0 1.5rem; color: var(--texte-secondaire); line-height: 1.55; }
 
+/* Synthèse accueil et hôtellerie */
+.page-synthese { width: min(100%, 96rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-synthese { margin-bottom: 1.5rem; }
+.entete-synthese h1 { margin: .35rem 0 .4rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+.entete-synthese > div > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.filtre-synthese { display: flex; align-items: end; gap: .8rem; margin-bottom: 1.25rem; }
+.filtre-synthese .champ { min-width: 11rem; }
+.filtre-synthese .bouton-principal { min-height: 3.2rem; }
+.liste-synthese { display: grid; gap: 1rem; }
+.jour-synthese { display: grid; grid-template-columns: 10.5rem 18rem minmax(0, 1fr); overflow: hidden; border: 1px solid #d8e2e6; border-radius: .75rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 5%); }
+.date-synthese { padding: 1.25rem; color: #fff; background: var(--bleu-sgdf); }
+.date-synthese time, .date-synthese strong, .date-synthese span { display: block; }
+.date-synthese strong { font-size: 1.08rem; line-height: 1.35; }
+.date-synthese span { margin-top: .5rem; color: #c4d9e4; font-size: .78rem; }
+.repas-synthese { display: grid; grid-template-columns: repeat(3, 1fr); align-content: center; padding: 1rem; border-right: 1px solid #e0e7ea; }
+.repas-synthese div { text-align: center; }
+.repas-synthese span, .repas-synthese strong { display: block; }
+.repas-synthese span { min-height: 2.2rem; color: var(--texte-secondaire); font-size: .7rem; line-height: 1.15; }
+.repas-synthese strong { font-size: 1.75rem; }
+.details-synthese { display: grid; grid-template-columns: repeat(4, minmax(8rem, 1fr)); gap: 1rem; padding: 1rem 1.2rem; }
+.details-synthese h2 { margin: 0 0 .6rem; font-size: .82rem; }
+.details-synthese h2 b { margin-left: .25rem; padding: .08rem .4rem; border-radius: 2rem; color: #087b67; background: #e5f6f0; font-size: .72rem; }
+.pastille-presence { display: block; overflow: hidden; margin: .22rem 0; color: #284f68; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+.pastille-presence::before { color: var(--menthe-sgdf); content: "• "; }
+.donnee-vide { margin: 0; color: #8a9ba4; font-size: .74rem; font-style: italic; }
+.regimes-synthese h2 small { display: block; margin-top: .15rem; color: var(--texte-secondaire); font-size: .62rem; font-weight: 500; }
+.regimes-synthese dl { margin: 0; }
+.regimes-synthese dl div { display: flex; justify-content: space-between; gap: .5rem; padding: .12rem 0; font-size: .72rem; }
+.regimes-synthese dt { color: var(--texte-secondaire); }
+.regimes-synthese dd { margin: 0; font-weight: 800; }
+.commentaires-regimes { margin-top: .65rem; padding-top: .55rem; border-top: 1px solid #d8e2e6; }
+.commentaires-regimes h3 { margin: 0 0 .3rem; color: var(--texte-secondaire); font-size: .68rem; }
+.commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
+
 @media (max-width: 760px) {
     .navigation-laterale { position: static; width: 100%; padding: .8rem; }
     .marque-navigation { display: none; }
@@ -258,6 +292,15 @@ body {
     .contenu-calendrier { padding: 1.2rem .7rem 2rem; }
     .page-formulaire-presence { padding: 1.2rem .7rem 2rem; }
     .page-profil { padding: 1.2rem .7rem 2rem; }
+    .page-synthese { padding: 1.2rem .7rem 2rem; }
+    .filtre-synthese { align-items: stretch; flex-direction: column; }
+    .filtre-synthese .champ { min-width: 0; }
+    .jour-synthese { grid-template-columns: 1fr; }
+    .date-synthese { padding: .9rem 1rem; }
+    .date-synthese time { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .date-synthese span { margin: 0; }
+    .repas-synthese { border-right: 0; border-bottom: 1px solid #e0e7ea; }
+    .details-synthese { grid-template-columns: 1fr 1fr; }
     .entete-calendrier, .outils-calendrier { align-items: stretch; flex-direction: column; }
     .outils-calendrier form, .outils-calendrier select { width: 100%; }
     .navigation-mois { justify-content: space-between; }

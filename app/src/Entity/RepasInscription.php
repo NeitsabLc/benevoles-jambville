@@ -50,6 +50,16 @@ final class RepasInscription
         return $this->selectionne;
     }
 
+    public function getDateRepas(): \DateTimeImmutable
+    {
+        return $this->dateRepas;
+    }
+
+    public function getTypeRepas(): string
+    {
+        return $this->typeRepas;
+    }
+
     private static function genererUuid(): string
     {
         $bytes = random_bytes(16);

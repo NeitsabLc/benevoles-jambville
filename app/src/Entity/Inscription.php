@@ -237,4 +237,6 @@ final class Inscription
     public function isActif(): bool { return $this->actif; }
     public function getNombreRepas(): int { return $this->repas->count(); }
     public function getNombreRepasSelectionnes(): int { return count($this->getRepasSelectionnes()); }
+    /** @return Collection<int, RepasInscription> */
+    public function getRepas(): Collection { return $this->repas; }
 }

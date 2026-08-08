@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Synthèse des inscriptions · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-synthese">
+        <header class="entete-synthese">
+            <div><h1>Synthèse des inscriptions</h1><p>Repas, couchages et régimes alimentaires, jour par jour.</p></div>
+        </header>
+
+        <form class="filtre-synthese" method="get" action="{{ path('app_synthese') }}">
+            <div class="champ"><label for="synthese-debut">Du</label><input id="synthese-debut" type="date" name="debut" value="{{ debut|date('Y-m-d') }}" required></div>
+            <div class="champ"><label for="synthese-fin">Au</label><input id="synthese-fin" type="date" name="fin" value="{{ fin|date('Y-m-d') }}" required></div>
+            <button class="bouton-principal" type="submit">Afficher la période</button>
+        </form>
+        {% if erreur %}<div class="alerte alerte-erreur">{{ erreur }}</div>{% endif %}
+
+        <div class="liste-synthese">
+            {% for jour in jours %}
+                {% set total = jour.presences|reduce((total, presence) => total + presence.effectif, 0) %}
+                <article class="jour-synthese">
+                    <header class="date-synthese">
+                        <time datetime="{{ jour.date|date('Y-m-d') }}"><strong>{{ jour.libelle_date }}</strong><span>{{ total }} personne{{ total > 1 ? 's' }}</span></time>
+                    </header>
+                    <section class="repas-synthese" aria-label="Repas">
+                        <div><span>Petit-déjeuner</span><strong>{{ jour.repas.PETIT_DEJEUNER }}</strong></div>
+                        <div><span>Déjeuner</span><strong>{{ jour.repas.DEJEUNER }}</strong></div>
+                        <div><span>Dîner</span><strong>{{ jour.repas.DINER }}</strong></div>
+                    </section>
+                    <section class="details-synthese">
+                        <div><h2>Présences</h2>{% for presence in jour.presences %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucune présence</p>{% endfor %}</div>
+                        {% for type, couchage in jour.couchages %}
+                            <div><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2>{% for presence in couchage.presences %}<span class="pastille-presence pastille-couchage">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucun couchage</p>{% endfor %}</div>
+                        {% endfor %}
+                        <div class="regimes-synthese">
+                            <h2>Régimes</h2>
+                            <dl><div><dt>Végétariens</dt><dd>{{ jour.regimes.vegetariens }}</dd></div><div><dt>Allergie œuf</dt><dd>{{ jour.regimes.oeuf }}</dd></div><div><dt>Allergie arachide</dt><dd>{{ jour.regimes.arachide }}</dd></div></dl>
+                            {% if jour.regimes.commentaires %}
+                                <section class="commentaires-regimes" aria-label="Autres allergies et régimes signalés">
+                                    <h3>Autres signalés</h3>
+                                    <ul>{% for commentaire in jour.regimes.commentaires %}<li>{{ commentaire }}</li>{% endfor %}</ul>
+                                </section>
+                            {% endif %}
+                        </div>
+                    </section>
+                </article>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

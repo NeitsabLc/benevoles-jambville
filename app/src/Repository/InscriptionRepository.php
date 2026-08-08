@@ -39,6 +39,23 @@ final class InscriptionRepository extends ServiceEntityRepository
         return $requete->getQuery()->getResult();
     }
 
+    /** @return list<Inscription> */
+    public function findPourSynthese(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array
+    {
+        return $this->createQueryBuilder('i')
+            ->addSelect('u', 'r')
+            ->leftJoin('i.utilisateur', 'u')
+            ->leftJoin('i.repas', 'r')
+            ->andWhere('i.actif = true')
+            ->andWhere('i.dateDebut <= :fin AND i.dateFin >= :debut')
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->orderBy('i.dateDebut', 'ASC')
+            ->addOrderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function chevauchePour(Utilisateur $utilisateur, \DateTimeImmutable $debut, \DateTimeImmutable $fin, ?Inscription $inscriptionIgnoree = null): bool
     {
         $requete = $this->createQueryBuilder('i')
