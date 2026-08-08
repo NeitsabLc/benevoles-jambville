@@ -1,8 +1,11 @@
+{% if app.user.roleMetier == 'BENEVOLE' %}
 <header class="barre-application">
     {% include 'securite/_identite.html.twig' %}
     <div class="utilisateur-connecte">
-        <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nomComplet|split(' ')|last|first }}</span>
-        <span>{{ app.user.nomComplet }}</span>
+        <a class="lien-profil" href="{{ path('app_profil') }}" aria-label="Voir mon profil">
+            <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nomComplet|split(' ')|last|first }}</span>
+            <span class="nom-utilisateur">{{ app.user.nomComplet }}</span>
+        </a>
         <form action="{{ path('app_deconnexion') }}" method="post">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
             <button class="bouton-texte bouton-deconnexion" type="submit" aria-label="Se déconnecter" title="Se déconnecter">
@@ -13,3 +16,52 @@
         </form>
     </div>
 </header>
+{% else %}
+<aside class="navigation-laterale">
+    <div class="marque-navigation">{% include 'securite/_identite.html.twig' %}</div>
+
+    <nav aria-label="Navigation principale">
+        <div class="groupe-navigation">
+            <a class="lien-navigation {{ app.current_route == 'app_accueil' ? 'actif' }}" href="{{ path('app_accueil') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>
+                <span>Calendrier</span>
+            </a>
+            <a class="lien-navigation {{ app.current_route == 'app_synthese' ? 'actif' }}" href="{{ path('app_synthese') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
+                <span>Synthèse</span>
+            </a>
+        </div>
+
+        <div class="groupe-navigation administration-navigation">
+            <p>Administration</p>
+            {% if is_granted('ROLE_EQUIPE_PILOTE') %}
+                <a class="lien-navigation {{ app.current_route == 'app_admin_thematiques' ? 'actif' }}" href="{{ path('app_admin_thematiques') }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/></svg>
+                    <span>Thématiques</span>
+                </a>
+            {% endif %}
+            <a class="lien-navigation {{ app.current_route == 'app_admin_calendrier' ? 'actif' }}" href="{{ path('app_admin_calendrier') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
+                <span>Configuration calendrier</span>
+            </a>
+            {% if is_granted('ROLE_EQUIPE_PILOTE') %}
+                <a class="lien-navigation {{ app.current_route == 'app_admin_benevoles' ? 'actif' }}" href="{{ path('app_admin_benevoles') }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 10 0v2m3-10a3 3 0 0 1 0 6m2 4v-2a4 4 0 0 0-2-3.5"/></svg>
+                    <span>Bénévoles</span>
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="compte-navigation">
+        <a class="lien-profil" href="{{ path('app_profil') }}">
+            <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nom|first }}</span>
+            <span><strong>{{ app.user.nomComplet }}</strong><small>Mon profil</small></span>
+        </a>
+        <form action="{{ path('app_deconnexion') }}" method="post">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+            <button class="bouton-texte bouton-deconnexion" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H9"/></svg></button>
+        </form>
+    </div>
+</aside>
+{% endif %}

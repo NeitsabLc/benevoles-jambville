@@ -29,6 +29,33 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column(length: 180)]
     private string $email;
 
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $telephone = null;
+
+    #[ORM\Column]
+    private bool $vegetarien = false;
+
+    #[ORM\Column(name: 'allergie_oeuf')]
+    private bool $allergieOeuf = false;
+
+    #[ORM\Column(name: 'allergie_arachide')]
+    private bool $allergieArachide = false;
+
+    #[ORM\Column(name: 'regime_autre', type: 'text', nullable: true)]
+    private ?string $regimeAutre = null;
+
+    #[ORM\Column(name: 'besoin_couchage', type: 'text', nullable: true)]
+    private ?string $besoinCouchage = null;
+
+    #[ORM\Column(name: 'foulard_remis')]
+    private bool $foulardRemis = false;
+
+    #[ORM\Column(name: 'tenue_remise')]
+    private bool $tenueRemise = false;
+
+    #[ORM\Column(name: 'telephone_modifie_localement')]
+    private bool $telephoneModifieLocalement = false;
+
     #[ORM\Column(length: 30)]
     private string $role = 'BENEVOLE';
 
@@ -99,6 +126,71 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function isVegetarien(): bool
+    {
+        return $this->vegetarien;
+    }
+
+    public function hasAllergieOeuf(): bool
+    {
+        return $this->allergieOeuf;
+    }
+
+    public function hasAllergieArachide(): bool
+    {
+        return $this->allergieArachide;
+    }
+
+    public function getRegimeAutre(): ?string
+    {
+        return $this->regimeAutre;
+    }
+
+    public function getBesoinCouchage(): ?string
+    {
+        return $this->besoinCouchage;
+    }
+
+    public function isFoulardRemis(): bool
+    {
+        return $this->foulardRemis;
+    }
+
+    public function isTenueRemise(): bool
+    {
+        return $this->tenueRemise;
+    }
+
+    public function modifierProfil(
+        ?string $telephone,
+        bool $vegetarien,
+        bool $allergieOeuf,
+        bool $allergieArachide,
+        ?string $regimeAutre,
+        ?string $besoinCouchage,
+    ): void {
+        if ($this->telephone !== $telephone) {
+            $this->telephoneModifieLocalement = true;
+        }
+        $this->telephone = $telephone;
+        $this->vegetarien = $vegetarien;
+        $this->allergieOeuf = $allergieOeuf;
+        $this->allergieArachide = $allergieArachide;
+        $this->regimeAutre = $regimeAutre;
+        $this->besoinCouchage = $besoinCouchage;
+    }
+
+    public function modifierRemiseEquipement(bool $foulardRemis, bool $tenueRemise): void
+    {
+        $this->foulardRemis = $foulardRemis;
+        $this->tenueRemise = $tenueRemise;
     }
 
     public function getRoleMetier(): string

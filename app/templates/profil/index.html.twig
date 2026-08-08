@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+
+    <main class="page-profil">
+        <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
+
+        <header class="entete-profil">
+            <h1>Mon profil</h1>
+            <p>Gardez à jour les informations utiles à votre accueil à Jambville.</p>
+        </header>
+
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+
+        <form class="formulaire-profil" method="post" action="{{ path('app_profil') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('modifier-profil') }}">
+
+            <section class="carte-profil" aria-labelledby="identite-titre">
+                <header><h2 id="identite-titre">Identité</h2><p>Ces informations proviennent de votre dossier adhérent et ne sont pas modifiables ici.</p></header>
+                <div class="grille-profil">
+                    <div class="champ"><label>Prénom</label><input value="{{ app.user.prenom }}" readonly></div>
+                    <div class="champ"><label>Nom</label><input value="{{ app.user.nom }}" readonly></div>
+                    <div class="champ"><label>Email</label><input type="email" value="{{ app.user.email }}" readonly></div>
+                    <div class="champ"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', app.user.telephone) }}" autocomplete="tel"></div>
+                </div>
+            </section>
+
+            <section class="carte-profil" aria-labelledby="alimentation-titre">
+                <header><h2 id="alimentation-titre">Régime alimentaire et allergies</h2><p>Ces informations sensibles servent uniquement à préparer votre accueil et vos repas.</p></header>
+                <div class="choix-profil">
+                    <label><input type="checkbox" name="vegetarien" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('vegetarien') : app.user.vegetarien) ? 'checked' }}> Régime végétarien</label>
+                    <label><input type="checkbox" name="allergie_oeuf" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_oeuf') : app.user.allergieOeuf) ? 'checked' }}> Allergie aux œufs</label>
+                    <label><input type="checkbox" name="allergie_arachide" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_arachide') : app.user.allergieArachide) ? 'checked' }}> Allergie aux arachides</label>
+                </div>
+                <div class="champ"><label for="regime_autre">Autre régime ou allergie</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', app.user.regimeAutre) }}</textarea></div>
+            </section>
+
+            <section class="carte-profil" aria-labelledby="couchage-titre">
+                <header><h2 id="couchage-titre">Couchage</h2><p>Signalez ici les besoins à anticiper pour votre hébergement.</p></header>
+                <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', app.user.besoinCouchage) }}</textarea></div>
+            </section>
+
+            <section class="carte-profil" aria-labelledby="equipement-titre">
+                <header><h2 id="equipement-titre">Équipement bénévole</h2><p>{{ app.user.equipePilote ? 'Vous pouvez mettre à jour la remise de votre équipement.' : 'La remise de ces éléments est enregistrée par l’équipe pilote.' }}</p></header>
+                <div class="choix-profil">
+                    <label class="{{ not app.user.equipePilote ? 'choix-verrouille' }}"><input type="checkbox" name="foulard_remis" value="1" {{ app.user.foulardRemis ? 'checked' }} {{ not app.user.equipePilote ? 'disabled' }}> Foulard remis</label>
+                    <label class="{{ not app.user.equipePilote ? 'choix-verrouille' }}"><input type="checkbox" name="tenue_remise" value="1" {{ app.user.tenueRemise ? 'checked' }} {{ not app.user.equipePilote ? 'disabled' }}> Tenue remise</label>
+                </div>
+            </section>
+
+            <section class="carte-profil" aria-labelledby="mot-de-passe-titre">
+                <header><h2 id="mot-de-passe-titre">Mot de passe</h2><p>Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.</p></header>
+                <div class="grille-profil">
+                    <div class="champ champ-large">
+                        <label for="mot_de_passe_actuel">Mot de passe actuel</label>
+                        <input id="mot_de_passe_actuel" name="mot_de_passe_actuel" type="password" autocomplete="current-password">
+                    </div>
+                    <div class="champ">
+                        <label for="nouveau_mot_de_passe">Nouveau mot de passe</label>
+                        <input id="nouveau_mot_de_passe" name="nouveau_mot_de_passe" type="password" minlength="12" autocomplete="new-password">
+                        <small>Utilisez au moins 12 caractères.</small>
+                    </div>
+                    <div class="champ">
+                        <label for="confirmation_mot_de_passe">Confirmer le nouveau mot de passe</label>
+                        <input id="confirmation_mot_de_passe" name="confirmation_mot_de_passe" type="password" minlength="12" autocomplete="new-password">
+                    </div>
+                </div>
+            </section>
+
+            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_accueil') }}">Annuler</a><button class="bouton-principal" type="submit">Enregistrer mon profil</button></div>
+        </form>
+    </main>
+</div>
+{% endblock %}
