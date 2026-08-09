@@ -5,6 +5,25 @@ services:
       APP_ENV: prod
       APP_DEBUG: "0"
 
+  maintenance:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        PHP_VERSION: "${PHP_VERSION}"
+    working_dir: /var/www/app
+    entrypoint: ["benevole-jambville-maintenance"]
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+    volumes:
+      - ./app:/var/www/app
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [benevole_jambville]
+
   nginx:
     restart: unless-stopped
 

@@ -383,8 +383,10 @@ la couleur.
 - Stocker uniquement le hash des jetons d’activation et de réinitialisation.
 - Limiter la durée de vie des liens temporaires.
 - Ne jamais journaliser les mots de passe, jetons bruts ou données médicales.
-- Conserver les sauvegardes PostgreSQL sept jours et les journaux Symfony
-  environ 48 heures, selon les mêmes rotations que Campement.
+- Appliquer les durées de conservation validées aux sauvegardes et aux journaux
+  sans les exposer dans la documentation versionnée du dépôt.
+- Exécuter les purges depuis le service applicatif prévu à cet effet, sans
+  dépendre d’une configuration manuelle non versionnée sur l’hôte.
 - Normaliser les emails en minuscules sans en faire une identité métier.
 - Valider les fichiers CSV, leur encodage, leur taille et leurs en-têtes.
 - Échapper les contenus affichés et conserver l’échappement automatique Twig.

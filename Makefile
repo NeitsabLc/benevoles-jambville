@@ -96,3 +96,7 @@ test: ## Exécuter les tests
 .PHONY: backup-now
 backup-now: ## Créer immédiatement une sauvegarde via le service de production
 	$(DOCKER_COMPOSE_PROD) run --rm -e BACKUP_ONCE=1 backup
+
+.PHONY: maintenance-now
+maintenance-now: ## Exécuter immédiatement un cycle de maintenance de production
+	$(DOCKER_COMPOSE_PROD) run --rm -e MAINTENANCE_ONCE=1 maintenance

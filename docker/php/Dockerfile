@@ -9,7 +9,8 @@ RUN apt-get update \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-benevole-jambville.ini
 COPY docker/php/entrypoint.sh /usr/local/bin/benevole-jambville-entrypoint
-RUN chmod +x /usr/local/bin/benevole-jambville-entrypoint
+COPY docker/php/maintenance.sh /usr/local/bin/benevole-jambville-maintenance
+RUN chmod +x /usr/local/bin/benevole-jambville-entrypoint /usr/local/bin/benevole-jambville-maintenance
 WORKDIR /var/www/app
 ENTRYPOINT ["benevole-jambville-entrypoint"]
 CMD ["php-fpm"]
