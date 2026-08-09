@@ -99,7 +99,7 @@ body {
 .compte-navigation .lien-profil small { margin-top: .08rem; color: #b8cfdb; font-size: .7rem; }
 .compte-navigation form { margin: 0; }
 .compte-navigation .bouton-deconnexion { color: #ff9ab4; }
-.application:has(> .navigation-laterale) > main { width: auto; margin-left: 14.5rem; }
+.application:has(> .navigation-laterale) > main { width: calc(100% - 14.5rem); margin-left: 14.5rem; }
 .barre-application { display: flex; min-height: 5rem; align-items: center; justify-content: space-between; gap: 2rem; padding: 1rem clamp(1rem, 4vw, 3rem); border-bottom: 1px solid #d8e2e6; background: #fff; }
 .barre-application .identite-application { margin: 0; }
 .utilisateur-connecte { display: flex; align-items: center; gap: .7rem; color: var(--bleu-sgdf); font-size: .9rem; font-weight: 700; }
@@ -488,6 +488,12 @@ body {
 .commentaires-regimes h3 { margin: 0 0 .3rem; color: var(--texte-secondaire); font-size: .68rem; }
 .commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
 
+@media (max-width: 1400px) and (min-width: 761px) {
+    .jour-synthese { grid-template-columns: 10.5rem minmax(0, 1fr); }
+    .details-synthese { grid-column: 1 / -1; border-top: 1px solid #e0e7ea; }
+    .repas-synthese { border-right: 0; }
+}
+
 @media (max-width: 760px) {
     .page-formulaire-presence > .retour-calendrier, .page-profil > .retour-calendrier { display: none; }
     .bouton-menu-mobile { position: fixed; z-index: 12; top: .75rem; left: .75rem; display: grid; width: 2.7rem; height: 2.7rem; padding: 0; border: 0; border-radius: .4rem; color: #fff; background: var(--bleu-sgdf); box-shadow: 0 4px 15px rgb(0 34 54 / 22%); font: inherit; cursor: pointer; place-items: center; }
@@ -499,7 +505,7 @@ body {
     .menu-mobile-ouvert .navigation-laterale { transform: translateX(0); }
     .menu-mobile-ouvert .fond-menu-mobile { display: block; }
     .menu-mobile-ouvert { overflow: hidden; }
-    .application:has(> .navigation-laterale) > main { margin-left: 0; padding-top: 4.5rem; }
+    .application:has(> .navigation-laterale) > main { width: 100%; margin-left: 0; padding-top: 4.5rem; }
     .page-future { padding: 1.5rem 1rem; }
     .nom-utilisateur { display: none; }
     .contenu-calendrier { padding: 1.2rem .7rem 2rem; }
