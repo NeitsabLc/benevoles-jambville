@@ -198,11 +198,6 @@ final class EspacePriveController extends AbstractController
         return $modifies;
     }
 
-    private function page(string $titre, string $surtitre, string $message): Response
-    {
-        return $this->render('espace_prive/page_future.html.twig', compact('titre', 'surtitre', 'message'));
-    }
-
     private function garantirAccesEquipe(): void
     {
         if (!$this->isGranted('ROLE_SALARIE_ACCUEIL') && !$this->isGranted('ROLE_EQUIPE_PILOTE')) {

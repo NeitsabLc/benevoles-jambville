@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\InscriptionRepository;
+use App\Util\UuidV7;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -75,7 +76,7 @@ final class Inscription
 
     private function __construct(Utilisateur $auteur, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, ?string $commentaire)
     {
-        $this->id = self::genererUuid();
+        $this->id = UuidV7::generate();
         $this->creePar = $auteur;
         $this->modifiePar = $auteur;
         $this->dateDebut = $dateDebut;
@@ -208,16 +209,6 @@ final class Inscription
         }
 
         return $selectionnes;
-    }
-
-    private static function genererUuid(): string
-    {
-        $bytes = random_bytes(16);
-        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
-        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
-        $hex = bin2hex($bytes);
-
-        return substr($hex, 0, 8).'-'.substr($hex, 8, 4).'-'.substr($hex, 12, 4).'-'.substr($hex, 16, 4).'-'.substr($hex, 20);
     }
 
     public function getId(): string { return $this->id; }

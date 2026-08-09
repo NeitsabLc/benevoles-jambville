@@ -53,6 +53,8 @@ final class PresenceController extends AbstractController
                 $erreurs[] = 'Les dates de présence sont obligatoires.';
             } elseif ($dateFin < $dateDebut) {
                 $erreurs[] = 'La date de fin doit être postérieure ou égale à la date de début.';
+            } elseif ($dateFin > $dateDebut->modify('+366 days')) {
+                $erreurs[] = 'La durée d’une présence est limitée à un an.';
             }
 
             $typeCouchage = $request->request->getString('type_couchage');
@@ -95,8 +97,8 @@ final class PresenceController extends AbstractController
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
                 $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
                 $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
-                if ($nomEquipe === '') {
-                    $erreurs[] = 'Le nom de l’équipe compa est obligatoire.';
+                if ($nomEquipe === '' || mb_strlen($nomEquipe) > 150) {
+                    $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';
@@ -166,6 +168,8 @@ final class PresenceController extends AbstractController
                 $erreurs[] = 'Les dates de présence sont obligatoires.';
             } elseif ($dateFin < $dateDebut) {
                 $erreurs[] = 'La date de fin doit être postérieure ou égale à la date de début.';
+            } elseif ($dateFin > $dateDebut->modify('+366 days')) {
+                $erreurs[] = 'La durée d’une présence est limitée à un an.';
             }
 
             $typeCouchage = $request->request->getString('type_couchage');
@@ -207,8 +211,8 @@ final class PresenceController extends AbstractController
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
                 $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
                 $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
-                if ($nomEquipe === '') {
-                    $erreurs[] = 'Le nom de l’équipe compa est obligatoire.';
+                if ($nomEquipe === '' || mb_strlen($nomEquipe) > 150) {
+                    $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';

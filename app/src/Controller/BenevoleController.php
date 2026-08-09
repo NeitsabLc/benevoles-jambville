@@ -168,7 +168,7 @@ final class BenevoleController extends AbstractController
 
         $csvLiens = "nom;email;lien_premiere_connexion\r\n";
         foreach ($liensActivation as $lien) {
-            $csvLiens .= implode(';', array_map(static fn (string $valeur): string => '"'.str_replace('"', '""', $valeur).'"', [$lien['nom'], $lien['email'], $lien['url']]))."\r\n";
+            $csvLiens .= implode(';', array_map($this->encoderCelluleCsv(...), [$lien['nom'], $lien['email'], $lien['url']]))."\r\n";
         }
         $request->getSession()->remove('import_benevoles_apercu');
         $request->getSession()->set('fichier_liens_import_benevoles', "\xEF\xBB\xBF".$csvLiens);
@@ -179,7 +179,7 @@ final class BenevoleController extends AbstractController
     #[Route('/importer/liens', name: 'app_admin_benevoles_importer_liens', methods: ['GET'])]
     public function telechargerLiens(Request $request): Response
     {
-        $contenu = $request->getSession()->get('fichier_liens_import_benevoles');
+        $contenu = $request->getSession()->remove('fichier_liens_import_benevoles');
         if (!is_string($contenu)) {
             throw $this->createNotFoundException('Le fichier de liens n’est plus disponible.');
         }
@@ -237,6 +237,8 @@ final class BenevoleController extends AbstractController
             $erreur = null;
             if ($donnees['code_adherent'] === '' || $donnees['nom'] === '' || $donnees['prenom'] === '' || $donnees['email'] === '') {
                 $erreur = 'Champs obligatoires manquants';
+            } elseif (mb_strlen($donnees['code_adherent']) > 50 || mb_strlen($donnees['nom']) > 100 || mb_strlen($donnees['prenom']) > 100 || mb_strlen($donnees['email']) > 180 || mb_strlen($donnees['telephone']) > 30 || mb_strlen($donnees['code_fonction']) > 50 || mb_strlen($donnees['code_structure']) > 50) {
+                $erreur = 'Un champ dépasse la longueur maximale autorisée';
             } elseif (!filter_var($donnees['email'], FILTER_VALIDATE_EMAIL)) {
                 $erreur = 'Adresse email invalide';
             } elseif (isset($codesVus[$donnees['code_adherent']])) {
@@ -263,6 +265,10 @@ final class BenevoleController extends AbstractController
                     && (string) $existant->getTelephone() === $donnees['telephone'] ? 'inchange' : 'mise_a_jour';
             }
             $apercu[] = $donnees + ['ligne' => $ligne, 'statut' => $statut, 'erreur' => $erreur];
+            if (count($apercu) > 5000) {
+                $erreurs[] = 'Le fichier ne peut pas contenir plus de 5 000 bénévoles.';
+                break;
+            }
         }
         fclose($poignee);
 
@@ -294,5 +300,14 @@ final class BenevoleController extends AbstractController
 
         // Les exports CSV d'Excel en français utilisent généralement Windows-1252.
         return mb_convert_encoding($contenu, 'UTF-8', 'Windows-1252');
+    }
+
+    private function encoderCelluleCsv(string $valeur): string
+    {
+        if (preg_match('/^[=+\-@]/', ltrim($valeur)) === 1) {
+            $valeur = "'".$valeur;
+        }
+
+        return '"'.str_replace('"', '""', $valeur).'"';
     }
 }

@@ -87,14 +87,24 @@ CREATE TABLE benevole_jambville.thematique (
     nom VARCHAR(120) NOT NULL,
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     ordre_affichage INTEGER NOT NULL DEFAULT 0,
+    date_debut_evenement DATE,
+    date_fin_evenement DATE,
+    exclusive_sur_periode BOOLEAN NOT NULL DEFAULT FALSE,
     cree_le TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modifie_le TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_thematique PRIMARY KEY (id),
-    CONSTRAINT ck_thematique_ordre CHECK (ordre_affichage >= 0)
+    CONSTRAINT ck_thematique_ordre CHECK (ordre_affichage >= 0),
+    CONSTRAINT ck_thematique_periode_evenement CHECK (
+        (date_debut_evenement IS NULL AND date_fin_evenement IS NULL AND NOT exclusive_sur_periode)
+        OR (date_debut_evenement IS NOT NULL AND date_fin_evenement IS NOT NULL AND date_fin_evenement >= date_debut_evenement)
+    )
 );
 
 CREATE UNIQUE INDEX uq_thematique_nom_normalise
     ON benevole_jambville.thematique (LOWER(nom));
+CREATE INDEX idx_thematique_periode_evenement
+    ON benevole_jambville.thematique (date_debut_evenement, date_fin_evenement)
+    WHERE actif AND date_debut_evenement IS NOT NULL;
 
 CREATE TABLE benevole_jambville.inscription (
     id UUID NOT NULL DEFAULT uuidv7(),
@@ -107,6 +117,9 @@ CREATE TABLE benevole_jambville.inscription (
     date_fin DATE NOT NULL,
     type_couchage VARCHAR(10) NOT NULL,
     nombre_enfants INTEGER NOT NULL DEFAULT 0,
+    nombre_vegetariens INTEGER NOT NULL DEFAULT 0,
+    nombre_allergie_oeuf INTEGER NOT NULL DEFAULT 0,
+    nombre_allergie_arachide INTEGER NOT NULL DEFAULT 0,
     commentaire TEXT,
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     cree_par_id UUID NOT NULL,
@@ -126,6 +139,21 @@ CREATE TABLE benevole_jambville.inscription (
     CONSTRAINT ck_inscription_couchage CHECK (type_couchage IN ('DUR', 'TENTE')),
     CONSTRAINT ck_inscription_dates CHECK (date_fin >= date_debut),
     CONSTRAINT ck_inscription_enfants CHECK (nombre_enfants >= 0),
+    CONSTRAINT ck_inscription_effectifs_alimentaires CHECK (
+        nombre_vegetariens >= 0
+        AND nombre_allergie_oeuf >= 0
+        AND nombre_allergie_arachide >= 0
+        AND (
+            (type = 'INDIVIDUELLE'
+                AND nombre_vegetariens = 0
+                AND nombre_allergie_oeuf = 0
+                AND nombre_allergie_arachide = 0)
+            OR (type = 'COMPAGNON'
+                AND nombre_vegetariens <= nombre_personnes
+                AND nombre_allergie_oeuf <= nombre_personnes
+                AND nombre_allergie_arachide <= nombre_personnes)
+        )
+    ),
     CONSTRAINT ck_inscription_contenu CHECK (
         (type = 'INDIVIDUELLE'
             AND utilisateur_id IS NOT NULL
@@ -285,4 +313,3 @@ CREATE INDEX idx_journal_audit_date
 
 --rollback DROP SCHEMA IF EXISTS benevole_jambville CASCADE;
 --rollback DROP EXTENSION IF EXISTS btree_gist;
-

@@ -19,16 +19,12 @@ final class ThematiqueRepository extends ServiceEntityRepository
     /** @return list<Thematique> */
     public function findActives(): array
     {
-        $this->desactiverExpirees();
-
         return $this->findBy(['actif' => true], ['ordreAffichage' => 'ASC', 'nom' => 'ASC']);
     }
 
     /** @return list<Thematique> */
     public function findToutes(): array
     {
-        $this->desactiverExpirees();
-
         return $this->findBy([], ['actif' => 'DESC', 'ordreAffichage' => 'ASC', 'nom' => 'ASC']);
     }
 

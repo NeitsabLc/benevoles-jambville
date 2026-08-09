@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Util\UuidV7;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -29,7 +30,7 @@ final class RepasInscription
 
     public function __construct(Inscription $inscription, \DateTimeImmutable $dateRepas, string $typeRepas)
     {
-        $this->id = self::genererUuid();
+        $this->id = UuidV7::generate();
         $this->inscription = $inscription;
         $this->dateRepas = $dateRepas;
         $this->typeRepas = $typeRepas;
@@ -60,13 +61,4 @@ final class RepasInscription
         return $this->typeRepas;
     }
 
-    private static function genererUuid(): string
-    {
-        $bytes = random_bytes(16);
-        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
-        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
-        $hex = bin2hex($bytes);
-
-        return substr($hex, 0, 8).'-'.substr($hex, 8, 4).'-'.substr($hex, 12, 4).'-'.substr($hex, 16, 4).'-'.substr($hex, 20);
-    }
 }

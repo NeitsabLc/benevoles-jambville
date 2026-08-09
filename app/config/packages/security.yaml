@@ -17,6 +17,9 @@ security:
                 username_parameter: email
                 password_parameter: mot_de_passe
                 default_target_path: app_accueil
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             logout:
                 path: app_deconnexion
                 target: app_connexion
