@@ -34,6 +34,80 @@ final class BenevoleController extends AbstractController
         ]);
     }
 
+    #[Route('/ajouter', name: 'app_admin_benevole_ajouter', methods: ['GET', 'POST'])]
+    public function ajouter(
+        Request $request,
+        Connection $connexion,
+        MailerInterface $mailer,
+        #[Autowire('%env(MAILER_FROM)%')] string $adresseExpediteur,
+        #[Autowire('%kernel.project_dir%')] string $repertoireProjet,
+    ): Response {
+        $valeurs = [
+            'code_adherent' => trim($request->request->getString('code_adherent')),
+            'nom' => trim($request->request->getString('nom')),
+            'prenom' => trim($request->request->getString('prenom')),
+            'email' => mb_strtolower(trim($request->request->getString('email'))),
+            'telephone' => trim($request->request->getString('telephone')),
+        ];
+        $erreurs = [];
+
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('ajouter-benevole', $request->request->getString('_csrf_token'))) {
+                $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
+            }
+            if ($valeurs['code_adherent'] === '' || $valeurs['nom'] === '' || $valeurs['prenom'] === '' || $valeurs['email'] === '') {
+                $erreurs[] = 'Renseignez tous les champs obligatoires.';
+            }
+            if (mb_strlen($valeurs['code_adherent']) > 50 || mb_strlen($valeurs['nom']) > 100 || mb_strlen($valeurs['prenom']) > 100 || mb_strlen($valeurs['email']) > 180 || mb_strlen($valeurs['telephone']) > 30) {
+                $erreurs[] = 'Un champ dépasse la longueur maximale autorisée.';
+            }
+            if ($valeurs['email'] !== '' && !filter_var($valeurs['email'], FILTER_VALIDATE_EMAIL)) {
+                $erreurs[] = 'L’adresse email n’est pas valide.';
+            }
+
+            if ($erreurs === []) {
+                $token = bin2hex(random_bytes(32));
+                try {
+                    $connexion->insert('benevole_jambville.utilisateur', [
+                        'code_adherent' => $valeurs['code_adherent'],
+                        'nom' => $valeurs['nom'],
+                        'prenom' => $valeurs['prenom'],
+                        'email' => $valeurs['email'],
+                        'telephone' => $valeurs['telephone'] !== '' ? $valeurs['telephone'] : null,
+                        'role' => 'BENEVOLE',
+                        'source_role' => 'MANUEL',
+                        'changement_mot_de_passe_requis' => true,
+                        'jeton_activation' => hash('sha256', $token),
+                        'expiration_jeton_activation' => (new \DateTimeImmutable('+7 days'))->format('Y-m-d H:i:sO'),
+                    ]);
+                } catch (UniqueConstraintViolationException) {
+                    $erreurs[] = 'Un compte utilise déjà ce code adhérent ou cette adresse email.';
+                }
+
+                if ($erreurs === []) {
+                    $url = $this->generateUrl('app_premiere_connexion', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                    try {
+                        $mailer->send((new TemplatedEmail())
+                            ->from(new Address($adresseExpediteur, 'Bénévoles Jambville'))
+                            ->to($valeurs['email'])
+                            ->subject('Bienvenue sur Bénévoles Jambville')
+                            ->htmlTemplate('email/premiere_connexion.html.twig')
+                            ->context(['nom' => $valeurs['prenom'].' '.$valeurs['nom'], 'urlActivation' => $url])
+                            ->embedFromPath($repertoireProjet.'/assets/images/sgdf-logo-horizontal.png', 'sgdf-logo-horizontal')
+                            ->text("Bonjour {$valeurs['prenom']} {$valeurs['nom']},\n\nVotre compte Bénévoles Jambville vient d’être créé. Choisissez votre mot de passe dans les 7 jours :\n{$url}"));
+                        $this->addFlash('succes', sprintf('Le compte de %s %s a été créé. Son invitation a été envoyée.', $valeurs['prenom'], $valeurs['nom']));
+                    } catch (TransportExceptionInterface) {
+                        $this->addFlash('erreur', sprintf('Le compte de %s %s a été créé, mais l’invitation n’a pas pu être envoyée.', $valeurs['prenom'], $valeurs['nom']));
+                    }
+
+                    return $this->redirectToRoute('app_admin_benevoles');
+                }
+            }
+        }
+
+        return $this->render('benevole/ajouter.html.twig', ['valeurs' => $valeurs, 'erreurs' => $erreurs]);
+    }
+
     #[Route('/{id}/activation', name: 'app_admin_benevole_activation', methods: ['POST'])]
     public function activation(Utilisateur $utilisateur, Request $request, EntityManagerInterface $entityManager): Response
     {

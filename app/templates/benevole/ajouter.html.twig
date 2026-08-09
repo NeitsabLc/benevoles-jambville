@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-ajout-benevole">
+        <a class="retour-calendrier" href="{{ path('app_admin_benevoles') }}">← Retour aux bénévoles</a>
+        <header class="entete-ajout-benevole">
+            <p class="surtitre">Administration</p>
+            <h1>Créer un compte</h1>
+            <p>Ajoutez un bénévole et envoyez-lui son invitation de première connexion.</p>
+        </header>
+
+        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+
+        <form method="post" class="formulaire-ajout-benevole">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('ajouter-benevole') }}">
+            <section class="carte-ajout-benevole">
+                <h2>Informations du bénévole</h2>
+                <p class="explication-ajout-benevole">Le code adhérent et l’adresse email doivent être uniques.</p>
+                <div class="grille-ajout-benevole">
+                    <label class="champ"><span>Code adhérent</span><input name="code_adherent" maxlength="50" value="{{ valeurs.code_adherent }}" required autocomplete="off"></label>
+                    <label class="champ"><span>Adresse email</span><input name="email" type="email" maxlength="180" value="{{ valeurs.email }}" required autocomplete="email"></label>
+                    <label class="champ"><span>Prénom</span><input name="prenom" maxlength="100" value="{{ valeurs.prenom }}" required autocomplete="given-name"></label>
+                    <label class="champ"><span>Nom</span><input name="nom" maxlength="100" value="{{ valeurs.nom }}" required autocomplete="family-name"></label>
+                    <label class="champ champ-large"><span>Téléphone <small>(facultatif)</small></span><input name="telephone" type="tel" maxlength="30" value="{{ valeurs.telephone }}" autocomplete="tel"></label>
+                </div>
+            </section>
+            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles') }}">Annuler</a><button class="bouton-principal" type="submit">Créer et envoyer l’invitation</button></div>
+        </form>
+    </main>
+</div>
+{% endblock %}

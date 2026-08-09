@@ -302,6 +302,7 @@ body {
 .entete-benevoles p:last-child { margin: 0; color: var(--texte-secondaire); }
 .bouton-importer-benevoles { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .55rem; text-decoration: none; }
 .bouton-importer-benevoles svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.actions-entete-benevoles { display: flex; flex: 0 0 auto; align-items: center; gap: .7rem; }
 .carte-liste-benevoles { overflow: hidden; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
 .carte-liste-benevoles > header { padding: 1rem 1.4rem; border-bottom: 1px solid #d8e2e6; }
 .carte-liste-benevoles > header p { margin: 0; color: var(--texte-secondaire); font-size: .88rem; font-weight: 700; }
@@ -332,6 +333,23 @@ body {
 .bouton-activation-benevole svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .action-glissee-benevole { display: none; }
 .liste-benevoles-vide { margin: 0; padding: 3rem 1.4rem; color: var(--texte-secondaire); text-align: center; }
+
+/* Création manuelle d'un bénévole */
+.page-ajout-benevole { width: min(100%, 48rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-ajout-benevole { margin: 1.25rem 0 1.75rem; }
+.entete-ajout-benevole h1 { margin: .25rem 0 .4rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.035em; }
+.entete-ajout-benevole > p:last-child, .explication-ajout-benevole { color: var(--texte-secondaire); }
+.entete-ajout-benevole > p:last-child { margin: 0; }
+.carte-ajout-benevole { margin-bottom: 1.25rem; padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 8px 25px rgb(0 58 93 / 5%); }
+.carte-ajout-benevole h2 { margin: 0; font-size: 1.25rem; }
+.explication-ajout-benevole { margin: .35rem 0 1.4rem; font-size: .84rem; }
+.grille-ajout-benevole { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+.grille-ajout-benevole .champ { display: grid; gap: .4rem; }
+.grille-ajout-benevole .champ > span { font-size: .82rem; font-weight: 800; }
+.grille-ajout-benevole input { width: 100%; min-height: 2.85rem; padding: .7rem .8rem; border: 1px solid #b8c8cf; border-radius: .35rem; color: var(--bleu-sgdf); background: #fff; font: inherit; }
+.grille-ajout-benevole input:focus { outline: 2px solid rgb(29 157 130 / 25%); border-color: var(--menthe-sgdf); }
+.grille-ajout-benevole .champ-large { grid-column: 1 / -1; }
+.grille-ajout-benevole small { color: var(--texte-secondaire); font-weight: 500; }
 
 /* Import CSV des bénévoles */
 .page-import-benevoles { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
@@ -502,6 +520,10 @@ body {
     .actions-resultat-import { grid-column: 1 / -1; grid-row: auto; padding-top: 1rem; border-top: 1px solid #b9ded1; }
     .actions-resultat-import .bouton-secondaire, .actions-resultat-import .bouton-principal { justify-content: center; }
     .entete-benevoles { align-items: stretch; flex-direction: column; }
+    .actions-entete-benevoles { align-items: stretch; flex-direction: column; }
+    .actions-entete-benevoles a { justify-content: center; }
+    .grille-ajout-benevole { grid-template-columns: 1fr; }
+    .grille-ajout-benevole .champ-large { grid-column: auto; }
     .bouton-importer-benevoles { display: none; }
     .carte-liste-benevoles { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
     .entete-table-benevoles, .ligne-benevole { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(7rem, 1.15fr); gap: .65rem; padding-inline: 1.25rem; }

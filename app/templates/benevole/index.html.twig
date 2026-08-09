@@ -13,10 +13,13 @@
                 <h1>Bénévoles</h1>
                 <p>Consultez et mettez à jour les informations des bénévoles.</p>
             </div>
+            <div class="actions-entete-benevoles">
+            <a class="bouton-secondaire" href="{{ path('app_admin_benevole_ajouter') }}">Créer un compte</a>
             <a class="bouton-principal bouton-importer-benevoles" href="{{ path('app_admin_benevoles_importer') }}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
                 <span>Importer un CSV</span>
             </a>
+            </div>
         </header>
 
         {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
