@@ -39,3 +39,14 @@ make db-dev-update
 ```
 
 Doctrine ne doit jamais créer ni modifier le schéma.
+
+## Envoi des emails
+
+Les nouveaux comptes créés par import CSV reçoivent leur lien de première connexion par SMTP. Configurez ces variables dans `app/.env.local` en adaptant l’hôte, le port et les identifiants :
+
+```dotenv
+MAILER_DSN=smtp://utilisateur:mot-de-passe@smtp.exemple.fr:587?encryption=tls&auth_mode=login
+MAILER_FROM=no-reply@jambville.sgdf.fr
+```
+
+En développement, la valeur par défaut `null://null` neutralise la livraison réelle des emails.

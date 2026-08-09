@@ -29,4 +29,5 @@ security:
     access_control:
         - { path: ^/connexion$, roles: PUBLIC_ACCESS }
         - { path: ^/premiere-connexion/, roles: PUBLIC_ACCESS }
+        - { route: app_page_introuvable, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

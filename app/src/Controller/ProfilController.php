@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class ProfilController extends AbstractController
 {
@@ -82,7 +83,57 @@ final class ProfilController extends AbstractController
             }
         }
 
-        return $this->render('profil/index.html.twig', ['erreurs' => $erreurs]);
+        return $this->render('profil/index.html.twig', [
+            'erreurs' => $erreurs,
+            'utilisateurProfil' => $utilisateur,
+            'profilAdmin' => false,
+            'actionProfil' => $this->generateUrl('app_profil'),
+        ]);
+    }
+
+    #[Route('/administration/benevoles/{id}/profil', name: 'app_admin_benevole_profil', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_EQUIPE_PILOTE')]
+    public function administrer(Utilisateur $utilisateur, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $erreurs = [];
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('modifier-profil-'.$utilisateur->getId(), $request->request->getString('_csrf_token'))) {
+                $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
+            }
+
+            $telephone = trim($request->request->getString('telephone')) ?: null;
+            if ($telephone !== null && mb_strlen($telephone) > 30) {
+                $erreurs[] = 'Le numéro de téléphone ne peut pas dépasser 30 caractères.';
+            } elseif ($telephone !== null && !$this->telephoneEstValide($telephone)) {
+                $erreurs[] = 'Le numéro de téléphone doit être un numéro français valide, par exemple 06 12 34 56 78.';
+            }
+
+            if ($erreurs === []) {
+                $utilisateur->modifierProfil(
+                    $telephone,
+                    $request->request->getBoolean('vegetarien'),
+                    $request->request->getBoolean('allergie_oeuf'),
+                    $request->request->getBoolean('allergie_arachide'),
+                    trim($request->request->getString('regime_autre')) ?: null,
+                    trim($request->request->getString('besoin_couchage')) ?: null,
+                );
+                $utilisateur->modifierRemiseEquipement(
+                    $request->request->getBoolean('foulard_remis'),
+                    $request->request->getBoolean('tenue_remise'),
+                );
+                $entityManager->flush();
+                $this->addFlash('succes', 'Le profil a bien été mis à jour.');
+
+                return $this->redirectToRoute('app_admin_benevole_profil', ['id' => $utilisateur->getId()]);
+            }
+        }
+
+        return $this->render('profil/index.html.twig', [
+            'erreurs' => $erreurs,
+            'utilisateurProfil' => $utilisateur,
+            'profilAdmin' => true,
+            'actionProfil' => $this->generateUrl('app_admin_benevole_profil', ['id' => $utilisateur->getId()]),
+        ]);
     }
 
     private function telephoneEstValide(string $telephone): bool

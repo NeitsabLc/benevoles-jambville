@@ -208,6 +208,11 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         return $this->actif;
     }
 
+    public function basculerActivation(): void
+    {
+        $this->actif = !$this->actif;
+    }
+
     public function isChangementMotDePasseRequis(): bool
     {
         return $this->changementMotDePasseRequis;

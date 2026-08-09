@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Importer des bénévoles · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-import-benevoles">
+        <a class="retour-calendrier" href="{{ path('app_admin_benevoles') }}">← Retour aux bénévoles</a>
+        <header class="entete-import-benevoles">
+            <p class="surtitre">Administration</p>
+            <h1>Importer des bénévoles</h1>
+            <p>Ajoutez ou actualisez plusieurs profils à partir d’un fichier CSV.</p>
+        </header>
+
+        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur">{{ message }}</div>{% endfor %}
+
+        {% if resultatImport %}
+        <section class="carte-resultat-import">
+            <div class="icone-resultat-import">✓</div>
+            <div><h2>Import appliqué</h2><p>{{ resultatImport.creations }} création{{ resultatImport.creations > 1 ? 's' }} et {{ resultatImport.mises_a_jour }} mise{{ resultatImport.mises_a_jour > 1 ? 's' }} à jour effectuée{{ resultatImport.mises_a_jour > 1 ? 's' }}.</p></div>
+            {% if resultatImport.echecs_email %}<div class="alerte-email-import">{{ resultatImport.echecs_email }} email{{ resultatImport.echecs_email > 1 ? 's n’ont' : ' n’a' }} pas pu être envoyé. Téléchargez le fichier des liens pour les transmettre manuellement.</div>{% endif %}
+            <div class="actions-resultat-import">{% if resultatImport.nombre_liens %}<a class="bouton-secondaire" href="{{ path('app_admin_benevoles_importer_liens') }}" download>Télécharger les liens</a>{% endif %}<a class="bouton-principal" href="{{ path('app_admin_benevoles') }}">Voir les bénévoles</a></div>
+        </section>
+        {% endif %}
+
+        <section class="carte-import-benevoles">
+            <div class="instructions-import">
+                <span class="numero-etape">1</span>
+                <div><h2>Sélectionnez votre fichier</h2><p>Le fichier doit être au format CSV, utiliser le point-virgule comme séparateur et ne pas dépasser 2 Mo.</p></div>
+            </div>
+            <form class="formulaire-import-benevoles" method="post" enctype="multipart/form-data" action="{{ path('app_admin_benevoles_importer') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('import-benevoles') }}">
+                <label class="zone-depot-csv" for="fichier_csv">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+                    <strong>Choisir un fichier CSV</strong>
+                    <span>ou déposez-le dans cette zone</span>
+                    <input id="fichier_csv" name="fichier_csv" type="file" accept=".csv,text/csv" required onchange="this.closest('label').querySelector('strong').textContent = this.files[0]?.name || 'Choisir un fichier CSV'">
+                </label>
+                <div class="format-import-csv"><strong>Colonnes attendues</strong><code>code_adherent;nom;prenom;email;telephone;code_fonction;code_structure</code></div>
+                <div class="actions-formulaire actions-import-benevoles"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles') }}">Annuler</a><button class="bouton-principal" type="submit">Prévisualiser l’import</button></div>
+            </form>
+        </section>
+
+        {% if apercu %}
+        <section class="carte-apercu-import">
+            <div class="instructions-import"><span class="numero-etape">2</span><div><h2>Prévisualisation</h2><p>Vérifiez les changements détectés avant leur application.</p></div></div>
+            <div class="resume-import">
+                <span><b>{{ apercu|filter(l => l.statut == 'creation')|length }}</b> créations</span>
+                <span><b>{{ apercu|filter(l => l.statut == 'mise_a_jour')|length }}</b> mises à jour</span>
+                <span><b>{{ apercu|filter(l => l.statut == 'inchange')|length }}</b> inchangés</span>
+                <span class="resume-erreurs"><b>{{ apercu|filter(l => l.statut == 'erreur')|length }}</b> erreurs</span>
+            </div>
+            <div class="table-apercu-import"><table><thead><tr><th>État</th><th>Code adhérent</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th></tr></thead><tbody>{% for ligne in apercu %}<tr><td><span class="statut-import statut-{{ ligne.statut }}">{{ ligne.statut == 'creation' ? 'Création' : (ligne.statut == 'mise_a_jour' ? 'Mise à jour' : (ligne.statut == 'inchange' ? 'Inchangé' : ligne.erreur)) }}</span></td><td>{{ ligne.code_adherent }}</td><td>{{ ligne.nom }}</td><td>{{ ligne.prenom }}</td><td>{{ ligne.email }}</td><td>{{ ligne.telephone ?: '—' }}</td></tr>{% endfor %}</tbody></table></div>
+            <p class="note-apercu-import">Cette étape est une prévisualisation : aucune donnée n’a encore été modifiée.</p>
+            {% if peutAppliquer %}<div class="actions-validation-import"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles_importer') }}">Choisir un autre fichier</a><button class="bouton-principal" type="button" data-ouvrir-confirmation-import>Valider et importer</button></div>
+            <dialog class="dialog-confirmation-import" data-dialog-confirmation-import><section><div class="icone-confirmation-import">!</div><h2>Confirmer l’import</h2><p>Vous allez créer <strong>{{ apercu|filter(l => l.statut == 'creation')|length }}</strong> compte{{ apercu|filter(l => l.statut == 'creation')|length > 1 ? 's' }} et mettre à jour <strong>{{ apercu|filter(l => l.statut == 'mise_a_jour')|length }}</strong> profil{{ apercu|filter(l => l.statut == 'mise_a_jour')|length > 1 ? 's' }}.</p><p class="information-email-import">Les personnes nouvellement ajoutées recevront un email contenant leur accès à la plateforme.</p><div class="actions-dialog-import"><button class="bouton-secondaire" type="button" data-fermer-confirmation-import>Annuler</button><form method="post" action="{{ path('app_admin_benevoles_importer_appliquer') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token('appliquer-import-benevoles') }}"><button class="bouton-principal" type="submit">Confirmer l’import</button></form></div></section></dialog>
+            {% else %}<p class="import-bloque">Corrigez les erreurs du fichier avant de pouvoir appliquer l’import.</p>{% endif %}
+        </section>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

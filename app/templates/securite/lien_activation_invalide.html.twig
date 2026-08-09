@@ -11,7 +11,7 @@
             <h1 id="titre-lien-invalide">Ce lien n’est plus valide</h1>
             <p>Il a peut-être expiré ou déjà été utilisé. Demandez un nouveau lien à l’équipe de Jambville.</p>
         </div>
-        <a class="bouton-principal" href="{{ path('app_connexion') }}">Revenir à la connexion</a>
+        {% if app.user %}<a class="bouton-principal" href="{{ path('app_accueil') }}">Retour au calendrier</a>{% else %}<a class="bouton-principal" href="{{ path('app_connexion') }}">Revenir à la connexion</a>{% endif %}
     </section>
 </main>
 {% endblock %}

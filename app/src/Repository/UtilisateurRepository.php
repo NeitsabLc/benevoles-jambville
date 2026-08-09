@@ -40,4 +40,13 @@ final class UtilisateurRepository extends ServiceEntityRepository implements Use
             ->addOrderBy('u.prenom', 'ASC')
             ->getQuery()->getResult();
     }
+
+    /** @return list<Utilisateur> */
+    public function findTousPourAdministration(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.nom', 'ASC')
+            ->addOrderBy('u.prenom', 'ASC')
+            ->getQuery()->getResult();
+    }
 }

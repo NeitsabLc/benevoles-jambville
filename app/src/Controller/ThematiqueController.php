@@ -122,6 +122,6 @@ final class ThematiqueController extends AbstractController
 
     private function garantirAcces(): void
     {
-        if (!$this->isGranted('ROLE_EQUIPE_PILOTE') && !$this->isGranted('ROLE_SALARIE_ACCUEIL')) throw $this->createAccessDeniedException();
+        if (!$this->isGranted('ROLE_EQUIPE_PILOTE')) throw $this->createAccessDeniedException();
     }
 }

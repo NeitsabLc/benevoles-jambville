@@ -118,23 +118,29 @@ final class ProfilControllerTest extends WebTestCase
         $hasher = self::getContainer()->get(UserPasswordHasherInterface::class);
         $utilisateur->setPassword($hasher->hashPassword($utilisateur, 'Mot de passe actuel'));
         self::getContainer()->get(EntityManagerInterface::class)->flush();
-        $client->loginUser($utilisateur);
 
-        $crawler = $client->request('GET', '/mon-profil');
-        $client->submit($crawler->selectButton('Enregistrer mon profil')->form([
-            'mot_de_passe_actuel' => 'Mot de passe actuel',
-            'nouveau_mot_de_passe' => 'Une nouvelle phrase secrète',
-            'confirmation_mot_de_passe' => 'Une nouvelle phrase secrète',
-        ]));
+        try {
+            $client->loginUser($utilisateur);
 
-        self::assertResponseRedirects('/mon-profil');
-        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
-        self::assertNotNull($utilisateur);
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($utilisateur, 'Une nouvelle phrase secrète'));
+            $crawler = $client->request('GET', '/mon-profil');
+            $client->submit($crawler->selectButton('Enregistrer mon profil')->form([
+                'mot_de_passe_actuel' => 'Mot de passe actuel',
+                'nouveau_mot_de_passe' => 'Une nouvelle phrase secrète',
+                'confirmation_mot_de_passe' => 'Une nouvelle phrase secrète',
+            ]));
 
-        self::assertNotNull($ancienHash);
-        $utilisateur->setPassword($ancienHash);
-        self::getContainer()->get(EntityManagerInterface::class)->flush();
+            self::assertResponseRedirects('/mon-profil');
+            $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+            self::assertNotNull($utilisateur);
+            self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($utilisateur, 'Une nouvelle phrase secrète'));
+        } finally {
+            self::assertNotNull($ancienHash);
+            $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+            if ($utilisateur !== null) {
+                $utilisateur->setPassword($ancienHash);
+                self::getContainer()->get(EntityManagerInterface::class)->flush();
+            }
+        }
     }
 
     public function testUnNumeroDeTelephoneInvalideEstRefuse(): void

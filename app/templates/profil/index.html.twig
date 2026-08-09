@@ -1,36 +1,38 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon profil · Bénévoles Jambville{% endblock %}
+{% block title %}{{ profilAdmin ? utilisateurProfil.nomComplet : 'Mon profil' }} · Bénévoles Jambville{% endblock %}
 
 {% block body %}
 <div class="application">
     {% include 'commun/_barre_application.html.twig' %}
 
     <main class="page-profil">
-        {% if app.user.roleMetier == 'BENEVOLE' %}
+        {% if profilAdmin %}
+            <a class="retour-calendrier" href="{{ path('app_admin_benevoles') }}">← Retour aux bénévoles</a>
+        {% elseif app.user.roleMetier == 'BENEVOLE' %}
             <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
         {% endif %}
 
         <header class="entete-profil">
-            <h1>Mon profil</h1>
-            <p>Gardez à jour les informations utiles à votre accueil à Jambville.</p>
+            <h1>{{ profilAdmin ? utilisateurProfil.nomComplet : 'Mon profil' }}</h1>
+            <p>{{ profilAdmin ? 'Consultez et mettez à jour les informations de ce bénévole.' : 'Gardez à jour les informations utiles à votre accueil à Jambville.' }}</p>
         </header>
 
         {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
         {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
 
-        <form class="formulaire-profil" method="post" action="{{ path('app_profil') }}">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('modifier-profil') }}">
+        <form class="formulaire-profil" method="post" action="{{ actionProfil }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token(profilAdmin ? 'modifier-profil-' ~ utilisateurProfil.id : 'modifier-profil') }}">
 
             <section class="carte-profil" aria-labelledby="identite-titre">
                 <header><h2 id="identite-titre">Identité</h2><p>Ces informations proviennent de votre dossier adhérent et ne sont pas modifiables ici.</p></header>
                 <div class="grille-profil">
-                    <div class="champ"><label>Prénom</label><input value="{{ app.user.prenom }}" readonly></div>
-                    <div class="champ"><label>Nom</label><input value="{{ app.user.nom }}" readonly></div>
-                    <div class="champ"><label>Email</label><input type="email" value="{{ app.user.email }}" readonly></div>
+                    <div class="champ"><label>Prénom</label><input value="{{ utilisateurProfil.prenom }}" readonly></div>
+                    <div class="champ"><label>Nom</label><input value="{{ utilisateurProfil.nom }}" readonly></div>
+                    <div class="champ"><label>Email</label><input type="email" value="{{ utilisateurProfil.email }}" readonly></div>
                     <div class="champ">
                         <label for="telephone">Téléphone</label>
-                        <input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', app.user.telephone) }}" autocomplete="tel" inputmode="tel" aria-describedby="erreur-telephone" data-telephone-francais>
+                        <input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', utilisateurProfil.telephone) }}" autocomplete="tel" inputmode="tel" aria-describedby="erreur-telephone" data-telephone-francais>
                         <small id="erreur-telephone" class="erreur-champ" data-erreur-telephone hidden>Indiquez un numéro français valide, par exemple 06 12 34 56 78.</small>
                     </div>
                 </div>
@@ -39,29 +41,29 @@
             <section class="carte-profil" aria-labelledby="alimentation-titre">
                 <header><h2 id="alimentation-titre">Régime alimentaire et allergies</h2><p>Ces informations sensibles servent uniquement à préparer votre accueil et vos repas.</p></header>
                 <div class="choix-profil">
-                    <label><input type="checkbox" name="vegetarien" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('vegetarien') : app.user.vegetarien) ? 'checked' }}> Régime végétarien</label>
-                    <label><input type="checkbox" name="allergie_oeuf" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_oeuf') : app.user.allergieOeuf) ? 'checked' }}> Allergie aux œufs</label>
-                    <label><input type="checkbox" name="allergie_arachide" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_arachide') : app.user.allergieArachide) ? 'checked' }}> Allergie aux arachides</label>
+                    <label><input type="checkbox" name="vegetarien" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('vegetarien') : utilisateurProfil.vegetarien) ? 'checked' }}> Régime végétarien</label>
+                    <label><input type="checkbox" name="allergie_oeuf" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_oeuf') : utilisateurProfil.allergieOeuf) ? 'checked' }}> Allergie aux œufs</label>
+                    <label><input type="checkbox" name="allergie_arachide" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_arachide') : utilisateurProfil.allergieArachide) ? 'checked' }}> Allergie aux arachides</label>
                 </div>
-                <div class="champ"><label for="regime_autre">Autre régime ou allergie</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', app.user.regimeAutre) }}</textarea></div>
+                <div class="champ"><label for="regime_autre">Autre régime ou allergie</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', utilisateurProfil.regimeAutre) }}</textarea></div>
             </section>
 
             <section class="carte-profil" aria-labelledby="couchage-titre">
                 <header><h2 id="couchage-titre">Couchage</h2><p>Signalez ici les besoins à anticiper pour votre hébergement.</p></header>
-                <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', app.user.besoinCouchage) }}</textarea></div>
+                <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', utilisateurProfil.besoinCouchage) }}</textarea></div>
             </section>
 
             {% if app.user.equipePilote %}
             <section class="carte-profil" aria-labelledby="equipement-titre">
                 <header><h2 id="equipement-titre">Équipement bénévole</h2><p>Vous pouvez mettre à jour la remise de votre équipement.</p></header>
                 <div class="choix-profil">
-                    <label><input type="checkbox" name="foulard_remis" value="1" {{ app.user.foulardRemis ? 'checked' }}> Foulard remis</label>
-                    <label><input type="checkbox" name="tenue_remise" value="1" {{ app.user.tenueRemise ? 'checked' }}> Tenue remise</label>
+                    <label><input type="checkbox" name="foulard_remis" value="1" {{ utilisateurProfil.foulardRemis ? 'checked' }}> Foulard remis</label>
+                    <label><input type="checkbox" name="tenue_remise" value="1" {{ utilisateurProfil.tenueRemise ? 'checked' }}> Tenue remise</label>
                 </div>
             </section>
             {% endif %}
 
-            <section class="carte-profil" aria-labelledby="mot-de-passe-titre">
+            {% if not profilAdmin %}<section class="carte-profil" aria-labelledby="mot-de-passe-titre">
                 <header><h2 id="mot-de-passe-titre">Mot de passe</h2><p>Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.</p></header>
                 <div class="grille-profil">
                     <div class="champ champ-large">
@@ -78,9 +80,9 @@
                         <input id="confirmation_mot_de_passe" name="confirmation_mot_de_passe" type="password" minlength="12" autocomplete="new-password">
                     </div>
                 </div>
-            </section>
+            </section>{% endif %}
 
-            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_accueil') }}">Annuler</a><button class="bouton-principal" type="submit">Enregistrer mon profil</button></div>
+            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ profilAdmin ? path('app_admin_benevoles') : path('app_accueil') }}">Annuler</a><button class="bouton-principal" type="submit">{{ profilAdmin ? 'Enregistrer le profil' : 'Enregistrer mon profil' }}</button></div>
         </form>
     </main>
 </div>

@@ -55,8 +55,11 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('button[data-menu-mobile][aria-controls="navigation-principale"]');
         self::assertSelectorExists('a[href="/synthese"]');
         self::assertSelectorExists('a[href="/administration/calendrier"]');
-        self::assertSelectorExists('a[href="/administration/thematiques"]');
+        self::assertSelectorNotExists('a[href="/administration/thematiques"]');
         self::assertSelectorNotExists('a[href="/administration/benevoles"]');
+
+        $client->request('GET', '/administration/thematiques');
+        self::assertResponseStatusCodeSame(403);
 
         $client->request('GET', '/administration/benevoles');
         self::assertResponseStatusCodeSame(403);

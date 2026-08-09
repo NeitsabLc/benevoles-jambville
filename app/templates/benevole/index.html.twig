@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bénévoles · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+
+    <main class="page-benevoles">
+        <header class="entete-benevoles">
+            <div>
+                <p class="surtitre">Administration</p>
+                <h1>Bénévoles</h1>
+                <p>Consultez et mettez à jour les informations des bénévoles.</p>
+            </div>
+            <a class="bouton-principal bouton-importer-benevoles" href="{{ path('app_admin_benevoles_importer') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+                <span>Importer un CSV</span>
+            </a>
+        </header>
+
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur">{{ message }}</div>{% endfor %}
+
+        <section class="carte-liste-benevoles" aria-labelledby="nombre-benevoles">
+            <header><p id="nombre-benevoles">{{ benevoles|length }} bénévole{{ benevoles|length > 1 ? 's' }}</p></header>
+            {% if benevoles is empty %}
+                <p class="liste-benevoles-vide">Aucun bénévole à afficher.</p>
+            {% else %}
+                <div class="table-benevoles">
+                    <div class="entete-table-benevoles" aria-hidden="true">
+                        <span>Nom</span><span>Prénom</span><span>Téléphone</span><span>Foulard</span><span>Tenue</span>
+                    </div>
+                    <div class="corps-table-benevoles">
+                    {% for benevole in benevoles %}
+                        <div class="conteneur-ligne-benevole {{ not benevole.actif ? 'inactive' }}" data-glissiere-benevole>
+                            {% if benevole.id != app.user.id %}<form class="action-glissee-benevole {{ not benevole.actif ? 'reactiver' }}" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}"><button type="submit">{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}</button></form>{% endif %}
+                            <a class="ligne-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" aria-label="Voir le profil de {{ benevole.nomComplet }}">
+                                <strong>{{ benevole.nom }}{% if not benevole.actif %}<small>Inactif</small>{% endif %}</strong>
+                                <span>{{ benevole.prenom }}</span>
+                                <span class="telephone-benevole">{{ benevole.telephone ?: '—' }}</span>
+                                <span class="equipement-benevole"><i class="pastille-equipement {{ benevole.foulardRemis ? 'remis' }}"></i>{{ benevole.foulardRemis ? 'Remis' : 'Non remis' }}</span>
+                                <span class="equipement-benevole"><i class="pastille-equipement {{ benevole.tenueRemise ? 'remis' }}"></i>{{ benevole.tenueRemise ? 'Remise' : 'Non remise' }}</span>
+                            </a>
+                            <div class="actions-ligne-benevole">
+                                <a class="bouton-edition-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" aria-label="Modifier {{ benevole.nomComplet }}" title="Modifier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm13.5-16.5 3 3a1.4 1.4 0 0 1 0 2L19 10l-5-5 1.5-1.5a1.4 1.4 0 0 1 2 0Z"/></svg></a>
+                                {% if benevole.id != app.user.id %}<form class="formulaire-activation-benevole" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}" onsubmit="return confirm('{{ benevole.actif ? 'Désactiver' : 'Réactiver' }} le compte de {{ benevole.nomComplet|e('js') }} ?');">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}">
+                                <button class="bouton-activation-benevole {{ not benevole.actif ? 'reactiver' }}" type="submit" aria-label="{{ benevole.actif ? 'Désactiver' : 'Réactiver' }} {{ benevole.nomComplet }}" title="{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}">
+                                    {% if benevole.actif %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5"/></svg>{% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9m-5.7-6.3a8 8 0 1 0 11.4 0"/></svg>{% endif %}
+                                </button>
+                                </form>{% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

@@ -34,7 +34,8 @@ Il n’existe pas de cumul de rôles.
 | Consulter le calendrier des présences | Oui | Oui | Oui |
 | Modifier la permanence et le commentaire d’une journée | Non | Oui | Oui |
 | Consulter la synthèse accueil et hôtellerie | Non | Oui | Oui |
-| Gérer les thématiques et personnes de permanence | Non | Oui | Oui |
+| Gérer les thématiques | Non | Non | Oui |
+| Gérer les personnes de permanence | Non | Oui | Oui |
 | Gérer les utilisateurs, leurs droits et les imports | Non | Non | Oui |
 
 Les autorisations doivent toujours être contrôlées côté serveur. Masquer un

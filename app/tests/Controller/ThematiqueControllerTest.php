@@ -9,10 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ThematiqueControllerTest extends WebTestCase
 {
-    public function testLeSalariePeutConsulterLaGestionDesThematiques(): void
+    public function testLePilotePeutConsulterLaGestionDesThematiques(): void
     {
         $client = self::createClient();
-        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
         self::assertNotNull($utilisateur);
         $client->loginUser($utilisateur);
         $client->request('GET', '/administration/thematiques');
@@ -28,6 +28,20 @@ final class ThematiqueControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Ajouter une thématique');
         self::assertSelectorExists('input[name="date_debut_evenement"]');
         self::assertSelectorExists('input[name="exclusive_sur_periode"]');
+    }
+
+    public function testLeSalarieAccueilNePeutPasGererLesThematiques(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+        self::assertNotNull($utilisateur);
+        $client->loginUser($utilisateur);
+        $client->request('GET', '/administration/thematiques');
+
+        self::assertResponseStatusCodeSame(403);
+
+        $client->request('GET', '/administration/thematiques/ajouter');
+        self::assertResponseStatusCodeSame(403);
     }
 
     public function testLeBenevoleNePeutPasGererLesThematiques(): void

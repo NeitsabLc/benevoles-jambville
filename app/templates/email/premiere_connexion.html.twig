@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+    <title>Bienvenue sur Bénévoles Jambville</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Raleway:wght@700;800&family=Sarabun:wght@400;600;700&display=swap');
+        :root { color-scheme: only light; supported-color-schemes: light; }
+        body, .fond-email { background-color:#ffffff !important; }
+        .bleu-institutionnel { background-color:#003a5d !important; }
+        .texte-bleu-institutionnel { color:#003a5d !important; }
+        [data-ogsc] .bleu-institutionnel { background-color:#003a5d !important; }
+        [data-ogsc] .texte-bleu-institutionnel { color:#003a5d !important; }
+    </style>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;color:#003a5d;font-family:Sarabun,Arial,Helvetica,sans-serif;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Votre compte Bénévoles Jambville est prêt. Choisissez votre mot de passe.</div>
+<table class="fond-email" role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background:#ffffff;"><tr><td align="center" style="padding:28px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:640px;background:#ffffff;">
+        <tr><td style="padding:22px 32px;text-align:left;background:#ffffff;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td style="width:205px;vertical-align:middle;"><img src="cid:sgdf-logo-horizontal" width="205" alt="Scouts et Guides de France" style="display:block;width:205px;max-width:100%;height:auto;border:0;"></td>
+                <td align="right" style="color:#003a5d;font-size:12px;">Bénévoles Jambville</td>
+            </tr></table>
+        </td></tr>
+        <tr><td class="bleu-institutionnel" bgcolor="#003a5d" style="padding:28px 32px 31px;background:#003a5d;color:#ffffff;">
+            <div style="font-family:'Caveat Brush','Trebuchet MS',cursive;font-size:38px;line-height:1.08;letter-spacing:.3px;">Bienvenue dans l'aventure&nbsp;!</div>
+            <div style="margin-top:10px;font-family:Raleway,Arial,sans-serif;color:#ffffff;font-size:15px;font-weight:700;">Votre espace Bénévoles Jambville vous attend</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;"><tr>
+                <td style="width:18px;color:#ff8300;font-size:21px;">✦</td><td style="border-top:3px dashed #ffffff;font-size:0;line-height:0;opacity:.9;">&nbsp;</td>
+                <td style="width:26px;color:#65bc99;font-size:24px;text-align:center;">◇</td><td style="border-top:3px dashed #ffffff;font-size:0;line-height:0;opacity:.9;">&nbsp;</td>
+                <td style="width:22px;color:#d03f15;font-size:22px;text-align:right;">➜</td>
+            </tr></table>
+        </td></tr>
+        <tr><td style="height:12px;background:#ffffff;line-height:0;font-size:0;border-top:8px solid #003a5d;">&nbsp;</td></tr>
+        <tr><td style="padding:28px 38px 34px;">
+            <h1 style="margin:0 0 16px;font-family:Raleway,Arial,sans-serif;color:#003a5d;font-size:25px;line-height:1.25;font-weight:800;">Bonjour {{ nom }},</h1>
+            <p style="margin:0 0 15px;color:#003a5d;font-size:16px;line-height:1.65;">Votre compte sur la plateforme <strong>Bénévoles Jambville</strong> vient d’être créé.</p>
+            <p style="margin:0 0 24px;color:#003a5d;font-size:16px;line-height:1.65;">Vous pourrez y mettre à jour votre profil et organiser vos prochaines présences à Jambville.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0"><tr><td class="bleu-institutionnel" bgcolor="#003a5d" style="background:#003a5d;"><a href="{{ urlActivation }}" style="display:inline-block;padding:15px 28px;font-family:Raleway,Arial,sans-serif;color:#ffffff;font-size:15px;font-weight:800;text-decoration:none;">JE CHOISIS MON MOT DE PASSE</a></td></tr></table>
+            </td></tr></table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:25px;background:#65bc99;"><tr>
+                <td style="width:8px;background:#007254;font-size:0;">&nbsp;</td>
+                <td style="padding:13px 16px;color:#003a5d;font-size:14px;line-height:1.5;"><strong>À faire dans les 7 jours</strong><br>Passé ce délai, demandez un nouveau lien à l’équipe pilote.</td>
+            </tr></table>
+            <p style="margin:25px 0 7px;color:#003a5d;font-size:12px;line-height:1.45;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :</p>
+            <p style="margin:0;word-break:break-all;color:#003a5d;font-size:12px;line-height:1.45;"><a href="{{ urlActivation }}" style="color:#003a5d;">{{ urlActivation }}</a></p>
+        </td></tr>
+        <tr><td class="bleu-institutionnel" bgcolor="#003a5d" style="padding:22px 38px;background:#003a5d;color:#ffffff;text-align:center;">
+            <div style="font-family:'Caveat Brush','Trebuchet MS',cursive;color:#ffffff;font-size:23px;">À bientôt à Jambville&nbsp;!</div>
+            <div style="margin-top:7px;font-family:Raleway,Arial,sans-serif;color:#65bc99;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">L’équipe Bénévoles Jambville</div>
+            <div style="margin:18px auto 0;width:58px;border-top:3px dashed #ffffff;opacity:.75;">&nbsp;</div>
+        </td></tr>
+        <tr><td style="height:7px;background:#ff8300;font-size:0;line-height:0;">&nbsp;</td></tr>
+    </table>
+</td></tr></table>
+</body>
+</html>

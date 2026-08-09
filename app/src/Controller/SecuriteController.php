@@ -39,7 +39,7 @@ final class SecuriteController extends AbstractController
         $utilisateur = $utilisateurs->findByActivationToken($token);
 
         if ($utilisateur === null || !$utilisateur->activationEstValideA(new \DateTimeImmutable())) {
-            return $this->render('securite/lien_activation_invalide.html.twig', status: Response::HTTP_GONE);
+            return $this->redirectToRoute($this->getUser() !== null ? 'app_accueil' : 'app_connexion');
         }
 
         $erreurs = [];
