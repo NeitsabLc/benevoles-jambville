@@ -42,6 +42,9 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('.liens-legaux-navigation + .compte-navigation');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/conditions-utilisation"]');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/politique-confidentialite"]');
+        self::assertSelectorTextContains('.pied-page-legal--avec-navigation', 'Version 0.2');
+        self::assertSelectorExists('.pied-page-legal--avec-navigation a[href="/conditions-utilisation"]');
+        self::assertSelectorExists('.pied-page-legal--avec-navigation a[href="/politique-confidentialite"]');
     }
 
     public function testLeSalarieAccueilNaPasLesLiensReservesAuPilote(): void

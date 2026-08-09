@@ -16,6 +16,7 @@ body {
 }
 
 .pied-page-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; padding: 1rem 1.5rem; color: var(--texte-secondaire); font-size: .78rem; }
+.pied-page-legal--avec-navigation { position: fixed; z-index: 20; right: 0; bottom: 0; left: 14.5rem; margin-left: 0; background: var(--fond); }
 .pied-page-legal a, .note-legale-connexion a { color: inherit; }
 .note-legale-connexion { max-width: 30rem; margin: 1.25rem auto 0; color: var(--texte-secondaire); font-size: .75rem; line-height: 1.55; text-align: center; }
 .page-legale { min-height: 100vh; background: var(--fond); }
