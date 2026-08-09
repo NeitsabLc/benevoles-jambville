@@ -345,8 +345,12 @@ dupliqués dans le mapping Doctrine.
 
 ### 8.4 Conservation des données
 
-Un utilisateur ou référentiel déjà utilisé ne doit pas être supprimé
-physiquement. Il est désactivé afin de conserver l’historique.
+Un utilisateur est d’abord désactivé, puis supprimé physiquement avec ses
+données associées après 30 jours sans réactivation. Les données détaillées
+d’une campagne de septembre à août sont agrégées puis supprimées le 10 octobre
+suivant. L’historique ne conserve que la date, le nombre de bénévoles par
+thématique et le nombre de compagnons, sans identifiant personnel ni lien vers
+les données sources.
 
 Les suppressions en cascade ne sont admises que pour des données strictement
 dépendantes sans valeur autonome, par exemple les repas d’une inscription.
@@ -379,6 +383,8 @@ la couleur.
 - Stocker uniquement le hash des jetons d’activation et de réinitialisation.
 - Limiter la durée de vie des liens temporaires.
 - Ne jamais journaliser les mots de passe, jetons bruts ou données médicales.
+- Conserver les sauvegardes PostgreSQL sept jours et les journaux Symfony
+  environ 48 heures, selon les mêmes rotations que Campement.
 - Normaliser les emails en minuscules sans en faire une identité métier.
 - Valider les fichiers CSV, leur encodage, leur taille et leurs en-têtes.
 - Échapper les contenus affichés et conserver l’échappement automatique Twig.

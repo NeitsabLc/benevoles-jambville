@@ -34,4 +34,36 @@ final class UtilisateurTest extends TestCase
         self::assertFalse($utilisateur->isChangementMotDePasseRequis());
         self::assertFalse($utilisateur->activationEstValideA(new \DateTimeImmutable()));
     }
+
+    public function testLaDesactivationSupprimeLesAllergiesEtLeCommentaireAlimentaire(): void
+    {
+        $utilisateur = new Utilisateur();
+        $utilisateur->modifierProfil(
+            '0612345678',
+            true,
+            true,
+            true,
+            'Allergie au lait',
+            'Lit en rez-de-chaussée',
+        );
+
+        $dateDesactivation = new \DateTimeImmutable('2026-07-01 12:00:00');
+        $utilisateur->basculerActivation($dateDesactivation);
+
+        self::assertFalse($utilisateur->isActif());
+        self::assertSame($dateDesactivation, $utilisateur->getDesactiveLe());
+        self::assertFalse($utilisateur->hasAllergieOeuf());
+        self::assertFalse($utilisateur->hasAllergieArachide());
+        self::assertNull($utilisateur->getRegimeAutre());
+        self::assertTrue($utilisateur->isVegetarien());
+        self::assertSame('Lit en rez-de-chaussée', $utilisateur->getBesoinCouchage());
+
+        $utilisateur->basculerActivation();
+
+        self::assertTrue($utilisateur->isActif());
+        self::assertNull($utilisateur->getDesactiveLe());
+        self::assertFalse($utilisateur->hasAllergieOeuf());
+        self::assertFalse($utilisateur->hasAllergieArachide());
+        self::assertNull($utilisateur->getRegimeAutre());
+    }
 }

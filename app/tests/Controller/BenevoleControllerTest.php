@@ -120,6 +120,9 @@ final class BenevoleControllerTest extends WebTestCase
         $client->loginUser($pilote);
 
         $crawler = $client->request('GET', '/administration/benevoles');
+        self::assertSelectorExists('dialog[data-dialog-desactivation]');
+        self::assertSelectorExists(sprintf('form[action="/administration/benevoles/%s/activation"][data-confirmation-desactivation]', $benevole->getId()));
+        self::assertSelectorNotExists('form[onsubmit*="confirm"]');
         $formulaire = $crawler->filter(sprintf('form[action="/administration/benevoles/%s/activation"]', $benevole->getId()))->form();
         $client->submit($formulaire);
         $client->followRedirect();

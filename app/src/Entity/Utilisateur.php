@@ -74,6 +74,9 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column]
     private bool $actif = true;
 
+    #[ORM\Column(name: 'desactive_le', type: 'datetimetz_immutable', nullable: true)]
+    private ?\DateTimeImmutable $desactiveLe = null;
+
     public function getId(): string
     {
         return $this->id;
@@ -208,9 +211,23 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         return $this->actif;
     }
 
-    public function basculerActivation(): void
+    public function basculerActivation(?\DateTimeImmutable $maintenant = null): void
     {
         $this->actif = !$this->actif;
+
+        if (!$this->actif) {
+            $this->desactiveLe = $maintenant ?? new \DateTimeImmutable();
+            $this->allergieOeuf = false;
+            $this->allergieArachide = false;
+            $this->regimeAutre = null;
+        } else {
+            $this->desactiveLe = null;
+        }
+    }
+
+    public function getDesactiveLe(): ?\DateTimeImmutable
+    {
+        return $this->desactiveLe;
     }
 
     public function isChangementMotDePasseRequis(): bool

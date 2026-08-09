@@ -11,3 +11,18 @@ services:
   database:
     restart: unless-stopped
 
+  backup:
+    restart: unless-stopped
+    image: "postgres:${POSTGRES_VERSION}"
+    entrypoint: ["/bin/sh", "/usr/local/bin/benevole-jambville-backup"]
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      PGPASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - ./docker/postgres/backup.sh:/usr/local/bin/benevole-jambville-backup:ro
+      - "${BACKUP_DIR:-./var/backups}:/backups"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [benevole_jambville]

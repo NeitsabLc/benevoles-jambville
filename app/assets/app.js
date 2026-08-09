@@ -159,6 +159,29 @@ const initialiserSuppressionPresence = () => {
     });
 };
 
+const initialiserDesactivationCompte = () => {
+    const dialog = document.querySelector('[data-dialog-desactivation]');
+    if (!dialog || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    const formulaireConfirmation = dialog.querySelector('[data-form-desactivation]');
+    const nom = dialog.querySelector('[data-nom-desactivation]');
+    const token = dialog.querySelector('[data-token-desactivation]');
+
+    document.querySelectorAll('[data-confirmation-desactivation]').forEach((formulaire) => {
+        formulaire.addEventListener('submit', (event) => {
+            event.preventDefault();
+            nom.textContent = formulaire.dataset.benevoleNom;
+            formulaireConfirmation.action = formulaire.action;
+            token.value = formulaire.querySelector('input[name="_csrf_token"]').value;
+            dialog.showModal();
+        });
+    });
+    dialog.querySelector('[data-fermer-desactivation]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+};
+
 const initialiserMenuMobile = () => {
     const bouton = document.querySelector('[data-menu-mobile]');
     const navigation = document.querySelector('[data-navigation-mobile]');
@@ -328,6 +351,8 @@ document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
 document.addEventListener('turbo:load', initialiserFormulairePresence);
 document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
 document.addEventListener('turbo:load', initialiserSuppressionPresence);
+document.addEventListener('DOMContentLoaded', initialiserDesactivationCompte);
+document.addEventListener('turbo:load', initialiserDesactivationCompte);
 document.addEventListener('DOMContentLoaded', initialiserMenuMobile);
 document.addEventListener('turbo:load', initialiserMenuMobile);
 document.addEventListener('DOMContentLoaded', initialiserLignesPresence);

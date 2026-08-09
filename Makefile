@@ -41,6 +41,22 @@ prod-up: ## Démarrer les services avec la configuration de production
 prod-ps: ## Afficher l'état des services de production
 	$(DOCKER_COMPOSE_PROD) ps
 
+.PHONY: logs
+logs: ## Afficher les journaux
+	$(DOCKER_COMPOSE) logs -f --tail=100
+
+.PHONY: logs-php
+logs-php: ## Afficher les journaux PHP
+	$(DOCKER_COMPOSE) logs -f --tail=100 php
+
+.PHONY: logs-nginx
+logs-nginx: ## Afficher les journaux Nginx
+	$(DOCKER_COMPOSE) logs -f --tail=100 nginx
+
+.PHONY: logs-database
+logs-database: ## Afficher les journaux PostgreSQL
+	$(DOCKER_COMPOSE) logs -f --tail=100 database
+
 .PHONY: composer-install
 composer-install: ## Installer les dépendances PHP
 	$(PHP_RUN) composer install
@@ -76,3 +92,7 @@ db-shell: ## Ouvrir une console PostgreSQL
 .PHONY: test
 test: ## Exécuter les tests
 	$(PHP) php bin/phpunit
+
+.PHONY: backup-now
+backup-now: ## Créer immédiatement une sauvegarde via le service de production
+	$(DOCKER_COMPOSE_PROD) run --rm -e BACKUP_ONCE=1 backup

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de confidentialité · Bénévoles Jambville{% endblock %}
+{% block body_class %}page-legale{% endblock %}
+
+{% block body %}
+<main class="conteneur-page-legale">
+    <header class="entete-page-legale">
+        <a class="marque-page-legale" href="{{ app.user ? path('app_accueil') : path('app_connexion') }}" aria-label="Retour à Bénévoles Jambville"><span aria-hidden="true">BJ</span><strong>Bénévoles Jambville</strong></a>
+        <p>Vos données</p>
+        <h1>Politique de confidentialité</h1>
+        <p class="mise-a-jour-page-legale">Dernière mise à jour : 9 août 2026</p>
+    </header>
+
+    <article class="contenu-page-legale">
+        <p>Cette page explique quelles données sont utilisées dans Bénévoles Jambville, pourquoi elles le sont et comment demander à les consulter ou les corriger.</p>
+        <div class="encart-page-legale"><strong>Responsable du traitement</strong><p>Bénévoles Jambville est actuellement administré à titre associatif par son exploitant pour les Scouts et Guides de France. Pour toute question relative aux données personnelles, le point de contact est <a href="mailto:contact@neitsab.net">contact@neitsab.net</a>. L’identité et l’adresse complète de la structure responsable seront ajoutées dès leur formalisation.</p></div>
+
+        <h2>1. Personnes concernées</h2>
+        <p>Les traitements concernent les bénévoles, les membres de l’équipe pilote et les salariés d’accueil disposant d’un compte, ainsi que les équipes compagnons inscrites.</p>
+
+        <h2>2. Données utilisées</h2>
+        <ul><li><strong>Compte et identité :</strong> code adhérent, nom, prénom, adresse e-mail, téléphone, rôle et informations techniques nécessaires à la connexion.</li><li><strong>Profil d’accueil :</strong> régime végétarien, allergies aux œufs ou aux arachides, autre régime ou allergie, besoin d’hébergement et remise du foulard ou de la tenue.</li><li><strong>Présences individuelles :</strong> dates, thématique, couchage, enfants, repas et commentaire.</li><li><strong>Équipes compagnons :</strong> nom de l’équipe, effectif, dates, couchage, repas, effectifs alimentaires et commentaire.</li><li><strong>Administration :</strong> auteurs des modifications, opérations d’import et informations de sécurité nécessaires à l’audit.</li></ul>
+
+        <h2>3. Finalités</h2>
+        <p>Les données servent exclusivement à administrer les accès, organiser les présences, préparer l’accueil, l’hébergement et les repas, remettre les équipements et produire les synthèses nécessaires aux équipes de Jambville.</p>
+        <p>Les informations relatives aux allergies et aux besoins particuliers ne sont utilisées que par les personnes qui en ont besoin pour préparer l’accueil.</p>
+
+        <h2>4. Destinataires</h2>
+        <p>L’accès dépend du rôle attribué. Peuvent recevoir tout ou partie des informations l’équipe pilote, les salariés d’accueil et les administrateurs techniques, dans la limite de leurs missions. Les prestataires d’hébergement, de sauvegarde ou d’envoi d’e-mails peuvent traiter les données uniquement pour fournir ces services.</p>
+
+        <h2>5. Durées de conservation</h2>
+        <ul><li><strong>Données détaillées d’une campagne :</strong> les inscriptions, repas, hébergements, commentaires et données nominatives de la période allant du 1er septembre au 31 août sont supprimés le 10 octobre suivant.</li><li><strong>Historique statistique :</strong> seuls sont conservés, sans limite de durée, la date, le nombre de bénévoles par thématique et le nombre total de compagnons. Cet historique ne contient aucun nom, commentaire, donnée sensible, identifiant de compte ou lien vers les données sources.</li><li><strong>Compte désactivé :</strong> les allergies et le champ alimentaire libre sont effacés immédiatement ; le compte et ses données associées sont supprimés après 30 jours, sauf réactivation.</li><li><strong>Jeton de première connexion :</strong> validité maximale de 7 jours et suppression lors de son utilisation ou de son remplacement.</li><li><strong>Sauvegardes PostgreSQL :</strong> rotation automatique après 7 jours.</li><li><strong>Journaux techniques de l’application :</strong> rotation automatique quotidienne avec deux fichiers au maximum, soit environ 48 heures.</li></ul>
+        <p>Les fichiers exportés ou copiés par les utilisateurs sortent du stockage du service : leur destinataire doit les supprimer dès qu’ils ne sont plus nécessaires.</p>
+
+        <h2>6. Sécurité</h2>
+        <p>Le service utilise des comptes nominatifs, des droits d’accès par rôle, des mots de passe protégés, une limitation des tentatives de connexion et des protections contre les requêtes frauduleuses. Les utilisateurs doivent protéger leurs identifiants et les éventuels exports.</p>
+
+        <h2>7. Cookies</h2>
+        <p>Seuls des cookies techniques nécessaires à la connexion, à la session et à la sécurité des formulaires sont utilisés. Ils ne servent ni à la publicité ni au suivi sur d’autres sites. Aucun bandeau de consentement n’est donc affiché.</p>
+
+        <h2>8. Vos droits</h2>
+        <p>Selon la situation et la base juridique applicable, vous pouvez demander l’accès, la rectification, l’effacement ou la limitation de vos données, et vous opposer à certains traitements lorsque ce droit s’applique.</p>
+        <p>Adressez votre demande à <a href="mailto:contact@neitsab.net">contact@neitsab.net</a>. Une vérification d’identité pourra être demandée si nécessaire. Vous pouvez également adresser une réclamation à la <a href="https://www.cnil.fr/" rel="external">CNIL</a>.</p>
+
+        <h2>9. Évolution</h2>
+        <p>Cette politique peut être mise à jour pour refléter une évolution du service ou de son organisation. La version en vigueur est celle publiée sur cette page.</p>
+        <p class="liens-page-legale">Voir également les <a href="{{ path('app_conditions_utilisation') }}">conditions d’utilisation</a>.</p>
+    </article>
+</main>
+{% endblock %}

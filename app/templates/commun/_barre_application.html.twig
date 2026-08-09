@@ -59,6 +59,12 @@
         </div>
     </nav>
 
+    <nav class="liens-legaux-navigation" aria-label="Informations légales">
+        <span>Version {{ version_application }}</span>
+        <a href="{{ path('app_conditions_utilisation') }}">Conditions d’utilisation</a>
+        <a href="{{ path('app_politique_confidentialite') }}">Politique de confidentialité</a>
+    </nav>
+
     <div class="compte-navigation">
         <a class="lien-profil" href="{{ path('app_profil') }}">
             <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nom|first }}</span>

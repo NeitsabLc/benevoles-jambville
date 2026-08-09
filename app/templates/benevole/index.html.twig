@@ -37,7 +37,7 @@
                     <div class="corps-table-benevoles">
                     {% for benevole in benevoles %}
                         <div class="conteneur-ligne-benevole {{ not benevole.actif ? 'inactive' }}" data-glissiere-benevole>
-                            {% if benevole.id != app.user.id %}<form class="action-glissee-benevole {{ not benevole.actif ? 'reactiver' }}" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}"><button type="submit">{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}</button></form>{% endif %}
+                            {% if benevole.id != app.user.id %}<form class="action-glissee-benevole {{ not benevole.actif ? 'reactiver' }}" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}"{% if benevole.actif %} data-confirmation-desactivation data-benevole-nom="{{ benevole.nomComplet }}"{% endif %}><input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}"><button type="submit">{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}</button></form>{% endif %}
                             <a class="ligne-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" aria-label="Voir le profil de {{ benevole.nomComplet }}">
                                 <strong>{{ benevole.nom }}{% if not benevole.actif %}<small>Inactif</small>{% endif %}</strong>
                                 <span>{{ benevole.prenom }}</span>
@@ -47,7 +47,7 @@
                             </a>
                             <div class="actions-ligne-benevole">
                                 <a class="bouton-edition-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" aria-label="Modifier {{ benevole.nomComplet }}" title="Modifier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Zm13.5-16.5 3 3a1.4 1.4 0 0 1 0 2L19 10l-5-5 1.5-1.5a1.4 1.4 0 0 1 2 0Z"/></svg></a>
-                                {% if benevole.id != app.user.id %}<form class="formulaire-activation-benevole" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}" onsubmit="return confirm('{{ benevole.actif ? 'Désactiver' : 'Réactiver' }} le compte de {{ benevole.nomComplet|e('js') }} ?');">
+                                {% if benevole.id != app.user.id %}<form class="formulaire-activation-benevole" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}"{% if benevole.actif %} data-confirmation-desactivation data-benevole-nom="{{ benevole.nomComplet }}"{% endif %}>
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}">
                                 <button class="bouton-activation-benevole {{ not benevole.actif ? 'reactiver' }}" type="submit" aria-label="{{ benevole.actif ? 'Désactiver' : 'Réactiver' }} {{ benevole.nomComplet }}" title="{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}">
                                     {% if benevole.actif %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5"/></svg>{% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9m-5.7-6.3a8 8 0 1 0 11.4 0"/></svg>{% endif %}
@@ -60,6 +60,23 @@
                 </div>
             {% endif %}
         </section>
+
+        <dialog class="dialog-suppression-presence" data-dialog-desactivation aria-labelledby="titre-dialog-desactivation">
+            <section>
+                <div class="icone-suppression-presence" aria-hidden="true">!</div>
+                <h2 id="titre-dialog-desactivation">Désactiver ce compte&nbsp;?</h2>
+                <p>Le compte de <strong data-nom-desactivation></strong> ne pourra plus se connecter.</p>
+                <p class="avertissement-suppression-presence">Ses informations d’allergie et son autre régime ou allergie seront définitivement effacés.</p>
+                <p>Vous pourrez réactiver le compte pendant 30 jours. Passé ce délai, le compte et toutes ses données associées seront définitivement supprimés.</p>
+                <form method="post" data-form-desactivation>
+                    <input type="hidden" name="_csrf_token" data-token-desactivation>
+                    <div class="actions-dialog-suppression">
+                        <button class="annuler-suppression-presence" type="button" data-fermer-desactivation>Annuler</button>
+                        <button class="confirmer-suppression-presence" type="submit">Désactiver le compte</button>
+                    </div>
+                </form>
+            </section>
+        </dialog>
     </main>
 </div>
 {% endblock %}

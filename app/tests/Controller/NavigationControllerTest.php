@@ -39,6 +39,9 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('a[href="/administration/calendrier"]');
         self::assertSelectorExists('a[href="/administration/thematiques"]');
         self::assertSelectorExists('a[href="/administration/benevoles"]');
+        self::assertSelectorExists('.liens-legaux-navigation + .compte-navigation');
+        self::assertSelectorExists('.liens-legaux-navigation a[href="/conditions-utilisation"]');
+        self::assertSelectorExists('.liens-legaux-navigation a[href="/politique-confidentialite"]');
     }
 
     public function testLeSalarieAccueilNaPasLesLiensReservesAuPilote(): void

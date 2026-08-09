@@ -49,4 +49,23 @@ final class UtilisateurRepository extends ServiceEntityRepository implements Use
             ->addOrderBy('u.prenom', 'ASC')
             ->getQuery()->getResult();
     }
+
+    public function purgerDesactivesAvant(\DateTimeImmutable $limite): int
+    {
+        $connexion = $this->getEntityManager()->getConnection();
+
+        return $connexion->transactional(function () use ($connexion, $limite): int {
+            $parametres = ['limite' => $limite->format('Y-m-d H:i:sP')];
+            $condition = 'SELECT id FROM benevole_jambville.utilisateur WHERE NOT actif AND desactive_le <= :limite';
+
+            $connexion->executeStatement("DELETE FROM benevole_jambville.inscription WHERE utilisateur_id IN ($condition) OR cree_par_id IN ($condition) OR modifie_par_id IN ($condition)", $parametres);
+            $connexion->executeStatement("DELETE FROM benevole_jambville.journee WHERE modifie_par_id IN ($condition)", $parametres);
+            $connexion->executeStatement("DELETE FROM benevole_jambville.journal_audit WHERE utilisateur_id IN ($condition) OR objet_id IN ($condition)", $parametres);
+
+            return $connexion->executeStatement(
+                "DELETE FROM benevole_jambville.utilisateur WHERE id IN ($condition)",
+                $parametres,
+            );
+        });
+    }
 }

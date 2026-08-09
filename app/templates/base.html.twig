@@ -10,7 +10,12 @@
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     {% block body %}{% endblock %}
+    <footer class="pied-page-legal">
+        <span>Bénévoles Jambville</span><span aria-hidden="true">—</span>
+        <a href="{{ path('app_conditions_utilisation') }}">Conditions d’utilisation</a><span aria-hidden="true">—</span>
+        <a href="{{ path('app_politique_confidentialite') }}">Politique de confidentialité</a>
+    </footer>
 </body>
 </html>
