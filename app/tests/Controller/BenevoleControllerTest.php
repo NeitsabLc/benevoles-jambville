@@ -101,6 +101,7 @@ final class BenevoleControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Importer des bénévoles');
         self::assertSelectorExists('input[type="file"][accept*=".csv"]');
+        self::assertSelectorExists('form[action="/administration/benevoles/importer#previsualisation-import"][data-turbo="false"]');
 
         $chemin = tempnam(sys_get_temp_dir(), 'benevoles-csv-');
         self::assertNotFalse($chemin);
@@ -110,6 +111,7 @@ final class BenevoleControllerTest extends WebTestCase
         $client->submit($formulaire);
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('#previsualisation-import');
         self::assertSelectorTextContains('.carte-apercu-import', 'NOUVEAU-1');
         self::assertSelectorTextContains('.statut-creation', 'Création');
     }

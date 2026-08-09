@@ -30,7 +30,7 @@
                 <span class="numero-etape">1</span>
                 <div><h2>Sélectionnez votre fichier</h2><p>Le fichier doit être au format CSV, utiliser le point-virgule comme séparateur et ne pas dépasser 2 Mo.</p></div>
             </div>
-            <form class="formulaire-import-benevoles" method="post" enctype="multipart/form-data" action="{{ path('app_admin_benevoles_importer') }}">
+            <form class="formulaire-import-benevoles" method="post" enctype="multipart/form-data" action="{{ path('app_admin_benevoles_importer') }}#previsualisation-import" data-turbo="false">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('import-benevoles') }}">
                 <label class="zone-depot-csv" for="fichier_csv">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
@@ -44,7 +44,7 @@
         </section>
 
         {% if apercu %}
-        <section class="carte-apercu-import">
+        <section class="carte-apercu-import" id="previsualisation-import">
             <div class="instructions-import"><span class="numero-etape">2</span><div><h2>Prévisualisation</h2><p>Vérifiez les changements détectés avant leur application.</p></div></div>
             <div class="resume-import">
                 <span><b>{{ apercu|filter(l => l.statut == 'creation')|length }}</b> créations</span>
