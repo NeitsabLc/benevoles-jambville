@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 
 DOCKER_COMPOSE := docker compose
+DOCKER_COMPOSE_PROD := docker compose -f compose.yaml -f compose.prod.yaml
 PHP := $(DOCKER_COMPOSE) exec php
 PHP_RUN := $(DOCKER_COMPOSE) run --rm php
 LIQUIBASE := $(DOCKER_COMPOSE) --profile outils run --rm liquibase
@@ -27,6 +28,18 @@ down: ## Arrêter l'environnement
 .PHONY: ps
 ps: ## Afficher l'état des conteneurs
 	$(DOCKER_COMPOSE) ps
+
+.PHONY: prod-config
+prod-config: ## Valider et afficher la configuration Compose de production
+	$(DOCKER_COMPOSE_PROD) config
+
+.PHONY: prod-up
+prod-up: ## Démarrer les services avec la configuration de production
+	$(DOCKER_COMPOSE_PROD) up -d
+
+.PHONY: prod-ps
+prod-ps: ## Afficher l'état des services de production
+	$(DOCKER_COMPOSE_PROD) ps
 
 .PHONY: composer-install
 composer-install: ## Installer les dépendances PHP

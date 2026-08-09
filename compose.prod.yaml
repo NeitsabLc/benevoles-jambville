@@ -1,0 +1,13 @@
+services:
+  php:
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+
+  nginx:
+    restart: unless-stopped
+
+  database:
+    restart: unless-stopped
+
