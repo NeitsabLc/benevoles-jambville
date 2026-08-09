@@ -51,6 +51,8 @@ final class PresenceControllerTest extends WebTestCase
         self::assertGreaterThanOrEqual(8, $client->getCrawler()->filter('select[name="thematique"] option')->count());
         self::assertSelectorNotExists('[data-mode-button="compa"]');
         self::assertSelectorNotExists('select[data-controller="searchable-select"]');
+        self::assertSelectorExists('label[for="nombre_enfants"]');
+        self::assertSelectorExists('input#nombre_enfants[name="nombre_enfants"][type="number"][min="0"]:not([disabled])');
     }
 
     public function testLeFiltreCompaEstSelectionneEtExpliqueUnMoisVide(): void

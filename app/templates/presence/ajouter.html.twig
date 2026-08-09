@@ -70,8 +70,11 @@
                     <small class="erreur-champ" data-erreur-periode-exclusive hidden></small>
                 </div>
                 <div class="champ"><label for="type_couchage">Couchage</label><select id="type_couchage" name="type_couchage" required><option value="">Choisir</option><option value="DUR" {{ couchage == 'DUR' ? 'selected' }}>En dur</option><option value="TENTE" {{ couchage == 'TENTE' ? 'selected' }}>Sous tente</option></select></div>
+                <div class="champ" data-mode-detail="benevole" {{ mode != 'benevole' ? 'hidden' }}>
+                    <label for="nombre_enfants">Nombre d’enfants</label>
+                    <input id="nombre_enfants" name="nombre_enfants" type="number" min="0" value="{{ app.request.request.get('nombre_enfants', inscription ? inscription.nombreEnfants : 0) }}" {{ mode != 'benevole' ? 'disabled' }} required>
+                </div>
             </div>
-            <input type="hidden" name="nombre_enfants" value="{{ app.request.request.get('nombre_enfants', inscription ? inscription.nombreEnfants : 0) }}" data-mode-detail="benevole" {{ mode != 'benevole' ? 'disabled' }}>
 
             <section class="selection-repas" data-selection-repas data-selectionnes="{{ repas_selectionnes|json_encode|e('html_attr') }}" data-configures="{{ repas_configures ? 'true' : 'false' }}">
                 <header>

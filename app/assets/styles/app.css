@@ -206,7 +206,7 @@ body {
 .table-repas tbody th { min-width: 8rem; text-align: left; text-transform: capitalize; }
 .table-repas input { width: 1rem; height: 1rem; accent-color: var(--menthe-sgdf); }
 .table-repas .repas-vide { padding: 1rem; color: var(--texte-secondaire); text-align: center; }
-.alimentation-compa { padding: 1rem; border: 1px solid #d8e2e6; border-radius: .65rem; background: #f7fafb; }
+.alimentation-compa { margin: 1rem 0; padding: 1rem; border: 1px solid #d8e2e6; border-radius: .65rem; background: #f7fafb; }
 .alimentation-compa header { margin-bottom: .9rem; }
 .alimentation-compa h2 { margin: 0 0 .2rem; font-size: 1.2rem; }
 .alimentation-compa p { margin: 0; color: var(--texte-secondaire); font-size: .82rem; }
