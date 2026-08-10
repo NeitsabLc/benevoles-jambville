@@ -13,6 +13,45 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PresenceControllerTest extends WebTestCase
 {
+    public function testLesPresencesSontTrieesParPrenomPuisParNomChaqueJour(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $accueil = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Chantier']);
+        self::assertNotNull($benevole);
+        self::assertNotNull($accueil);
+        self::assertNotNull($pilote);
+        self::assertNotNull($thematique);
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        foreach ([$accueil, $pilote, $benevole] as $utilisateur) {
+            $entityManager->persist(Inscription::individuelle(
+                $utilisateur,
+                $thematique,
+                new \DateTimeImmutable('2095-06-15'),
+                new \DateTimeImmutable('2095-06-16'),
+                'DUR',
+                0,
+                null,
+            ));
+        }
+        $entityManager->flush();
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/?mois=2095-06');
+
+        self::assertResponseIsSuccessful();
+        foreach (['2095-06-15', '2095-06-16'] as $date) {
+            $noms = $crawler
+                ->filterXPath(sprintf('//article[contains(concat(" ", normalize-space(@class), " "), " jour-calendrier ")][.//time[@datetime="%s"]]//span[contains(concat(" ", normalize-space(@class), " "), " identite-presence ")]/strong', $date))
+                ->each(static fn ($noeud): string => trim($noeud->text()));
+            self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $noms);
+        }
+    }
+
     public function testLeCalendrierAuthentifieAfficheLesThematiques(): void
     {
         $client = self::createClient();
