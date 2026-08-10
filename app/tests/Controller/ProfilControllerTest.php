@@ -24,6 +24,8 @@ final class ProfilControllerTest extends WebTestCase
         $client->clickLink($utilisateur->getNomComplet());
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Mon profil');
+        self::assertSelectorTextContains('#alimentation-titre', 'Régime et allergies alimentaires');
+        self::assertSelectorTextContains('label[for="regime_autre"]', 'Autre régime ou allergie alimentaire');
         self::assertSelectorNotExists('input[value="DEV-BENEVOLE"]');
         self::assertSelectorExists('input[name="telephone"]');
         self::assertSelectorExists('input[name="telephone"][data-telephone-francais]');

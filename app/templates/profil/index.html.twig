@@ -39,13 +39,13 @@
             </section>
 
             <section class="carte-profil" aria-labelledby="alimentation-titre">
-                <header><h2 id="alimentation-titre">Régime alimentaire et allergies</h2><p>Ces informations sensibles servent uniquement à préparer votre accueil et vos repas.</p></header>
+                <header><h2 id="alimentation-titre">Régime et allergies alimentaires</h2><p>Ces informations sensibles servent uniquement à préparer votre accueil et vos repas.</p></header>
                 <div class="choix-profil">
                     <label><input type="checkbox" name="vegetarien" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('vegetarien') : utilisateurProfil.vegetarien) ? 'checked' }}> Régime végétarien</label>
                     <label><input type="checkbox" name="allergie_oeuf" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_oeuf') : utilisateurProfil.allergieOeuf) ? 'checked' }}> Allergie aux œufs</label>
                     <label><input type="checkbox" name="allergie_arachide" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_arachide') : utilisateurProfil.allergieArachide) ? 'checked' }}> Allergie aux arachides</label>
                 </div>
-                <div class="champ"><label for="regime_autre">Autre régime ou allergie</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', utilisateurProfil.regimeAutre) }}</textarea></div>
+                <div class="champ"><label for="regime_autre">Autre régime ou allergie alimentaire</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', utilisateurProfil.regimeAutre) }}</textarea></div>
             </section>
 
             <section class="carte-profil" aria-labelledby="couchage-titre">
