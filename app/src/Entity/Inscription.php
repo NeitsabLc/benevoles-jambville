@@ -63,12 +63,12 @@ final class Inscription
     private bool $actif = true;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'cree_par_id', nullable: false)]
-    private Utilisateur $creePar;
+    #[ORM\JoinColumn(name: 'cree_par_id', nullable: true, onDelete: 'SET NULL')]
+    private ?Utilisateur $creePar;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'modifie_par_id', nullable: false)]
-    private Utilisateur $modifiePar;
+    #[ORM\JoinColumn(name: 'modifie_par_id', nullable: true, onDelete: 'SET NULL')]
+    private ?Utilisateur $modifiePar;
 
     /** @var Collection<int, RepasInscription> */
     #[ORM\OneToMany(mappedBy: 'inscription', targetEntity: RepasInscription::class, cascade: ['persist'], orphanRemoval: true)]

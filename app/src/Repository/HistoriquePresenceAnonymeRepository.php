@@ -39,16 +39,19 @@ final class HistoriquePresenceAnonymeRepository
                     INTERVAL '1 day'
                 ) AS jours(date_journee)
                 WHERE inscription.actif
-                  AND inscription.date_debut BETWEEN CAST(:debut AS date) AND CAST(:fin AS date)
+                  AND inscription.date_debut <= CAST(:fin AS date)
+                  AND inscription.date_fin >= CAST(:debut AS date)
                 GROUP BY jours.date_journee, CASE WHEN inscription.type = 'INDIVIDUELLE' THEN thematique.nom END
-                ON CONFLICT (date_journee, thematique) DO UPDATE SET
-                    nombre_benevoles = historique_presence_anonyme.nombre_benevoles + EXCLUDED.nombre_benevoles,
-                    nombre_compagnons = historique_presence_anonyme.nombre_compagnons + EXCLUDED.nombre_compagnons
+                -- L'archive d'une campagne est immuable. Après la première
+                -- exécution, les inscriptions entièrement contenues ont été
+                -- supprimées et ne permettraient plus un recalcul complet.
+                ON CONFLICT (date_journee, thematique) DO NOTHING
                 SQL, $parametres);
 
             return $this->connexion->executeStatement(<<<'SQL'
                 DELETE FROM benevole_jambville.inscription
-                WHERE date_debut BETWEEN CAST(:debut AS date) AND CAST(:fin AS date)
+                WHERE date_debut >= CAST(:debut AS date)
+                  AND date_fin <= CAST(:fin AS date)
                 SQL, $parametres);
         });
     }

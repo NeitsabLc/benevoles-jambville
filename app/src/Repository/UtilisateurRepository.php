@@ -58,9 +58,12 @@ final class UtilisateurRepository extends ServiceEntityRepository implements Use
             $parametres = ['limite' => $limite->format('Y-m-d H:i:sP')];
             $condition = 'SELECT id FROM benevole_jambville.utilisateur WHERE NOT actif AND desactive_le <= :limite';
 
-            $connexion->executeStatement("DELETE FROM benevole_jambville.inscription WHERE utilisateur_id IN ($condition) OR cree_par_id IN ($condition) OR modifie_par_id IN ($condition)", $parametres);
-            $connexion->executeStatement("DELETE FROM benevole_jambville.journee WHERE modifie_par_id IN ($condition)", $parametres);
-            $connexion->executeStatement("DELETE FROM benevole_jambville.journal_audit WHERE utilisateur_id IN ($condition) OR objet_id IN ($condition)", $parametres);
+            // Une inscription personnelle disparaît avec son propriétaire. Les
+            // objets métier seulement créés ou modifiés par ce compte restent
+            // conservés ; leurs références d’audit sont anonymisées par les FK
+            // ON DELETE SET NULL lors de la suppression de l’utilisateur.
+            $connexion->executeStatement("DELETE FROM benevole_jambville.inscription WHERE utilisateur_id IN ($condition)", $parametres);
+            $connexion->executeStatement("UPDATE benevole_jambville.journal_audit SET objet_id = NULL WHERE type_objet = 'UTILISATEUR' AND objet_id IN ($condition)", $parametres);
 
             return $connexion->executeStatement(
                 "DELETE FROM benevole_jambville.utilisateur WHERE id IN ($condition)",

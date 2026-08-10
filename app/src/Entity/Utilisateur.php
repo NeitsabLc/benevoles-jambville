@@ -62,6 +62,15 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column(length: 30)]
     private string $role = 'BENEVOLE';
 
+    #[ORM\Column(name: 'source_role', length: 20)]
+    private string $sourceRole = 'MANUEL';
+
+    #[ORM\Column(name: 'role_calcule_le', type: 'datetimetz_immutable', nullable: true)]
+    private ?\DateTimeImmutable $roleCalculeLe = null;
+
+    #[ORM\Column(name: 'version_regle_role', length: 30, nullable: true)]
+    private ?string $versionRegleRole = null;
+
     #[ORM\Column(name: 'mot_de_passe', length: 255, nullable: true)]
     private ?string $motDePasse = null;
 
@@ -211,6 +220,14 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         }
 
         $this->role = $role;
+        $this->sourceRole = 'MANUEL';
+        $this->roleCalculeLe = null;
+        $this->versionRegleRole = null;
+    }
+
+    public function getSourceRole(): string
+    {
+        return $this->sourceRole;
     }
 
     public function isEquipePilote(): bool

@@ -114,6 +114,7 @@ final class SecuriteControllerTest extends WebTestCase
             self::assertSame('Lit proche des sanitaires', $utilisateur->getBesoinCouchage());
             self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($utilisateur, 'Une phrase secrète suffisamment longue'));
         } finally {
+            $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
             $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
             if ($utilisateur !== null && $ancienMotDePasse !== null) {

@@ -39,13 +39,14 @@ final class ProfilControllerTest extends WebTestCase
             self::assertResponseRedirects(sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
-            $benevoleModifie = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            $benevoleModifie = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
             self::assertNotNull($benevoleModifie);
             self::assertSame('SALARIE_ACCUEIL', $benevoleModifie->getRoleMetier());
+            self::assertSame('MANUEL', $benevoleModifie->getSourceRole());
         } finally {
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
-            $benevoleARestaurer = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            $benevoleARestaurer = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
             if ($benevoleARestaurer !== null) {
                 $benevoleARestaurer->modifierRole($roleInitial);
                 $entityManager->flush();

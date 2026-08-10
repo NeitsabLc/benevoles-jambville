@@ -1,4 +1,7 @@
 /.idea/
+/DEPLOIEMENT.md
+/DEPLOIEMENT_PRODUCTION.md
+/LIVRAISON_PRODUCTION.md
 /.env
 /.env.*
 !/.env.example

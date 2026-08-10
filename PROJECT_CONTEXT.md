@@ -10,6 +10,40 @@ Ce document constitue la référence fonctionnelle et technique du projet. Toute
 évolution doit respecter les règles décrites ici ou mettre ce document à jour
 dans le même changement.
 
+## État actuel du projet
+
+État de référence au 10 août 2026 :
+
+- l’application est utilisée en production ;
+- les profils, rôles, inscriptions individuelles et compagnons, repas,
+  couchages, présences, permanences, thématiques, synthèses et imports CSV sont
+  opérationnels ;
+- la première connexion et la collecte séparée des informations pratiques sont
+  en place ;
+- l’API adhérents et l’authentification SSO restent des évolutions futures ;
+- le schéma PostgreSQL est géré par Liquibase jusqu’à `V006` ; `V001`, appliquée
+  avant la première mise en production, est désormais immuable ;
+- les connexions PostgreSQL de l’application, des sauvegardes et des migrations
+  utilisent des responsabilités distinctes ; la préparation et le durcissement
+  des rôles sont volontairement séparés de la migration du schéma ;
+- les tests fonctionnels utilisent une base `_test` reconstruite séparément de
+  la base locale de développement ; au dernier état de référence, la suite
+  comporte 54 tests et 452 assertions réussies ;
+- la purge d’un compte supprime ses inscriptions personnelles mais conserve les
+  données métier qu’il a seulement créées ou modifiées, en anonymisant les
+  références d’auteur ;
+- une inscription qui traverse la frontière d’une campagne reste conservée ;
+  seules les journées comprises dans la campagne sont archivées sous forme
+  anonyme et l’archive est rejouable sans double comptage ;
+- les en-têtes HTTP de sécurité, les permissions des secrets locaux et les
+  restrictions de privilèges PostgreSQL ont été renforcés ;
+- l’automatisation CI et l’analyse statique approfondie restent à planifier.
+
+Le `README.md` est réservé au développement local. Les informations
+opérationnelles de livraison et d’infrastructure de production ne doivent pas
+être ajoutées au dépôt ; elles sont maintenues dans un document externe à accès
+restreint.
+
 ## 2. Profils et autorisations
 
 Un utilisateur possède exactement un des trois rôles suivants :
@@ -217,8 +251,9 @@ La synchronisation quotidienne :
 Une défaillance de l’API ou un volume anormalement faible ne doit jamais
 désactiver massivement les utilisateurs. Une personne absente est marquée comme
 telle puis désactivée après deux synchronisations complètes consécutives où elle
-est absente. Elle n’est jamais supprimée physiquement et est automatiquement
-réactivée si elle réapparaît.
+est absente. Elle est automatiquement réactivée si elle réapparaît avant
+l’échéance de conservation ; au-delà, la politique générale de purge et
+d’anonymisation s’applique.
 
 ### 5.3 Calcul des rôles
 
@@ -345,12 +380,17 @@ dupliqués dans le mapping Doctrine.
 
 ### 8.4 Conservation des données
 
-Un utilisateur est d’abord désactivé, puis supprimé physiquement avec ses
-données associées après 30 jours sans réactivation. Les données détaillées
-d’une campagne de septembre à août sont agrégées puis supprimées le 10 octobre
-suivant. L’historique ne conserve que la date, le nombre de bénévoles par
-thématique et le nombre de compagnons, sans identifiant personnel ni lien vers
-les données sources.
+Un utilisateur est d’abord désactivé, puis supprimé physiquement après 30 jours
+sans réactivation. Ses inscriptions individuelles sont supprimées. Les données
+métier qu’il a seulement créées ou modifiées sont conservées et leurs références
+d’auteur sont mises à `NULL`.
+
+Les données détaillées d’une campagne de septembre à août sont agrégées puis
+supprimées le 10 octobre suivant. Une inscription qui traverse une frontière de
+campagne reste entière afin de ne perdre aucune donnée ; seules ses journées
+comprises dans la campagne sont archivées. L’historique est immuable et ne
+conserve que la date, le nombre de bénévoles par thématique et le nombre de
+compagnons, sans identifiant personnel ni lien vers les données sources.
 
 Les suppressions en cascade ne sont admises que pour des données strictement
 dépendantes sans valeur autonome, par exemple les repas d’une inscription.

@@ -81,6 +81,18 @@ db-sql: ## Afficher le SQL Liquibase sans l'appliquer
 db-update: ## Appliquer les changements de base de données
 	$(LIQUIBASE) update
 
+.PHONY: db-prepare-roles
+db-prepare-roles: ## Créer les rôles limités absents, sans modifier les rôles existants
+	$(DOCKER_COMPOSE) exec -T database /docker-entrypoint-initdb.d/10-init-roles.sh
+
+.PHONY: db-verify-role-switch
+db-verify-role-switch: ## Vérifier que PHP utilise bien le rôle applicatif limité
+	$(PHP) php -r '$$pdo = new PDO(sprintf("pgsql:host=%s;dbname=%s", getenv("DATABASE_HOST"), getenv("DATABASE_NAME")), getenv("DATABASE_USER"), getenv("DATABASE_PASSWORD")); $$role = $$pdo->query("SELECT current_user")->fetchColumn(); if ($$role !== "benevole_jambville_app") { fwrite(STDERR, "Rôle PostgreSQL inattendu: ".$$role.PHP_EOL); exit(1); } echo $$role.PHP_EOL;'
+
+.PHONY: db-finalize-role-hardening
+db-finalize-role-hardening: ## Retirer explicitement les attributs élevés après la bascule vérifiée
+	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/finalize-role-hardening
+
 .PHONY: db-dev-update
 db-dev-update: ## Appliquer les changements et les données de démonstration
 	$(LIQUIBASE) update --context-filter=dev
@@ -89,8 +101,13 @@ db-dev-update: ## Appliquer les changements et les données de démonstration
 db-shell: ## Ouvrir une console PostgreSQL
 	$(DOCKER_COMPOSE) exec database psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
 
+.PHONY: test-db-reset
+test-db-reset: ## Reconstruire la base de test isolée
+	$(DOCKER_COMPOSE) exec -T database sh -c 'dropdb --if-exists --force --username="$$POSTGRES_USER" "$${POSTGRES_DB}_test" && createdb --username="$$POSTGRES_USER" --owner="$$POSTGRES_USER" "$${POSTGRES_DB}_test"'
+	$(DOCKER_COMPOSE) --profile outils run --rm -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/benevole_jambville_test" liquibase update --context-filter=dev
+
 .PHONY: test
-test: ## Exécuter les tests
+test: test-db-reset ## Reconstruire la base de test puis exécuter les tests
 	$(PHP) php bin/phpunit
 
 .PHONY: backup-now

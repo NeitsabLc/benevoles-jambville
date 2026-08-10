@@ -25,8 +25,8 @@ final class Journee
     private ?string $commentaire = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: 'modifie_par_id', nullable: false)]
-    private Utilisateur $modifiePar;
+    #[ORM\JoinColumn(name: 'modifie_par_id', nullable: true, onDelete: 'SET NULL')]
+    private ?Utilisateur $modifiePar;
 
     public function __construct(\DateTimeImmutable $dateJournee, Utilisateur $modifiePar)
     {
