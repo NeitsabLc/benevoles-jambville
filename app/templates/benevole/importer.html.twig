@@ -34,9 +34,9 @@
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('import-benevoles') }}">
                 <label class="zone-depot-csv" for="fichier_csv">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
-                    <strong>Choisir un fichier CSV</strong>
+                    <strong data-nom-fichier-selectionne>Choisir un fichier CSV</strong>
                     <span>ou déposez-le dans cette zone</span>
-                    <input id="fichier_csv" name="fichier_csv" type="file" accept=".csv,text/csv" required onchange="this.closest('label').querySelector('strong').textContent = this.files[0]?.name || 'Choisir un fichier CSV'">
+                    <input id="fichier_csv" name="fichier_csv" type="file" accept=".csv,text/csv" required data-affichage-nom-fichier>
                 </label>
                 <div class="format-import-csv"><strong>Colonnes attendues</strong><code>code_adherent;nom;prenom;email;telephone;code_fonction;code_structure</code></div>
                 <div class="actions-formulaire actions-import-benevoles"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles') }}">Annuler</a><button class="bouton-principal" type="submit">Prévisualiser l’import</button></div>

@@ -21,7 +21,7 @@
             <div class="filtre-et-legende-calendrier">
                 <form method="get" action="{{ path('app_accueil') }}">
                     <input type="hidden" name="mois" value="{{ mois|date('Y-m') }}">
-                    <select name="filtre" aria-label="Filtrer les présences" onchange="this.form.requestSubmit()">
+                    <select name="filtre" aria-label="Filtrer les présences" data-soumission-automatique>
                         <option value="">Toutes les présences</option>
                         <option value="compa" {{ filtre == 'compa' ? 'selected' }}>Compas</option>
                         {% for thematique in thematiques %}

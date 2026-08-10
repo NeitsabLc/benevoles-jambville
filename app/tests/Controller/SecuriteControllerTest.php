@@ -75,6 +75,8 @@ final class SecuriteControllerTest extends WebTestCase
             $crawler = $client->request('GET', '/premiere-connexion/'.$token);
 
             self::assertResponseIsSuccessful();
+            self::assertResponseHeaderSame('Referrer-Policy', 'no-referrer');
+            self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
             self::assertSelectorNotExists('input[name="vegetarien"]');
             self::assertSelectorNotExists('textarea[name="besoin_couchage"]');
 

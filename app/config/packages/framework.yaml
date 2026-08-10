@@ -10,7 +10,17 @@ framework:
         utf8: true
     csrf_protection: true
     http_method_override: false
-    session: true
+    session:
+        cookie_secure: auto
+        cookie_httponly: true
+        cookie_samesite: lax
+
+when@prod:
+    framework:
+        session:
+            cookie_secure: true
+            cookie_httponly: true
+            cookie_samesite: lax
 
 when@test:
     framework:

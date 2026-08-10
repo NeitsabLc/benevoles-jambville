@@ -15,7 +15,7 @@ dans le même changement.
 État de référence au 10 août 2026 :
 
 - l’application est utilisée en production ;
-- la version stable de référence est `1.0.0` ;
+- la version stable de référence est `1.0.1` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -29,7 +29,7 @@ dans le même changement.
   des rôles sont volontairement séparés de la migration du schéma ;
 - les tests fonctionnels utilisent une base `_test` reconstruite séparément de
   la base locale de développement ; au dernier état de référence, la suite
-  comporte 54 tests et 452 assertions réussies ;
+  comporte 54 tests et 454 assertions réussies ;
 - la purge d’un compte supprime ses inscriptions personnelles mais conserve les
   données métier qu’il a seulement créées ou modifiées, en anonymisant les
   références d’auteur ;

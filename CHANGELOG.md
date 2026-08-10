@@ -11,6 +11,22 @@ et le projet suit une numérotation de version sémantique.
 
 Aucun changement pour le moment.
 
+## 1.0.1 — 2026-08-10
+
+### Sécurité
+
+- désactivation explicite de l'affichage des erreurs PHP en production et
+  journalisation des erreurs vers la sortie standard du conteneur ;
+- masquage des jetons de première connexion et de leurs référents dans les
+  journaux d'accès Nginx, avec interdiction de mise en cache et de transmission
+  du référent sur ce parcours ;
+- remplacement de `script-src 'unsafe-inline'` par un nonce CSP généré pour
+  chaque requête et retrait des gestionnaires JavaScript intégrés au HTML ;
+- obligation de définir séparément les mots de passe PostgreSQL de
+  l'application et des sauvegardes, sans repli sur le compte administrateur ;
+- déclaration explicite des attributs `Secure`, `HttpOnly` et `SameSite=Lax`
+  pour le cookie de session en production.
+
 ## 1.0.0 — 2026-08-10
 
 ### Ajouté

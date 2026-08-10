@@ -347,6 +347,26 @@ const initialiserConfirmationCalendrier = () => {
     });
 };
 
+const initialiserSoumissionAutomatique = () => {
+    document.querySelectorAll('[data-soumission-automatique]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        champ.addEventListener('change', () => champ.form?.requestSubmit());
+    });
+};
+
+const initialiserAffichageNomFichier = () => {
+    document.querySelectorAll('[data-affichage-nom-fichier]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        const libelle = champ.closest('label')?.querySelector('[data-nom-fichier-selectionne]');
+        if (!libelle) return;
+        champ.addEventListener('change', () => {
+            libelle.textContent = champ.files?.[0]?.name || 'Choisir un fichier CSV';
+        });
+    });
+};
+
 document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
 document.addEventListener('turbo:load', initialiserFormulairePresence);
 document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
@@ -367,3 +387,7 @@ document.addEventListener('DOMContentLoaded', initialiserConfirmationCalendrier)
 document.addEventListener('turbo:load', initialiserConfirmationCalendrier);
 document.addEventListener('DOMContentLoaded', initialiserGlissieresBenevoles);
 document.addEventListener('turbo:load', initialiserGlissieresBenevoles);
+document.addEventListener('DOMContentLoaded', initialiserSoumissionAutomatique);
+document.addEventListener('turbo:load', initialiserSoumissionAutomatique);
+document.addEventListener('DOMContentLoaded', initialiserAffichageNomFichier);
+document.addEventListener('turbo:load', initialiserAffichageNomFichier);

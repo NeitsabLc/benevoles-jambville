@@ -7,7 +7,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
     {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% set nonce_csp = app.request.server.get('CSP_NONCE')|default('nonce-hors-proxy', true) %}
+        {% block importmap %}{{ importmap('app', {nonce: nonce_csp}) }}{% endblock %}
     {% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">

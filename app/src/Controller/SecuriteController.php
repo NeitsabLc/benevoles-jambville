@@ -68,11 +68,16 @@ final class SecuriteController extends AbstractController
             }
         }
 
-        return $this->render('securite/premiere_connexion.html.twig', [
+        $response = $this->render('securite/premiere_connexion.html.twig', [
             'utilisateur' => $utilisateur,
             'token' => $token,
             'erreurs' => $erreurs,
         ]);
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+        $response->headers->set('Referrer-Policy', 'no-referrer');
+
+        return $response;
     }
 
     #[Route('/deconnexion', name: 'app_deconnexion', methods: ['POST'])]

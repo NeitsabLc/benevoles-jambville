@@ -20,7 +20,7 @@ services:
       DATABASE_HOST: database
       DATABASE_NAME: "${POSTGRES_DB}"
       DATABASE_USER: benevole_jambville_app
-      DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:-${POSTGRES_PASSWORD}}"
+      DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
     volumes:
       - ./app:/var/www/app
     depends_on:
@@ -41,7 +41,7 @@ services:
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "benevole_jambville_backup"
-      PGPASSWORD: "${POSTGRES_BACKUP_PASSWORD:-${POSTGRES_PASSWORD}}"
+      PGPASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
     volumes:
       - ./docker/postgres/backup.sh:/usr/local/bin/benevole-jambville-backup:ro
       - "${BACKUP_DIR:-./var/backups}:/backups"
