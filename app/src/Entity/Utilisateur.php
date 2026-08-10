@@ -56,6 +56,9 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column(name: 'telephone_modifie_localement')]
     private bool $telephoneModifieLocalement = false;
 
+    #[ORM\Column(name: 'informations_accueil_completees')]
+    private bool $informationsAccueilCompletees = true;
+
     #[ORM\Column(length: 30)]
     private string $role = 'BENEVOLE';
 
@@ -204,6 +207,22 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     public function isEquipePilote(): bool
     {
         return $this->role === 'EQUIPE_PILOTE';
+    }
+
+    public function doitCompleterInformationsAccueil(): bool
+    {
+        return in_array($this->role, ['BENEVOLE', 'EQUIPE_PILOTE'], true)
+            && !$this->informationsAccueilCompletees;
+    }
+
+    public function terminerInformationsAccueil(): void
+    {
+        $this->informationsAccueilCompletees = true;
+    }
+
+    public function demanderInformationsAccueil(): void
+    {
+        $this->informationsAccueilCompletees = false;
     }
 
     public function isActif(): bool

@@ -77,6 +77,7 @@ final class BenevoleController extends AbstractController
                         'role' => 'BENEVOLE',
                         'source_role' => 'MANUEL',
                         'changement_mot_de_passe_requis' => true,
+                        'informations_accueil_completees' => 0,
                         'jeton_activation' => hash('sha256', $token),
                         'expiration_jeton_activation' => (new \DateTimeImmutable('+7 days'))->format('Y-m-d H:i:sO'),
                     ]);
@@ -213,7 +214,8 @@ final class BenevoleController extends AbstractController
                         $token = bin2hex(random_bytes(32));
                         $parametres['jeton'] = hash('sha256', $token);
                         $parametres['expiration'] = (new \DateTimeImmutable('+7 days'))->format('Y-m-d H:i:sO');
-                        $connexion->executeStatement('INSERT INTO benevole_jambville.utilisateur (code_adherent, nom, prenom, email, telephone, code_fonction, code_structure, role, source_role, role_calcule_le, version_regle_role, changement_mot_de_passe_requis, jeton_activation, expiration_jeton_activation) VALUES (:code, :nom, :prenom, :email, :telephone, :fonction, :structure, :role, \'CSV\', CURRENT_TIMESTAMP, :version, TRUE, :jeton, :expiration)', $parametres);
+                        $parametres['informations_accueil_completees'] = $role === 'SALARIE_ACCUEIL' ? 1 : 0;
+                        $connexion->executeStatement('INSERT INTO benevole_jambville.utilisateur (code_adherent, nom, prenom, email, telephone, code_fonction, code_structure, role, source_role, role_calcule_le, version_regle_role, changement_mot_de_passe_requis, informations_accueil_completees, jeton_activation, expiration_jeton_activation) VALUES (:code, :nom, :prenom, :email, :telephone, :fonction, :structure, :role, \'CSV\', CURRENT_TIMESTAMP, :version, TRUE, :informations_accueil_completees, :jeton, :expiration)', $parametres);
                         $liensActivation[] = ['nom' => $ligne['prenom'].' '.$ligne['nom'], 'email' => $ligne['email'], 'url' => $this->generateUrl('app_premiere_connexion', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL)];
                         ++$creations;
                     }

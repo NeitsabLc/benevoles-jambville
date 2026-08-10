@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Préparer mon accueil · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<main class="page-authentification">
+    <section class="panneau-authentification" aria-labelledby="titre-informations-accueil">
+        {% include 'securite/_identite.html.twig' %}
+
+        <div class="entete-formulaire">
+            <p class="surtitre">Bienvenue à Jambville</p>
+            <h1 id="titre-informations-accueil">Préparons votre accueil</h1>
+            <p>Indiquez-nous les informations utiles pour anticiper vos repas et votre couchage.</p>
+        </div>
+
+        {% if erreurs %}<div class="alerte alerte-erreur" role="alert">{% for erreur in erreurs %}<div>{{ erreur }}</div>{% endfor %}</div>{% endif %}
+
+        <form method="post" class="formulaire-authentification">
+            <div class="champ"><label>Régime et allergies alimentaires</label></div>
+            <div class="choix-profil">
+                <label><input type="checkbox" name="vegetarien" value="1" {{ app.request.request.getBoolean('vegetarien') ? 'checked' }}> Régime végétarien</label>
+                <label><input type="checkbox" name="allergie_oeuf" value="1" {{ app.request.request.getBoolean('allergie_oeuf') ? 'checked' }}> Allergie aux œufs</label>
+                <label><input type="checkbox" name="allergie_arachide" value="1" {{ app.request.request.getBoolean('allergie_arachide') ? 'checked' }}> Allergie aux arachides</label>
+            </div>
+            <div class="champ">
+                <label for="regime-autre">Autre régime ou allergie alimentaire</label>
+                <textarea id="regime-autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre') }}</textarea>
+            </div>
+            <div class="champ">
+                <label for="besoin-couchage">Information particulière de couchage</label>
+                <textarea id="besoin-couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage') }}</textarea>
+            </div>
+            <p class="note-authentification">Ces informations pourront être modifiées à tout moment depuis votre profil.</p>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('informations-accueil') }}">
+            <button class="bouton-principal" type="submit">Enregistrer et continuer</button>
+        </form>
+    </section>
+    <aside class="illustration-authentification" aria-hidden="true">
+        <div class="message-accueil"><p class="surtitre surtitre-clair">Votre séjour</p><p>Quelques informations pour mieux vous accueillir.</p></div>
+    </aside>
+</main>
+{% endblock %}
