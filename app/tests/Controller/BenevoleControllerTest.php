@@ -31,6 +31,7 @@ final class BenevoleControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Bénévoles');
         self::assertSelectorExists('a[href="/administration/benevoles/importer"]');
         self::assertSelectorExists('a[href="/administration/benevoles/ajouter"]');
+        self::assertSelectorTextContains(sprintf('a[href="/administration/benevoles/%s/profil"] .email-benevole', $benevole->getId()), $benevole->getEmail());
         self::assertSelectorTextContains('.corps-table-benevoles', 'Bénévole');
 
         $client->click($crawler->filter(sprintf('a[href="/administration/benevoles/%s/profil"]', $benevole->getId()))->link());

@@ -32,7 +32,7 @@
             {% else %}
                 <div class="table-benevoles">
                     <div class="entete-table-benevoles" aria-hidden="true">
-                        <span>Nom</span><span>Prénom</span><span>Téléphone</span><span>Foulard</span><span>Tenue</span>
+                        <span>Nom</span><span>Prénom</span><span>Téléphone</span><span>Adresse mail</span><span>Foulard</span><span>Tenue</span>
                     </div>
                     <div class="corps-table-benevoles">
                     {% for benevole in benevoles %}
@@ -42,6 +42,7 @@
                                 <strong>{{ benevole.nom }}{% if not benevole.actif %}<small>Inactif</small>{% endif %}</strong>
                                 <span>{{ benevole.prenom }}</span>
                                 <span class="telephone-benevole">{{ benevole.telephone ?: '—' }}</span>
+                                <span class="email-benevole">{{ benevole.email }}</span>
                                 <span class="equipement-benevole"><i class="pastille-equipement {{ benevole.foulardRemis ? 'remis' }}"></i>{{ benevole.foulardRemis ? 'Remis' : 'Non remis' }}</span>
                                 <span class="equipement-benevole"><i class="pastille-equipement {{ benevole.tenueRemise ? 'remis' }}"></i>{{ benevole.tenueRemise ? 'Remise' : 'Non remise' }}</span>
                             </a>
