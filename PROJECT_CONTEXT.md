@@ -15,6 +15,7 @@ dans le même changement.
 État de référence au 10 août 2026 :
 
 - l’application est utilisée en production ;
+- la version stable de référence est `1.0.0` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -497,7 +498,21 @@ Pour une évolution d’interface :
 4. vérifier la navigation clavier et les libellés accessibles ;
 5. vérifier les autorisations côté serveur.
 
-## 13. Principes de maintenance
+## 13. Gestion des branches et des versions
+
+- `main` représente exclusivement l’état stable livrable en production.
+- `dev` est la branche d’intégration et la branche par défaut du dépôt pour les
+  travaux de développement.
+- Une branche de fonctionnalité ou de correction est créée depuis `dev` et
+  fusionnée dans `dev` après validation.
+- Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour
+  `APP_VERSION` et `CHANGELOG.md`, puis en créant un tag annoté `vX.Y.Z`.
+- Un correctif urgent est créé depuis `main`, livré sur `main`, puis reporté
+  dans `dev` afin d’éviter toute divergence.
+- Les procédures de livraison et les paramètres de production restent dans le
+  dossier opérationnel externe au dépôt.
+
+## 14. Principes de maintenance
 
 - Lorsqu’une conversation aboutit à une validation puis à une demande de
   commit, relire systématiquement ce document avant de créer le commit et le

@@ -9,6 +9,10 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+Aucun changement pour le moment.
+
+## 1.0.0 — 2026-08-10
+
 ### Ajouté
 
 - séparation des rôles PostgreSQL utilisés par l’application, les sauvegardes
