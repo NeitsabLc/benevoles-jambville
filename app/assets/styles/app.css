@@ -148,6 +148,7 @@ body {
 .entete-calendrier { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; }
 .entete-calendrier h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
 .outils-calendrier { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1rem; }
+.filtre-et-legende-calendrier { display: flex; align-items: flex-start; flex-direction: column; gap: .55rem; }
 .outils-calendrier select { min-height: 2.75rem; min-width: 13rem; padding: .55rem 2.4rem .55rem .8rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: var(--bleu-sgdf); background: #fff; font: inherit; font-weight: 700; }
 .navigation-mois { display: flex; align-items: center; gap: .7rem; }
 .navigation-mois strong { min-width: 10rem; text-align: center; }
@@ -187,7 +188,7 @@ body {
 .annuler-suppression-presence { border: 1px solid #c7d2d8; color: var(--bleu-sgdf); background: #fff; }
 .confirmer-suppression-presence { border: 0; color: #fff; background: #b42318; }
 .confirmer-suppression-presence:hover { background: #912018; }
-.legende-calendrier { display: flex; flex-wrap: wrap; gap: .7rem 1.15rem; margin-top: .9rem; color: var(--texte-secondaire); font-size: .76rem; }
+.legende-calendrier { display: flex; flex-wrap: wrap; gap: .7rem 1.15rem; color: var(--texte-secondaire); font-size: .76rem; }
 .legende-calendrier span { display: inline-flex; align-items: center; gap: .35rem; }
 .legende-calendrier i { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; }
 
@@ -619,6 +620,7 @@ body {
     .repas-synthese { border-right: 0; border-bottom: 1px solid #e0e7ea; }
     .details-synthese { grid-template-columns: 1fr 1fr; }
     .entete-calendrier, .outils-calendrier { align-items: stretch; flex-direction: column; }
+    .filtre-et-legende-calendrier { align-items: stretch; gap: .55rem; }
     .outils-calendrier form, .outils-calendrier select { width: 100%; }
     .navigation-mois { justify-content: space-between; }
     .jours-semaine { display: none; }
