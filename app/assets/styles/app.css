@@ -382,6 +382,13 @@ body {
 .grille-ajout-benevole input:focus { outline: 2px solid rgb(29 157 130 / 25%); border-color: var(--menthe-sgdf); }
 .grille-ajout-benevole .champ-large { grid-column: 1 / -1; }
 .grille-ajout-benevole small { color: var(--texte-secondaire); font-weight: 500; }
+.choix-role-benevole { display: grid; gap: .7rem; margin: 0; padding: 0; border: 0; }
+.choix-role-benevole legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.choix-role-benevole label { display: flex; align-items: flex-start; gap: .8rem; padding: .9rem 1rem; border: 1px solid #c7d2d8; border-radius: .45rem; cursor: pointer; }
+.choix-role-benevole label:has(input:checked) { border-color: var(--menthe-sgdf); background: #eef8f5; }
+.choix-role-benevole input { flex: 0 0 auto; margin-top: .2rem; accent-color: var(--menthe-sgdf); }
+.choix-role-benevole span { display: grid; gap: .15rem; }
+.choix-role-benevole small { color: var(--texte-secondaire); }
 
 /* Import CSV des bénévoles */
 .page-import-benevoles { width: min(100%, 76rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
@@ -493,6 +500,8 @@ body {
 .entete-synthese > div > p:last-child { margin: 0; color: var(--texte-secondaire); }
 .filtre-synthese { display: flex; align-items: end; gap: .8rem; margin-bottom: 1.25rem; }
 .filtre-synthese .champ { min-width: 11rem; }
+.filtre-synthese input[type="date"] { display: block; min-width: 0; line-height: normal; }
+.filtre-synthese input[type="date"]::-webkit-date-and-time-value { min-height: 1.5rem; margin: 0; line-height: 1.5rem; text-align: left; }
 .filtre-synthese .bouton-principal { min-height: 3.2rem; }
 .liste-synthese { display: grid; gap: 1rem; }
 .jour-synthese { display: grid; grid-template-columns: 10.5rem 18rem minmax(0, 1fr); overflow: hidden; border: 1px solid #d8e2e6; border-radius: .75rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 5%); }

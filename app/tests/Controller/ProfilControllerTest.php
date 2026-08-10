@@ -11,6 +11,48 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class ProfilControllerTest extends WebTestCase
 {
+    public function testEquipePiloteVoitEtPeutModifierLeRoleDUnBenevole(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        $roleInitial = $benevole->getRoleMetier();
+        $client->loginUser($pilote);
+
+        try {
+            $crawler = $client->request('GET', sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextContains('#role-titre', 'Rôle');
+            self::assertSelectorExists('select[name="role"] option[value="BENEVOLE"]:contains("Bénévole")');
+            self::assertSelectorExists('select[name="role"] option[value="EQUIPE_PILOTE"]:contains("Équipe pilote")');
+            self::assertSelectorExists('select[name="role"] option[value="SALARIE_ACCUEIL"]:contains("Salarié")');
+            self::assertSelectorExists(sprintf('select[name="role"] option[value="%s"][selected]', $roleInitial));
+
+            $client->submit($crawler->selectButton('Enregistrer le profil')->form([
+                'role' => 'SALARIE_ACCUEIL',
+            ]));
+
+            self::assertResponseRedirects(sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
+            $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+            $entityManager->clear();
+            $benevoleModifie = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            self::assertNotNull($benevoleModifie);
+            self::assertSame('SALARIE_ACCUEIL', $benevoleModifie->getRoleMetier());
+        } finally {
+            $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+            $entityManager->clear();
+            $benevoleARestaurer = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            if ($benevoleARestaurer !== null) {
+                $benevoleARestaurer->modifierRole($roleInitial);
+                $entityManager->flush();
+            }
+        }
+    }
+
     public function testLeNomDansLaBarreDonneAccesAuProfilComplet(): void
     {
         $client = self::createClient();
@@ -38,6 +80,7 @@ final class ProfilControllerTest extends WebTestCase
         self::assertSelectorNotExists('#equipement-titre');
         self::assertSelectorNotExists('input[name="foulard_remis"]');
         self::assertSelectorNotExists('input[name="tenue_remise"]');
+        self::assertSelectorNotExists('select[name="role"]');
         self::assertSelectorExists('input[name="mot_de_passe_actuel"]');
         self::assertSelectorExists('input[name="nouveau_mot_de_passe"][minlength="12"]');
         self::assertSelectorExists('input[name="confirmation_mot_de_passe"]');

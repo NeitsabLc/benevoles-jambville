@@ -28,6 +28,16 @@
                     <label class="champ champ-large"><span>Téléphone <small>(facultatif)</small></span><input name="telephone" type="tel" maxlength="30" value="{{ valeurs.telephone }}" autocomplete="tel"></label>
                 </div>
             </section>
+            <section class="carte-ajout-benevole">
+                <h2>Rôle</h2>
+                <p class="explication-ajout-benevole">Le rôle détermine les espaces et les fonctionnalités accessibles à cette personne.</p>
+                <fieldset class="choix-role-benevole">
+                    <legend>Rôle du compte</legend>
+                    <label><input type="radio" name="role" value="BENEVOLE" {{ valeurs.role == 'BENEVOLE' ? 'checked' }} required><span><strong>Bénévole</strong><small>Gère son profil et ses propres présences.</small></span></label>
+                    <label><input type="radio" name="role" value="SALARIE_ACCUEIL" {{ valeurs.role == 'SALARIE_ACCUEIL' ? 'checked' }}><span><strong>Salarié</strong><small>Accède aux outils d’accueil et au calendrier.</small></span></label>
+                    <label><input type="radio" name="role" value="EQUIPE_PILOTE" {{ valeurs.role == 'EQUIPE_PILOTE' ? 'checked' }}><span><strong>Équipe pilote</strong><small>Dispose des droits d’administration.</small></span></label>
+                </fieldset>
+            </section>
             <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles') }}">Annuler</a><button class="bouton-principal" type="submit">Créer et envoyer l’invitation</button></div>
         </form>
     </main>

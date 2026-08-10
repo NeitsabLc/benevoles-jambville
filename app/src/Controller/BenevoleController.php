@@ -48,6 +48,7 @@ final class BenevoleController extends AbstractController
             'prenom' => trim($request->request->getString('prenom')),
             'email' => mb_strtolower(trim($request->request->getString('email'))),
             'telephone' => trim($request->request->getString('telephone')),
+            'role' => $request->request->getString('role', 'BENEVOLE'),
         ];
         $erreurs = [];
 
@@ -64,6 +65,9 @@ final class BenevoleController extends AbstractController
             if ($valeurs['email'] !== '' && !filter_var($valeurs['email'], FILTER_VALIDATE_EMAIL)) {
                 $erreurs[] = 'L’adresse email n’est pas valide.';
             }
+            if (!in_array($valeurs['role'], ['BENEVOLE', 'SALARIE_ACCUEIL', 'EQUIPE_PILOTE'], true)) {
+                $erreurs[] = 'Choisissez un rôle valide.';
+            }
 
             if ($erreurs === []) {
                 $token = bin2hex(random_bytes(32));
@@ -74,10 +78,10 @@ final class BenevoleController extends AbstractController
                         'prenom' => $valeurs['prenom'],
                         'email' => $valeurs['email'],
                         'telephone' => $valeurs['telephone'] !== '' ? $valeurs['telephone'] : null,
-                        'role' => 'BENEVOLE',
+                        'role' => $valeurs['role'],
                         'source_role' => 'MANUEL',
                         'changement_mot_de_passe_requis' => true,
-                        'informations_accueil_completees' => 0,
+                        'informations_accueil_completees' => $valeurs['role'] === 'SALARIE_ACCUEIL' ? 1 : 0,
                         'jeton_activation' => hash('sha256', $token),
                         'expiration_jeton_activation' => (new \DateTimeImmutable('+7 days'))->format('Y-m-d H:i:sO'),
                     ]);
@@ -106,7 +110,11 @@ final class BenevoleController extends AbstractController
             }
         }
 
-        return $this->render('benevole/ajouter.html.twig', ['valeurs' => $valeurs, 'erreurs' => $erreurs]);
+        return $this->render(
+            'benevole/ajouter.html.twig',
+            ['valeurs' => $valeurs, 'erreurs' => $erreurs],
+            $request->isMethod('POST') ? new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY) : null,
+        );
     }
 
     #[Route('/{id}/activation', name: 'app_admin_benevole_activation', methods: ['POST'])]

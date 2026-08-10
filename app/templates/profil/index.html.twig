@@ -8,7 +8,7 @@
 
     <main class="page-profil">
         {% if profilAdmin %}
-            <a class="retour-calendrier" href="{{ path('app_admin_benevoles') }}">← Retour aux bénévoles</a>
+            <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
         {% elseif app.user.roleMetier == 'BENEVOLE' %}
             <a class="retour-calendrier" href="{{ path('app_accueil') }}">← Retour au calendrier</a>
         {% endif %}
@@ -37,6 +37,21 @@
                     </div>
                 </div>
             </section>
+
+            {% if profilAdmin %}
+            <section class="carte-profil" aria-labelledby="role-titre">
+                <header><h2 id="role-titre">Rôle</h2><p>Le rôle détermine les espaces et les fonctionnalités accessibles à cette personne.</p></header>
+                <div class="champ">
+                    <label for="role">Rôle de la personne</label>
+                    {% set roleSelectionne = app.request.isMethod('POST') ? app.request.request.get('role') : utilisateurProfil.roleMetier %}
+                    <select id="role" name="role" required>
+                        <option value="BENEVOLE" {{ roleSelectionne == 'BENEVOLE' ? 'selected' }}>Bénévole</option>
+                        <option value="EQUIPE_PILOTE" {{ roleSelectionne == 'EQUIPE_PILOTE' ? 'selected' }}>Équipe pilote</option>
+                        <option value="SALARIE_ACCUEIL" {{ roleSelectionne == 'SALARIE_ACCUEIL' ? 'selected' }}>Salarié</option>
+                    </select>
+                </div>
+            </section>
+            {% endif %}
 
             <section class="carte-profil" aria-labelledby="alimentation-titre">
                 <header><h2 id="alimentation-titre">Régime et allergies alimentaires</h2><p>Ces informations sensibles servent uniquement à préparer votre accueil et vos repas.</p></header>

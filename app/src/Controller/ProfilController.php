@@ -102,10 +102,14 @@ final class ProfilController extends AbstractController
             }
 
             $telephone = trim($request->request->getString('telephone')) ?: null;
+            $role = $request->request->getString('role');
             if ($telephone !== null && mb_strlen($telephone) > 30) {
                 $erreurs[] = 'Le numéro de téléphone ne peut pas dépasser 30 caractères.';
             } elseif ($telephone !== null && !$this->telephoneEstValide($telephone)) {
                 $erreurs[] = 'Le numéro de téléphone doit être un numéro français valide, par exemple 06 12 34 56 78.';
+            }
+            if (!in_array($role, ['BENEVOLE', 'EQUIPE_PILOTE', 'SALARIE_ACCUEIL'], true)) {
+                $erreurs[] = 'Choisissez un rôle valide.';
             }
 
             if ($erreurs === []) {
@@ -121,6 +125,7 @@ final class ProfilController extends AbstractController
                     $request->request->getBoolean('foulard_remis'),
                     $request->request->getBoolean('tenue_remise'),
                 );
+                $utilisateur->modifierRole($role);
                 $entityManager->flush();
                 $this->addFlash('succes', 'Le profil a bien été mis à jour.');
 

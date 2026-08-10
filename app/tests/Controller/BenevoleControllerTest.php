@@ -8,6 +8,7 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 final class BenevoleControllerTest extends WebTestCase
 {
@@ -38,6 +39,7 @@ final class BenevoleControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Camille Bénévole');
+        self::assertSelectorTextContains('a.retour-calendrier[href="/"]', 'Retour au calendrier');
         self::assertSelectorNotExists('#mot-de-passe-titre');
         self::assertSelectorExists('button:contains("Enregistrer le profil")');
     }
@@ -52,6 +54,7 @@ final class BenevoleControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/administration/benevoles/ajouter');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Créer un compte');
+        self::assertSelectorExists('input[name="role"][value="BENEVOLE"]:checked');
 
         $client->submit($crawler->selectButton('Créer et envoyer l’invitation')->form([
             'code_adherent' => 'TEST-CREATION-UNIQUE',
@@ -59,6 +62,7 @@ final class BenevoleControllerTest extends WebTestCase
             'prenom' => 'Alice',
             'email' => 'ALICE.UNIQUE@example.test',
             'telephone' => '06 10 20 30 40',
+            'role' => 'SALARIE_ACCUEIL',
         ]));
         $client->followRedirect();
 
@@ -66,6 +70,7 @@ final class BenevoleControllerTest extends WebTestCase
         $cree = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'TEST-CREATION-UNIQUE']);
         self::assertNotNull($cree);
         self::assertSame('alice.unique@example.test', $cree->getEmail());
+        self::assertSame('SALARIE_ACCUEIL', $cree->getRoleMetier());
         self::assertTrue($cree->isChangementMotDePasseRequis());
 
         self::getContainer()->get(Connection::class)->executeStatement('DELETE FROM benevole_jambville.utilisateur WHERE code_adherent = :code', ['code' => 'TEST-CREATION-UNIQUE']);
@@ -86,7 +91,7 @@ final class BenevoleControllerTest extends WebTestCase
             'email' => 'PILOTE@JAMBVILLE.TEST',
         ]));
 
-        self::assertResponseIsSuccessful();
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertSelectorTextContains('.alerte-erreur', 'utilise déjà ce code adhérent ou cette adresse email');
         self::assertNull(self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'TEST-DOUBLON-EMAIL']));
     }

@@ -204,6 +204,15 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         return $this->role;
     }
 
+    public function modifierRole(string $role): void
+    {
+        if (!in_array($role, ['BENEVOLE', 'EQUIPE_PILOTE', 'SALARIE_ACCUEIL'], true)) {
+            throw new \InvalidArgumentException('Rôle utilisateur invalide.');
+        }
+
+        $this->role = $role;
+    }
+
     public function isEquipePilote(): bool
     {
         return $this->role === 'EQUIPE_PILOTE';
