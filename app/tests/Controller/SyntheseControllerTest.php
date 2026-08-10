@@ -92,6 +92,14 @@ final class SyntheseControllerTest extends WebTestCase
         }
         $entityManager->flush();
 
+        $benevole->modifierProfil(
+            $benevole->getTelephone(),
+            $benevole->isVegetarien(),
+            $benevole->hasAllergieOeuf(),
+            $benevole->hasAllergieArachide(),
+            $benevole->getRegimeAutre(),
+            'Lit en rez-de-chaussée',
+        );
         $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2095-06-12'), new \DateTimeImmutable('2095-06-12'), 'DUR', 2, null);
         $inscription->definirRepasSelectionnes(['2095-06-12|DEJEUNER']);
         $entityManager->persist($inscription);
@@ -104,11 +112,22 @@ final class SyntheseControllerTest extends WebTestCase
         self::assertSelectorTextContains('.jour-synthese', 'Camille B. + 2 enfants');
         self::assertSelectorTextSame('.repas-synthese div:nth-child(2) strong', '3');
         self::assertSelectorTextSame('.details-synthese > div:nth-child(2) h2 b', '3');
+        self::assertSelectorExists('.details-synthese > div:nth-child(2) .info-couchage[data-info="Lit en rez-de-chaussée"]');
+        self::assertSelectorExists('.info-couchage[aria-label="Besoin de couchage : Lit en rez-de-chaussée"]');
+        self::assertSelectorNotExists('.details-synthese > div:first-child .info-couchage');
         self::assertSelectorTextContains('.regimes-synthese h2', 'Régimes');
         self::assertSelectorTextNotContains('.regimes-synthese', 'totaux anonymes');
         self::assertSelectorNotExists('.regimes-synthese .pastille-presence');
 
         $entityManager->remove($inscription);
+        $benevole->modifierProfil(
+            $benevole->getTelephone(),
+            $benevole->isVegetarien(),
+            $benevole->hasAllergieOeuf(),
+            $benevole->hasAllergieArachide(),
+            $benevole->getRegimeAutre(),
+            null,
+        );
         $entityManager->flush();
     }
 

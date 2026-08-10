@@ -32,7 +32,7 @@
                     <section class="details-synthese">
                         <div><h2>Présences</h2>{% for presence in jour.presences %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucune présence</p>{% endfor %}</div>
                         {% for type, couchage in jour.couchages %}
-                            <div><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2>{% for presence in couchage.presences %}<span class="pastille-presence pastille-couchage">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucun couchage</p>{% endfor %}</div>
+                            <div><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2>{% for presence in couchage.presences %}<span class="pastille-presence pastille-couchage">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}{% if presence.besoin_couchage %}<span class="info-couchage" tabindex="0" role="img" aria-label="Besoin de couchage : {{ presence.besoin_couchage }}" data-info="{{ presence.besoin_couchage }}"></span>{% endif %}</span>{% else %}<p class="donnee-vide">Aucun couchage</p>{% endfor %}</div>
                         {% endfor %}
                         <div class="regimes-synthese">
                             <h2>Régimes</h2>

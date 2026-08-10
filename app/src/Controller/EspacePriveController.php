@@ -58,7 +58,15 @@ final class EspacePriveController extends AbstractController
 
             for ($date = $premierJour; $date <= $dernierJour; $date = $date->modify('+1 day')) {
                 $cle = $date->format('Y-m-d');
-                $presence = ['libelle' => $libelle, 'effectif' => $effectif, 'est_equipe' => $inscription->getType() === 'COMPAGNON'];
+                $besoinCouchage = $inscription->getType() === 'INDIVIDUELLE'
+                    ? trim((string) $inscription->getUtilisateur()?->getBesoinCouchage())
+                    : '';
+                $presence = [
+                    'libelle' => $libelle,
+                    'effectif' => $effectif,
+                    'est_equipe' => $inscription->getType() === 'COMPAGNON',
+                    'besoin_couchage' => $besoinCouchage !== '' ? $besoinCouchage : null,
+                ];
                 $jours[$cle]['presences'][] = $presence;
                 $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['total'] += $effectif;
                 $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['presences'][] = $presence;

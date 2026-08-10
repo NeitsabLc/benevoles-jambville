@@ -509,6 +509,13 @@ body {
 .details-synthese h2 b { margin-left: .25rem; padding: .08rem .4rem; border-radius: 2rem; color: #087b67; background: #e5f6f0; font-size: .72rem; }
 .pastille-presence { display: block; overflow: hidden; margin: .22rem 0; color: #284f68; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
 .pastille-presence::before { color: var(--menthe-sgdf); content: "• "; }
+.pastille-couchage:has(.info-couchage) { overflow: visible; }
+.info-couchage { position: relative; display: inline-grid; width: 1.05rem; height: 1.05rem; margin-left: .35rem; border-radius: 50%; color: #fff; background: #087eb4; box-shadow: 0 1px 3px rgb(0 58 93 / 22%); font-family: Arial, sans-serif; font-size: .68rem; font-weight: 700; font-style: normal; line-height: 1; cursor: help; place-items: center; vertical-align: .04rem; transition: background-color .15s, box-shadow .15s, transform .15s; }
+.info-couchage::before { color: #fff; content: "i"; transform: translateY(-.01rem); }
+.info-couchage::after { position: absolute; z-index: 5; bottom: calc(100% + .45rem); left: 50%; width: max-content; max-width: min(18rem, 70vw); padding: .45rem .6rem; border-radius: .35rem; color: #fff; background: #173f57; box-shadow: 0 4px 12px rgb(0 34 54 / 18%); content: attr(data-info); font-size: .7rem; font-weight: 500; line-height: 1.35; opacity: 0; pointer-events: none; text-align: left; white-space: normal; transform: translate(-50%, .2rem); transition: opacity .15s, transform .15s; }
+.info-couchage:hover { background: var(--bleu-sgdf); box-shadow: 0 2px 5px rgb(0 58 93 / 30%); transform: translateY(-1px); }
+.info-couchage:hover::after, .info-couchage:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.info-couchage:focus-visible { outline: 2px solid var(--bleu-sgdf); outline-offset: 2px; }
 .donnee-vide { margin: 0; color: #8a9ba4; font-size: .74rem; font-style: italic; }
 .regimes-synthese h2 small { display: block; margin-top: .15rem; color: var(--texte-secondaire); font-size: .62rem; font-weight: 500; }
 .regimes-synthese dl { margin: 0; }
