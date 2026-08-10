@@ -54,8 +54,11 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->andWhere('i.dateDebut <= :fin AND i.dateFin >= :debut')
             ->setParameter('debut', $debut)
             ->setParameter('fin', $fin)
-            ->orderBy('i.dateDebut', 'ASC')
+            ->orderBy('u.prenom', 'ASC')
             ->addOrderBy('u.nom', 'ASC')
+            ->addOrderBy('i.nomEquipeCompa', 'ASC')
+            ->addOrderBy('i.dateDebut', 'ASC')
+            ->addOrderBy('i.id', 'ASC')
             ->getQuery()
             ->getResult();
     }
