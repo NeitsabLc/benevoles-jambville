@@ -11,6 +11,36 @@ et le projet suit une numérotation de version sémantique.
 
 Aucun changement pour le moment.
 
+## 1.1.0 — 2026-08-11
+
+### Ajouté
+
+- comparaison détaillée des valeurs actuelles et importées, dont le rôle cible,
+  avant application d'un import CSV ;
+- service centralisé de calcul du rôle à partir des codes fonction et structure ;
+- PHPStan au niveau 6 et analyse de l'image PHP par Trivy dans la CI ;
+- suivi technique des campagnes déjà purgées afin de ne rejouer la purge qu'en
+  cas de rattrapage nécessaire ;
+- tests des sessions désactivées, changements de rôle importés, thématiques
+  expirées, purges annuelles, périodes exclusives et saisies de calendrier.
+
+### Modifié
+
+- la maintenance vérifie quotidiennement les échéances et rattrape une purge
+  annuelle manquée, sans réexécuter une campagne déjà traitée ;
+- les thématiques événementielles expirées sont désormais désactivées par le
+  cycle normal de maintenance ;
+- les mots de passe des rôles PostgreSQL limités peuvent être resynchronisés
+  explicitement après une modification des fichiers d'environnement ;
+- l'image PHP applique les mises à jour de sécurité Debian disponibles pendant
+  sa construction.
+
+### Sécurité
+
+- révocation des sessions déjà ouvertes lors de la désactivation d'un compte ;
+- audit des dépendances Composer et blocage de la CI sur les vulnérabilités
+  corrigibles de sévérité haute ou critique dans l'image PHP.
+
 ## 1.0.1 — 2026-08-10
 
 ### Sécurité

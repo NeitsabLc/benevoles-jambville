@@ -1,5 +1,5 @@
 parameters:
-    app.version: '%env(APP_VERSION)%'
+    app.version: !php/const App\VersionApplication::VERSION
 
 services:
     _defaults:
@@ -8,4 +8,3 @@ services:
 
     App\:
         resource: '../src/'
-

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
+use App\Service\AttributionRoleService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Connection;
@@ -142,7 +143,11 @@ final class BenevoleController extends AbstractController
     }
 
     #[Route('/importer', name: 'app_admin_benevoles_importer', methods: ['GET', 'POST'])]
-    public function importer(Request $request, UtilisateurRepository $utilisateurs): Response
+    public function importer(
+        Request $request,
+        UtilisateurRepository $utilisateurs,
+        AttributionRoleService $attributionRole,
+    ): Response
     {
         $erreurs = [];
         $apercu = [];
@@ -156,7 +161,7 @@ final class BenevoleController extends AbstractController
             } elseif ($fichier->getSize() > 2_000_000) {
                 $erreurs[] = 'Le fichier ne doit pas dépasser 2 Mo.';
             } else {
-                [$apercu, $erreurs] = $this->analyserCsv($fichier, $utilisateurs);
+                [$apercu, $erreurs] = $this->analyserCsv($fichier, $utilisateurs, $attributionRole);
                 if ($erreurs === [] && !array_filter($apercu, static fn (array $ligne): bool => $ligne['statut'] === 'erreur')) {
                     $request->getSession()->set('import_benevoles_apercu', $apercu);
                 } else {
@@ -177,6 +182,7 @@ final class BenevoleController extends AbstractController
     public function appliquerImport(
         Request $request,
         Connection $connexion,
+        AttributionRoleService $attributionRole,
         MailerInterface $mailer,
         #[Autowire('%env(MAILER_FROM)%')] string $adresseExpediteur,
         #[Autowire('%kernel.project_dir%')] string $repertoireProjet,
@@ -195,17 +201,14 @@ final class BenevoleController extends AbstractController
         $creations = 0;
         $misesAJour = 0;
         try {
-            $connexion->transactional(function (Connection $connexion) use ($apercu, &$liensActivation, &$creations, &$misesAJour): void {
+            $connexion->transactional(function (Connection $connexion) use ($apercu, $attributionRole, &$liensActivation, &$creations, &$misesAJour): void {
                 foreach ($apercu as $ligne) {
                     if (!is_array($ligne) || ($ligne['statut'] ?? 'erreur') === 'erreur') {
                         throw new \RuntimeException('Une ligne invalide empêche l’import.');
                     }
-                    $regle = $connexion->fetchAssociative(
-                        'SELECT role_attribue, version FROM benevole_jambville.regle_attribution_role WHERE actif = TRUE AND code_fonction = :fonction AND code_structure = :structure',
-                        ['fonction' => $ligne['code_fonction'], 'structure' => $ligne['code_structure']],
-                    );
-                    $role = $regle !== false ? $regle['role_attribue'] : 'BENEVOLE';
-                    $version = $regle !== false ? $regle['version'] : null;
+                    $attribution = $attributionRole->determiner($ligne['code_fonction'], $ligne['code_structure']);
+                    $role = $attribution['role'];
+                    $version = $attribution['version'];
 
                     $existe = (bool) $connexion->fetchOne('SELECT EXISTS(SELECT 1 FROM benevole_jambville.utilisateur WHERE code_adherent = :code)', ['code' => $ligne['code_adherent']]);
                     $parametres = [
@@ -275,7 +278,11 @@ final class BenevoleController extends AbstractController
     }
 
     /** @return array{list<array<string, mixed>>, list<string>} */
-    private function analyserCsv(UploadedFile $fichier, UtilisateurRepository $utilisateurs): array
+    private function analyserCsv(
+        UploadedFile $fichier,
+        UtilisateurRepository $utilisateurs,
+        AttributionRoleService $attributionRole,
+    ): array
     {
         $colonnes = ['code_adherent', 'nom', 'prenom', 'email', 'telephone', 'code_fonction', 'code_structure'];
         $contenu = file_get_contents($fichier->getPathname());
@@ -315,9 +322,6 @@ final class BenevoleController extends AbstractController
                 continue;
             }
             $donnees = array_combine($colonnes, array_map('trim', $valeurs));
-            if ($donnees === false) {
-                continue;
-            }
             $erreur = null;
             if ($donnees['code_adherent'] === '' || $donnees['nom'] === '' || $donnees['prenom'] === '' || $donnees['email'] === '') {
                 $erreur = 'Champs obligatoires manquants';
@@ -339,16 +343,42 @@ final class BenevoleController extends AbstractController
             if ($erreur === null && $proprietaireEmail !== null && $proprietaireEmail->getCodeAdherent() !== $donnees['code_adherent']) {
                 $erreur = sprintf('Adresse email déjà utilisée par le code adhérent %s', $proprietaireEmail->getCodeAdherent());
             }
+            $attribution = $attributionRole->determiner($donnees['code_fonction'], $donnees['code_structure']);
+            $modifications = [];
             $statut = 'creation';
             if ($erreur !== null) {
                 $statut = 'erreur';
             } elseif ($existant !== null) {
-                $statut = $existant->getNom() === $donnees['nom']
-                    && $existant->getPrenom() === $donnees['prenom']
-                    && mb_strtolower($existant->getEmail()) === mb_strtolower($donnees['email'])
-                    && (string) $existant->getTelephone() === $donnees['telephone'] ? 'inchange' : 'mise_a_jour';
+                $telephoneCible = $existant->isTelephoneModifieLocalement()
+                    ? (string) $existant->getTelephone()
+                    : $donnees['telephone'];
+                $comparaisons = [
+                    'Nom' => [$existant->getNom(), $donnees['nom']],
+                    'Prénom' => [$existant->getPrenom(), $donnees['prenom']],
+                    'Email' => [mb_strtolower($existant->getEmail()), mb_strtolower($donnees['email'])],
+                    'Téléphone' => [(string) $existant->getTelephone(), $telephoneCible],
+                    'Code fonction' => [(string) $existant->getCodeFonction(), $donnees['code_fonction']],
+                    'Code structure' => [(string) $existant->getCodeStructure(), $donnees['code_structure']],
+                    'Rôle' => [$existant->getRoleMetier(), $attribution['role']],
+                ];
+                foreach ($comparaisons as $champ => [$avant, $apres]) {
+                    if ($avant !== $apres) {
+                        $modifications[] = ['champ' => $champ, 'avant' => $avant, 'apres' => $apres];
+                    }
+                }
+                if (!$existant->isActif()) {
+                    $modifications[] = ['champ' => 'Compte', 'avant' => 'Inactif', 'apres' => 'Actif'];
+                }
+                $statut = $modifications === [] ? 'inchange' : 'mise_a_jour';
             }
-            $apercu[] = $donnees + ['ligne' => $ligne, 'statut' => $statut, 'erreur' => $erreur];
+            $apercu[] = $donnees + [
+                'ligne' => $ligne,
+                'statut' => $statut,
+                'erreur' => $erreur,
+                'role_cible' => $attribution['role'],
+                'regle_role_reconnue' => $attribution['regle_reconnue'],
+                'modifications' => $modifications,
+            ];
             if (count($apercu) > 5000) {
                 $erreurs[] = 'Le fichier ne peut pas contenir plus de 5 000 bénévoles.';
                 break;

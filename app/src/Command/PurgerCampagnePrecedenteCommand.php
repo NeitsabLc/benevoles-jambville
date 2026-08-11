@@ -23,10 +23,18 @@ final class PurgerCampagnePrecedenteCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $annee = (int) (new \DateTimeImmutable())->format('Y');
-        $debut = new \DateTimeImmutable(sprintf('%d-09-01', $annee - 1));
-        $fin = new \DateTimeImmutable(sprintf('%d-08-31', $annee));
+        [$debut, $fin] = self::calculerCampagneEligible(new \DateTimeImmutable('today'));
         $nombre = $this->historique->archiverEtPurgerCampagne($debut, $fin);
+
+        if (null === $nombre) {
+            $output->writeln(sprintf(
+                'La campagne du %s au %s a déjà été purgée : aucune action nécessaire.',
+                $debut->format('d/m/Y'),
+                $fin->format('d/m/Y'),
+            ));
+
+            return Command::SUCCESS;
+        }
 
         $output->writeln(sprintf(
             '%d inscription%s supprimée%s après conservation des statistiques anonymes du %s au %s.',
@@ -38,5 +46,18 @@ final class PurgerCampagnePrecedenteCommand extends Command
         ));
 
         return Command::SUCCESS;
+    }
+
+    /** @return array{\DateTimeImmutable, \DateTimeImmutable} */
+    public static function calculerCampagneEligible(\DateTimeImmutable $dateReference): array
+    {
+        $annee = (int) $dateReference->format('Y');
+        $datePurgeAnnuelle = new \DateTimeImmutable(sprintf('%d-10-10', $annee));
+        $anneeFinCampagne = $dateReference >= $datePurgeAnnuelle ? $annee : $annee - 1;
+
+        return [
+            new \DateTimeImmutable(sprintf('%d-09-01', $anneeFinCampagne - 1)),
+            new \DateTimeImmutable(sprintf('%d-08-31', $anneeFinCampagne)),
+        ];
     }
 }

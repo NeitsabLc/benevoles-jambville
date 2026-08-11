@@ -6,12 +6,13 @@ namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\Table(name: 'utilisateur', schema: 'benevole_jambville')]
-final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
+final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'guid')]
@@ -65,6 +66,12 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column(name: 'source_role', length: 20)]
     private string $sourceRole = 'MANUEL';
 
+    #[ORM\Column(name: 'code_fonction', length: 50, nullable: true)]
+    private ?string $codeFonction = null;
+
+    #[ORM\Column(name: 'code_structure', length: 50, nullable: true)]
+    private ?string $codeStructure = null;
+
     #[ORM\Column(name: 'role_calcule_le', type: 'datetimetz_immutable', nullable: true)]
     private ?\DateTimeImmutable $roleCalculeLe = null;
 
@@ -116,6 +123,17 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
 
     public function eraseCredentials(): void
     {
+    }
+
+    public function isEqualTo(UserInterface $user): bool
+    {
+        return $user instanceof self
+            && $this->id === $user->id
+            && $this->email === $user->email
+            && $this->motDePasse === $user->motDePasse
+            && $this->role === $user->role
+            && $this->actif === $user->actif
+            && $this->changementMotDePasseRequis === $user->changementMotDePasseRequis;
     }
 
     public function getNomComplet(): string
@@ -228,6 +246,21 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     public function getSourceRole(): string
     {
         return $this->sourceRole;
+    }
+
+    public function getCodeFonction(): ?string
+    {
+        return $this->codeFonction;
+    }
+
+    public function getCodeStructure(): ?string
+    {
+        return $this->codeStructure;
+    }
+
+    public function isTelephoneModifieLocalement(): bool
+    {
+        return $this->telephoneModifieLocalement;
     }
 
     public function isEquipePilote(): bool

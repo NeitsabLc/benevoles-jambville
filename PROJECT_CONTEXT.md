@@ -12,24 +12,24 @@ dans le même changement.
 
 ## État actuel du projet
 
-État de référence au 10 août 2026 :
+État de référence au 11 août 2026 :
 
 - l’application est utilisée en production ;
-- la version stable de référence est `1.0.1` ;
+- la version stable de référence est `1.1.0` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
 - la première connexion et la collecte séparée des informations pratiques sont
   en place ;
 - l’API adhérents et l’authentification SSO restent des évolutions futures ;
-- le schéma PostgreSQL est géré par Liquibase jusqu’à `V006` ; `V001`, appliquée
+- le schéma PostgreSQL est géré par Liquibase jusqu’à `V007` ; `V001`, appliquée
   avant la première mise en production, est désormais immuable ;
 - les connexions PostgreSQL de l’application, des sauvegardes et des migrations
   utilisent des responsabilités distinctes ; la préparation et le durcissement
   des rôles sont volontairement séparés de la migration du schéma ;
 - les tests fonctionnels utilisent une base `_test` reconstruite séparément de
   la base locale de développement ; au dernier état de référence, la suite
-  comporte 54 tests et 454 assertions réussies ;
+  comporte 63 tests et 497 assertions réussies ;
 - la purge d’un compte supprime ses inscriptions personnelles mais conserve les
   données métier qu’il a seulement créées ou modifiées, en anonymisant les
   références d’auteur ;
@@ -38,7 +38,11 @@ dans le même changement.
   anonyme et l’archive est rejouable sans double comptage ;
 - les en-têtes HTTP de sécurité, les permissions des secrets locaux et les
   restrictions de privilèges PostgreSQL ont été renforcés ;
-- l’automatisation CI et l’analyse statique approfondie restent à planifier.
+- la désactivation d'un compte révoque sa session à la prochaine requête ;
+- la CI GitHub Actions valide les configurations Docker Compose, Composer, les
+  changelogs Liquibase, les mappings Doctrine, la compilation des assets et la
+  suite PHPUnit sur `dev` et `main` ; elle exécute également PHPStan au niveau
+  6, `composer audit` et un scan Trivy de l'image PHP.
 
 Le `README.md` est réservé au développement local. Les informations
 opérationnelles de livraison et d’infrastructure de production ne doivent pas
@@ -213,7 +217,9 @@ code_adherent;nom;prenom;email;telephone;code_fonction;code_structure
 ```
 
 L’import doit proposer une prévisualisation avant application : créations,
-mises à jour, lignes inchangées, erreurs, doublons et changements de rôle.
+mises à jour, lignes inchangées, erreurs, doublons et changements de rôle. Pour
+chaque compte mis à jour, les valeurs actuelles et cibles sont affichées champ
+par champ. Une règle de rôle inconnue est signalée avant confirmation.
 
 Le rapprochement se fait exclusivement par code adhérent. Un email ne doit
 jamais servir à choisir un compte existant.
@@ -247,7 +253,11 @@ La synchronisation quotidienne :
 3. met à jour les données de référence ;
 4. recalcule les rôles ;
 5. traite les absences de la source ;
-6. produit un rapport détaillé et un journal d’audit.
+6. produit un rapport détaillé.
+
+L'API et le SSO restent en attente. Le besoin d'un journal d'audit métier
+persistant sera réévalué avec leur périmètre réel ; il n'est pas justifié dans
+les parcours locaux actuels.
 
 Une défaillance de l’API ou un volume anormalement faible ne doit jamais
 désactiver massivement les utilisateurs. Une personne absente est marquée comme
@@ -265,10 +275,11 @@ des règles de la table `regle_attribution_role`.
 - une combinaison inconnue reçoit par défaut le rôle `BENEVOLE` ;
 - des codes absents ou invalides sont signalés dans le rapport ;
 - les changements vers ou depuis `EQUIPE_PILOTE` sont explicitement mis en
-  évidence et audités.
+  évidence avant application.
 
-Le calcul doit enregistrer la règle utilisée et sa version afin de permettre
-d’expliquer tout changement de droit.
+Le calcul est centralisé dans un service partagé. Il fournit la règle utilisée
+et sa version au rapport afin d'expliquer le rôle cible ; une conservation
+historique durable reste liée à la future décision sur l'audit métier.
 
 ## 6. Future authentification SSO
 
@@ -337,7 +348,7 @@ externe. Ils sont traduits avant enregistrement en base.
 
 ### 8.2 Tables principales
 
-Le schéma initial contient :
+Le schéma applicatif contient notamment :
 
 - `utilisateur` ;
 - `identite_authentification` ;
@@ -348,7 +359,9 @@ Le schéma initial contient :
 - `journee` ;
 - `regle_attribution_role` ;
 - `synchronisation_adherents` ;
-- `journal_audit`.
+- `journal_audit`, réservée à un éventuel besoin futur et non utilisée par les
+  parcours actuels ;
+- `purge_campagne`, état technique minimal des campagnes annuelles déjà traitées.
 
 ### 8.3 Responsabilité de Liquibase et Doctrine
 
@@ -386,8 +399,11 @@ sans réactivation. Ses inscriptions individuelles sont supprimées. Les donnée
 métier qu’il a seulement créées ou modifiées sont conservées et leurs références
 d’auteur sont mises à `NULL`.
 
-Les données détaillées d’une campagne de septembre à août sont agrégées puis
-supprimées le 10 octobre suivant. Une inscription qui traverse une frontière de
+Les données détaillées d’une campagne de septembre à août deviennent éligibles
+à l'agrégation et à la suppression le 10 octobre suivant. La maintenance vérifie
+quotidiennement si la campagne cible a déjà été traitée : elle rattrape une
+exécution manquée, puis s'arrête immédiatement les jours suivants grâce à l'état
+enregistré dans `purge_campagne`. Une inscription qui traverse une frontière de
 campagne reste entière afin de ne perdre aucune donnée ; seules ses journées
 comprises dans la campagne sont archivées. L’historique est immuable et ne
 conserve que la date, le nombre de bénévoles par thématique et le nombre de
@@ -431,9 +447,10 @@ la couleur.
 - Normaliser les emails en minuscules sans en faire une identité métier.
 - Valider les fichiers CSV, leur encodage, leur taille et leurs en-têtes.
 - Échapper les contenus affichés et conserver l’échappement automatique Twig.
-- Journaliser les changements de rôle, imports, synchronisations et remises de
-  tenue ou de foulard.
-- Préférer la désactivation à la suppression afin de préserver l’audit.
+- Conserver dans les journaux techniques les erreurs et opérations de
+  maintenance, sans donnée personnelle sensible.
+- Préférer la désactivation à la suppression lorsque les règles de conservation
+  l'exigent.
 
 ## 11. Tests attendus
 
@@ -478,6 +495,7 @@ make db-status
 make db-sql
 make db-update
 make test
+make analyse-statique
 ```
 
 Pour une évolution de schéma :
@@ -506,7 +524,8 @@ Pour une évolution d’interface :
 - Une branche de fonctionnalité ou de correction est créée depuis `dev` et
   fusionnée dans `dev` après validation.
 - Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour
-  `APP_VERSION` et `CHANGELOG.md`, puis en créant un tag annoté `vX.Y.Z`.
+  `VersionApplication::VERSION` et `CHANGELOG.md`, puis en créant un tag annoté
+  `vX.Y.Z`.
 - Un correctif urgent est créé depuis `main`, livré sur `main`, puis reporté
   dans `dev` afin d’éviter toute divergence.
 - Les procédures de livraison et les paramètres de production restent dans le
@@ -527,8 +546,9 @@ Pour une évolution d’interface :
 - Centraliser les calculs de repas, rôles et synthèses afin que le CSV, l’API et
   les écrans utilisent les mêmes règles.
 - Ne pas exposer les détails d’intégration externe dans les entités métier.
-- Conserver une trace expliquant les décisions automatiques importantes.
-- Traiter les synchronisations comme des opérations rejouables et auditées.
+- Rendre explicables dans les rapports les décisions automatiques importantes.
+- Traiter les synchronisations comme des opérations rejouables ; décider de
+  leur traçabilité durable avec le périmètre API réel.
 - Préserver la compatibilité avec les données existantes à chaque évolution.
 - Mettre à jour ce document lorsqu’une décision fonctionnelle ou technique est
   modifiée.

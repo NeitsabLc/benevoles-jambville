@@ -173,6 +173,67 @@ final class BenevoleControllerTest extends WebTestCase
         self::assertSelectorExists('#previsualisation-import');
         self::assertSelectorTextContains('.carte-apercu-import', 'NOUVEAU-1');
         self::assertSelectorTextContains('.statut-creation', 'Création');
+        self::assertSelectorTextContains('.regle-role-inconnue', 'rôle bénévole par défaut');
+    }
+
+    public function testLaPrevisualisationDetailleUnChangementDeRoleAvantApplication(): void
+    {
+        $client = self::createClient();
+        $connexion = self::getContainer()->get(Connection::class);
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        $client->loginUser($pilote);
+
+        $connexion->executeStatement(<<<'SQL'
+            INSERT INTO benevole_jambville.regle_attribution_role
+                (code_fonction, code_structure, role_attribue, version)
+            VALUES ('TEST-PILOTE', 'TEST-STRUCTURE', 'EQUIPE_PILOTE', 'test-1')
+            ON CONFLICT (code_fonction, code_structure) DO UPDATE
+                SET role_attribue = EXCLUDED.role_attribue, version = EXCLUDED.version, actif = TRUE
+            SQL);
+
+        try {
+            $crawler = $client->request('GET', '/administration/benevoles/importer');
+            $chemin = tempnam(sys_get_temp_dir(), 'benevoles-role-');
+            self::assertNotFalse($chemin);
+            file_put_contents($chemin, sprintf(
+                "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\n%s;%s;%s;%s;%s;TEST-PILOTE;TEST-STRUCTURE\n",
+                $benevole->getCodeAdherent(),
+                $benevole->getNom(),
+                $benevole->getPrenom(),
+                $benevole->getEmail(),
+                $benevole->getTelephone(),
+            ));
+            $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+            $formulaire['fichier_csv']->upload($chemin);
+            $crawler = $client->submit($formulaire);
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorExists('.details-comptes-mis-a-jour');
+            self::assertSelectorTextContains('.changement-role-import', 'Rôle : BENEVOLE → EQUIPE_PILOTE');
+            self::assertSelectorTextContains('.details-comptes-mis-a-jour', 'Code fonction : — → TEST-PILOTE');
+            self::assertSelectorNotExists('.regle-role-inconnue');
+
+            $client->submit($crawler->selectButton('Confirmer l’import')->form());
+            $client->followRedirect();
+            self::assertSame('EQUIPE_PILOTE', $connexion->fetchOne(
+                'SELECT role FROM benevole_jambville.utilisateur WHERE code_adherent = :code',
+                ['code' => 'DEV-BENEVOLE'],
+            ));
+        } finally {
+            $connexion->executeStatement(<<<'SQL'
+                UPDATE benevole_jambville.utilisateur
+                SET code_fonction = NULL, code_structure = NULL, role = 'BENEVOLE',
+                    source_role = 'MANUEL', role_calcule_le = NULL, version_regle_role = NULL
+                WHERE code_adherent = 'DEV-BENEVOLE'
+                SQL);
+            $connexion->executeStatement(
+                "DELETE FROM benevole_jambville.regle_attribution_role WHERE code_fonction = 'TEST-PILOTE' AND code_structure = 'TEST-STRUCTURE'",
+            );
+        }
     }
 
     public function testLImportConvertitUnCsvWindows1252EnUtf8(): void
