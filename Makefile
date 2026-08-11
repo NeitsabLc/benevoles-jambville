@@ -107,8 +107,9 @@ db-shell: ## Ouvrir une console PostgreSQL
 
 .PHONY: test-db-reset
 test-db-reset: ## Reconstruire la base de test isolée
-	$(DOCKER_COMPOSE) exec -T database sh -c 'dropdb --if-exists --force --username="$$POSTGRES_USER" "$${POSTGRES_DB}_test" && createdb --username="$$POSTGRES_USER" --owner="$$POSTGRES_USER" "$${POSTGRES_DB}_test"'
-	$(DOCKER_COMPOSE) --profile outils run --rm -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/benevole_jambville_test" liquibase update --context-filter=dev
+	$(DOCKER_COMPOSE) exec -T database sh -c 'base_test="$${POSTGRES_DB}_test"; dropdb --if-exists --force --username="$$POSTGRES_USER" "$$base_test" && createdb --username="$$POSTGRES_USER" --owner="$$POSTGRES_USER" "$$base_test"'
+	@base_test="$$($(DOCKER_COMPOSE) exec -T database printenv POSTGRES_DB)_test"; \
+		$(DOCKER_COMPOSE) --profile outils run --rm -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/$$base_test" liquibase update --context-filter=dev
 
 .PHONY: test
 test: test-db-reset ## Reconstruire la base de test puis exécuter les tests

@@ -28,7 +28,8 @@ techniques sont recensés dans [CHANGELOG.md](CHANGELOG.md).
 
 - Docker avec Docker Compose ;
 - `make` ;
-- Git.
+- Git ;
+- Node.js 20 ou supérieur et npm pour les contrôles d’accessibilité.
 
 PHP, PostgreSQL, Liquibase et Nginx sont fournis par les conteneurs du projet.
 
@@ -95,14 +96,20 @@ ou modifier le schéma.
 ```bash
 make test
 make analyse-statique
+npm ci
+npx playwright install chromium
+npm run test:accessibility
 ```
 
 `make test` reconstruit une base PostgreSQL locale dédiée dont le nom se
 termine par `_test`, applique les migrations et exécute PHPUnit. Elle ne modifie
 pas les données de développement.
 
-`make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif. Ces
-deux contrôles sont également exécutés par la CI.
+`make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
+`npm run test:accessibility` contrôle avec Playwright et Axe les pages publiques
+et les parcours des trois rôles ; l’application doit être démarrée et le jeu de
+démonstration chargé avec `make db-dev-update`. Ces contrôles sont également
+exécutés par la CI.
 
 ## Emails locaux
 
