@@ -136,7 +136,7 @@ final class PresenceController extends AbstractController
             'utilisateurs_selectionnables' => $utilisateur->isEquipePilote() ? $utilisateurs->findActifsPourInscription() : [],
             'repas_selectionnes' => $request->request->has('repas_configures') ? $this->lireRepasSelectionnes($request) : [],
             'repas_configures' => $request->request->has('repas_configures'),
-        ]);
+        ], $request->isMethod('POST') ? new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY) : null);
     }
 
     #[Route('/presences/{id}/modifier', name: 'app_presence_modifier', methods: ['GET', 'POST'])]
@@ -249,7 +249,7 @@ final class PresenceController extends AbstractController
             'utilisateurs_selectionnables' => $utilisateur->isEquipePilote() ? $utilisateurs->findActifsPourInscription() : [],
             'repas_selectionnes' => $request->request->has('repas_configures') ? $this->lireRepasSelectionnes($request) : $inscription->getRepasSelectionnes(),
             'repas_configures' => true,
-        ]);
+        ], $request->isMethod('POST') ? new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY) : null);
     }
 
     #[Route('/presences/{id}/supprimer', name: 'app_presence_supprimer', methods: ['POST'])]

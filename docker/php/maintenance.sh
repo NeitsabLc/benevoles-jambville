@@ -2,11 +2,9 @@
 set -eu
 
 while true; do
+    php bin/console app:thematiques:desactiver-expirees --env=prod --no-debug
     php bin/console app:comptes:purger-desactives --env=prod --no-debug
-
-    if [ "$(date +%m-%d)" = "10-10" ]; then
-        php bin/console app:donnees:purger-campagne-precedente --env=prod --no-debug
-    fi
+    php bin/console app:donnees:purger-campagne-precedente --env=prod --no-debug
 
     if [ "${MAINTENANCE_ONCE:-0}" = "1" ]; then
         exit 0

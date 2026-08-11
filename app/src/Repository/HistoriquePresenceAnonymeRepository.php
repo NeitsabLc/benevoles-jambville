@@ -16,13 +16,26 @@ final class HistoriquePresenceAnonymeRepository
         $this->connexion = $registry->getConnection();
     }
 
-    public function archiverEtPurgerCampagne(\DateTimeImmutable $debut, \DateTimeImmutable $fin): int
+    /**
+     * @return int|null Nombre d'inscriptions supprimées, ou null si la campagne avait déjà été purgée.
+     */
+    public function archiverEtPurgerCampagne(\DateTimeImmutable $debut, \DateTimeImmutable $fin): ?int
     {
-        return $this->connexion->transactional(function () use ($debut, $fin): int {
+        return $this->connexion->transactional(function () use ($debut, $fin): ?int {
             $parametres = [
                 'debut' => $debut->format('Y-m-d'),
                 'fin' => $fin->format('Y-m-d'),
             ];
+
+            $campagneReservee = 1 === $this->connexion->executeStatement(<<<'SQL'
+                INSERT INTO benevole_jambville.purge_campagne (date_debut, date_fin)
+                VALUES (CAST(:debut AS date), CAST(:fin AS date))
+                ON CONFLICT DO NOTHING
+                SQL, $parametres);
+
+            if (!$campagneReservee) {
+                return null;
+            }
 
             $this->connexion->executeStatement(<<<'SQL'
                 INSERT INTO benevole_jambville.historique_presence_anonyme

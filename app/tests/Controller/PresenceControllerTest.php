@@ -274,6 +274,51 @@ final class PresenceControllerTest extends WebTestCase
         $entityManager->flush();
     }
 
+    public function testUnePresenceQuiChevaucheUneThematiqueExclusiveEstRefusee(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematiqueOrdinaire = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Accueil']);
+        self::assertNotNull($utilisateur);
+        self::assertNotNull($thematiqueOrdinaire);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $exclusive = new \App\Entity\Thematique('Événement exclusif de test');
+        $exclusive->modifier(
+            'Événement exclusif de test',
+            0,
+            new \DateTimeImmutable('2092-06-10'),
+            new \DateTimeImmutable('2092-06-12'),
+            true,
+        );
+        $entityManager->persist($exclusive);
+        $entityManager->flush();
+        $exclusiveId = $exclusive->getId();
+        $client->loginUser($utilisateur);
+
+        try {
+            $crawler = $client->request('GET', '/presences/ajouter');
+            $jeton = $crawler->filter('.formulaire-presence input[name="_csrf_token"]')->attr('value');
+            self::assertNotNull($jeton);
+            $client->request('POST', '/presences/ajouter', [
+                '_csrf_token' => $jeton,
+                'mode' => 'benevole',
+                'date_debut' => '2092-06-09',
+                'date_fin' => '2092-06-11',
+                'type_couchage' => 'DUR',
+                'thematique' => $thematiqueOrdinaire->getId(),
+                'nombre_enfants' => 0,
+            ]);
+
+            self::assertResponseStatusCodeSame(422);
+            self::assertSelectorTextContains('.alerte-erreur', 'chevauchent la période exclusive');
+        } finally {
+            self::getContainer()->get(\Doctrine\DBAL\Connection::class)->executeStatement(
+                'DELETE FROM benevole_jambville.thematique WHERE id = :id',
+                ['id' => $exclusiveId],
+            );
+        }
+    }
+
     public function testModificationEstReserveeAuProprietaireEtALEquipePilote(): void
     {
         $client = self::createClient();

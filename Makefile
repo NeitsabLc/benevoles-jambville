@@ -89,6 +89,10 @@ db-prepare-roles: ## Créer les rôles limités absents, sans modifier les rôle
 db-verify-role-switch: ## Vérifier que PHP utilise bien le rôle applicatif limité
 	$(PHP) php -r '$$pdo = new PDO(sprintf("pgsql:host=%s;dbname=%s", getenv("DATABASE_HOST"), getenv("DATABASE_NAME")), getenv("DATABASE_USER"), getenv("DATABASE_PASSWORD")); $$role = $$pdo->query("SELECT current_user")->fetchColumn(); if ($$role !== "benevole_jambville_app") { fwrite(STDERR, "Rôle PostgreSQL inattendu: ".$$role.PHP_EOL); exit(1); } echo $$role.PHP_EOL;'
 
+.PHONY: db-sync-role-passwords
+db-sync-role-passwords: ## Synchroniser explicitement les mots de passe des rôles limités avec .env
+	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/sync-role-passwords
+
 .PHONY: db-finalize-role-hardening
 db-finalize-role-hardening: ## Retirer explicitement les attributs élevés après la bascule vérifiée
 	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/finalize-role-hardening
@@ -109,6 +113,11 @@ test-db-reset: ## Reconstruire la base de test isolée
 .PHONY: test
 test: test-db-reset ## Reconstruire la base de test puis exécuter les tests
 	$(PHP) php bin/phpunit
+
+.PHONY: analyse-statique
+analyse-statique: ## Analyser le code PHP avec PHPStan
+	$(PHP) php bin/console cache:warmup --env=dev --no-debug
+	$(PHP) vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
 .PHONY: backup-now
 backup-now: ## Créer immédiatement une sauvegarde via le service de production

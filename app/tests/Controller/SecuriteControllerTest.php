@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Repository\UtilisateurRepository;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -29,6 +30,34 @@ final class SecuriteControllerTest extends WebTestCase
         $client->request('GET', '/');
 
         self::assertResponseRedirects('http://localhost/connexion');
+    }
+
+    public function testLaDesactivationRevoqueUneSessionDejaOuverte(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE-2']);
+        self::assertNotNull($utilisateur);
+        $connexion = self::getContainer()->get(Connection::class);
+
+        $client->loginUser($utilisateur);
+        $client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+
+        try {
+            $connexion->executeStatement(
+                'UPDATE benevole_jambville.utilisateur SET actif = FALSE, desactive_le = CURRENT_TIMESTAMP WHERE id = :id',
+                ['id' => $utilisateur->getId()],
+            );
+
+            $client->request('GET', '/');
+
+            self::assertResponseRedirects('http://localhost/connexion');
+        } finally {
+            $connexion->executeStatement(
+                'UPDATE benevole_jambville.utilisateur SET actif = TRUE, desactive_le = NULL WHERE id = :id',
+                ['id' => $utilisateur->getId()],
+            );
+        }
     }
 
     public function testUnePageInexistanteRedirigeSelonLaConnexion(): void
