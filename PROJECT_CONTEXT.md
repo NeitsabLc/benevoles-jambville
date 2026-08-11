@@ -38,7 +38,10 @@ dans le même changement.
   anonyme et l’archive est rejouable sans double comptage ;
 - les en-têtes HTTP de sécurité, les permissions des secrets locaux et les
   restrictions de privilèges PostgreSQL ont été renforcés ;
-- l’automatisation CI et l’analyse statique approfondie restent à planifier.
+- la CI GitHub Actions valide les configurations Docker Compose, Composer, les
+  changelogs Liquibase, les mappings Doctrine, la compilation des assets et la
+  suite PHPUnit sur `dev` et `main` ; l’analyse statique approfondie reste à
+  planifier.
 
 Le `README.md` est réservé au développement local. Les informations
 opérationnelles de livraison et d’infrastructure de production ne doivent pas
@@ -506,7 +509,8 @@ Pour une évolution d’interface :
 - Une branche de fonctionnalité ou de correction est créée depuis `dev` et
   fusionnée dans `dev` après validation.
 - Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour
-  `APP_VERSION` et `CHANGELOG.md`, puis en créant un tag annoté `vX.Y.Z`.
+  `VersionApplication::VERSION` et `CHANGELOG.md`, puis en créant un tag annoté
+  `vX.Y.Z`.
 - Un correctif urgent est créé depuis `main`, livré sur `main`, puis reporté
   dans `dev` afin d’éviter toute divergence.
 - Les procédures de livraison et les paramètres de production restent dans le
