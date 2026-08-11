@@ -9,6 +9,15 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+### Modifié
+
+- alignement de la documentation du modèle de branches sur `main`, désormais
+  branche GitHub par défaut ;
+- clarification de la politique de confidentialité : la purge annuelle est
+  exécutée à partir du 10 octobre, au premier cycle de maintenance disponible.
+
+## 1.1.0 — 2026-08-11
+
 ### Ajouté
 
 - comparaison détaillée des valeurs actuelles et importées, dont le rôle cible,

@@ -124,9 +124,9 @@ hors de ce dépôt.
 
 ## Modèle de branches
 
-- `main` contient uniquement les versions stables destinées à la production ;
-- `dev` est la branche d’intégration et la branche GitHub par défaut pour le
-  développement ;
+- `main` contient uniquement les versions stables destinées à la production et
+  constitue la branche GitHub par défaut ;
+- `dev` est la branche d’intégration pour les travaux de développement ;
 - les changements sont préparés sur une branche courte créée depuis `dev`, puis
   fusionnés dans `dev` après validation ;
 - une livraison fusionne `dev` dans `main`, met à jour la version et le
