@@ -116,7 +116,7 @@ test: test-db-reset ## Reconstruire la base de test puis exécuter les tests
 
 .PHONY: analyse-statique
 analyse-statique: ## Analyser le code PHP avec PHPStan
-	$(PHP) php bin/console cache:warmup --env=dev --no-debug
+	$(PHP) php bin/console cache:warmup --env=dev
 	$(PHP) vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
 .PHONY: backup-now

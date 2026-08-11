@@ -81,7 +81,7 @@ jobs:
 
       - name: Analyser statiquement le code PHP
         run: |
-          docker compose exec --no-TTY php php bin/console cache:warmup --env=dev --no-debug
+          docker compose exec --no-TTY php php bin/console cache:warmup --env=dev
           docker compose exec --no-TTY php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
       - name: Preparer l'image PHP pour l'analyse de vulnerabilites
