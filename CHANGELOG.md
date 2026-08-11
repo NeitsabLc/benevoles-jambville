@@ -22,8 +22,9 @@ Aucun changement pour le moment.
 
 - amélioration des contrastes, de la taille des actions du calendrier et des
   associations entre libellés et champs de formulaire ;
-- découverte dynamique du port Nginx par la CI et alignement du port local sur
-  `8081` dans les configurations et la documentation ;
+- découverte dynamique du port Nginx par la CI, maintien du nom de contrôle
+  requis par la protection de `main` et alignement du port local sur `8081`
+  dans les configurations et la documentation ;
 - reconstruction de la base de tests à partir du nom PostgreSQL configuré,
   sans dépendre du nom par défaut ;
 - alignement de la documentation du modèle de branches sur `main`, désormais
