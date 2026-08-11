@@ -23,13 +23,19 @@ env:
 
 jobs:
   tests:
-    name: Qualite et tests
+    name: Qualite, tests et accessibilite
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Recuperer le code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Installer Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          cache: npm
 
       - name: Preparer la configuration de CI
         run: |
@@ -38,9 +44,11 @@ jobs:
           APP_SECRET_CI="$(openssl rand -hex 32)"
           sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
           sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
-          echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
-          echo "POSTGRES_APP_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
-          echo "POSTGRES_BACKUP_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+            valeur="$(openssl rand -hex 24)"
+            echo "::add-mask::${valeur}"
+            echo "${variable}=${valeur}" >> "$GITHUB_ENV"
+          done
 
       - name: Valider la configuration Docker Compose
         run: |
@@ -57,8 +65,8 @@ jobs:
           --prefer-dist
           --no-progress
 
-      - name: Demarrer les services de test
-        run: docker compose up --detach database php
+      - name: Demarrer l'application
+        run: docker compose up --detach database php nginx
 
       - name: Valider Composer
         run: docker compose exec --no-TTY php composer validate --strict --no-check-publish
@@ -113,11 +121,29 @@ jobs:
       - name: Executer les tests
         run: docker compose exec --no-TTY php php bin/phpunit
 
+      - name: Initialiser les donnees de controle
+        run: docker compose --profile outils run --rm liquibase update --context-filter=dev
+
+      - name: Installer les dependances d'accessibilite
+        run: npm ci
+
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Attendre que l'application soit disponible
+        run: |
+          APP_BASE_URL="http://$(docker compose port nginx 80)"
+          echo "APP_BASE_URL=${APP_BASE_URL}" >> "$GITHUB_ENV"
+          curl --fail --retry 30 --retry-delay 2 --retry-all-errors "${APP_BASE_URL}/connexion"
+
+      - name: Executer les controles d'accessibilite
+        run: npm run test:accessibility
+
       - name: Afficher les journaux en cas d'echec
         if: failure()
         run: |
           docker compose ps
-          docker compose logs --no-color --tail=200 database php
+          docker compose logs --no-color --tail=200 database php nginx
 
       - name: Arreter les services
         if: always()

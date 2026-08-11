@@ -40,7 +40,7 @@
                         </select>
                     </div>
                 {% else %}
-                    <div class="champ champ-large"><label>Bénévole</label><input value="{{ inscription and inscription.utilisateur ? inscription.utilisateur.nomComplet : app.user.nomComplet }}" disabled></div>
+                    <div class="champ champ-large"><label for="benevole_selectionne">Bénévole</label><input id="benevole_selectionne" value="{{ inscription and inscription.utilisateur ? inscription.utilisateur.nomComplet : app.user.nomComplet }}" disabled></div>
                 {% endif %}
             </div>
 
