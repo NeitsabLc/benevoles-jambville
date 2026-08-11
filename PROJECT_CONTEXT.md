@@ -15,7 +15,7 @@ dans le même changement.
 État de référence au 11 août 2026 :
 
 - l’application est utilisée en production ;
-- la version stable de référence est `1.0.1` ;
+- la version stable de référence est `1.1.0` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;

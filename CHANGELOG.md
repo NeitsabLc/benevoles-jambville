@@ -9,6 +9,10 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+Aucun changement pour le moment.
+
+## 1.1.0 — 2026-08-11
+
 ### Ajouté
 
 - comparaison détaillée des valeurs actuelles et importées, dont le rôle cible,
