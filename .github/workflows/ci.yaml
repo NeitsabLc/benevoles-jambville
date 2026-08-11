@@ -75,9 +75,9 @@ jobs:
           php bin/console doctrine:schema:validate --skip-sync
 
       - name: Compiler les assets
-        run: >-
-          docker compose exec --no-TTY php
-          php bin/console asset-map:compile
+        run: |
+          docker compose exec --no-TTY php php bin/console importmap:install
+          docker compose exec --no-TTY php php bin/console asset-map:compile
 
       - name: Analyser statiquement le code PHP
         run: |
