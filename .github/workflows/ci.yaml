@@ -44,9 +44,11 @@ jobs:
           APP_SECRET_CI="$(openssl rand -hex 32)"
           sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
           sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
-          echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
-          echo "POSTGRES_APP_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
-          echo "POSTGRES_BACKUP_PASSWORD=$(openssl rand -hex 24)" >> "$GITHUB_ENV"
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+            valeur="$(openssl rand -hex 24)"
+            echo "::add-mask::${valeur}"
+            echo "${variable}=${valeur}" >> "$GITHUB_ENV"
+          done
 
       - name: Valider la configuration Docker Compose
         run: |
@@ -129,7 +131,10 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Attendre que l'application soit disponible
-        run: curl --fail --retry 30 --retry-delay 2 --retry-all-errors http://127.0.0.1:8080/connexion
+        run: |
+          APP_BASE_URL="http://$(docker compose port nginx 80)"
+          echo "APP_BASE_URL=${APP_BASE_URL}" >> "$GITHUB_ENV"
+          curl --fail --retry 30 --retry-delay 2 --retry-all-errors "${APP_BASE_URL}/connexion"
 
       - name: Executer les controles d'accessibilite
         run: npm run test:accessibility
