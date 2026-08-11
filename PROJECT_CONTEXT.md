@@ -518,9 +518,9 @@ Pour une évolution d’interface :
 
 ## 13. Gestion des branches et des versions
 
-- `main` représente exclusivement l’état stable livrable en production.
-- `dev` est la branche d’intégration et la branche par défaut du dépôt pour les
-  travaux de développement.
+- `main` représente exclusivement l’état stable livrable en production et
+  constitue la branche GitHub par défaut.
+- `dev` est la branche d’intégration pour les travaux de développement.
 - Une branche de fonctionnalité ou de correction est créée depuis `dev` et
   fusionnée dans `dev` après validation.
 - Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour
