@@ -12,3 +12,6 @@
 /app/public/assets/
 /app/var/
 /app/vendor/
+/node_modules/
+/playwright-report/
+/test-results/

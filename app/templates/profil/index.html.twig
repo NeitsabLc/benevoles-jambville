@@ -27,9 +27,9 @@
             <section class="carte-profil" aria-labelledby="identite-titre">
                 <header><h2 id="identite-titre">Identité</h2><p>Ces informations proviennent de votre dossier adhérent et ne sont pas modifiables ici.</p></header>
                 <div class="grille-profil">
-                    <div class="champ"><label>Prénom</label><input value="{{ utilisateurProfil.prenom }}" readonly></div>
-                    <div class="champ"><label>Nom</label><input value="{{ utilisateurProfil.nom }}" readonly></div>
-                    <div class="champ"><label>Email</label><input type="email" value="{{ utilisateurProfil.email }}" readonly></div>
+                    <div class="champ"><label for="prenom">Prénom</label><input id="prenom" value="{{ utilisateurProfil.prenom }}" readonly></div>
+                    <div class="champ"><label for="nom">Nom</label><input id="nom" value="{{ utilisateurProfil.nom }}" readonly></div>
+                    <div class="champ"><label for="email">Email</label><input id="email" type="email" value="{{ utilisateurProfil.email }}" readonly></div>
                     <div class="champ">
                         <label for="telephone">Téléphone</label>
                         <input id="telephone" name="telephone" type="tel" maxlength="30" value="{{ app.request.request.get('telephone', utilisateurProfil.telephone) }}" autocomplete="tel" inputmode="tel" aria-describedby="erreur-telephone" data-telephone-francais>
