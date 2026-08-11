@@ -651,3 +651,50 @@ body {
     .champs-alimentation-compa { grid-template-columns: 1fr; }
     .grille-profil { grid-template-columns: 1fr; }
 }
+.regle-role-inconnue {
+    display: block;
+    margin-top: .25rem;
+    color: #8a4b08;
+    font-size: .75rem;
+    line-height: 1.25;
+}
+
+.details-comptes-mis-a-jour {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid #dbe7ea;
+    border-radius: .75rem;
+    background: #f8fbfc;
+}
+
+.details-comptes-mis-a-jour h3,
+.changement-import h4 {
+    margin-top: 0;
+}
+
+.liste-changements-import {
+    display: grid;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+.changement-import {
+    padding: 1rem;
+    border-left: .25rem solid #42c9a5;
+    background: #fff;
+}
+
+.changement-import h4 small {
+    margin-left: .5rem;
+    color: #60747a;
+    font-weight: 400;
+}
+
+.changement-import ul {
+    margin-bottom: 0;
+}
+
+.changement-role-import {
+    color: #8a2f14;
+    font-weight: 600;
+}

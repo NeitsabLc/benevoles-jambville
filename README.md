@@ -15,7 +15,7 @@ couchages et besoins d’accueil des bénévoles de Jambville.
 - calendrier des présences et gestion des permanences ;
 - synthèse des repas, couchages et régimes alimentaires anonymisés ;
 - gestion des thématiques et des bénévoles ;
-- import CSV avec prévisualisation ;
+- import CSV avec prévisualisation des champs et rôles modifiés ;
 - purge et anonymisation des données arrivées à échéance.
 
 Le détail des règles métier et l’état du projet sont consignés dans
@@ -84,6 +84,7 @@ make db-validate
 make db-status
 make db-sql
 make db-update
+make db-sync-role-passwords
 ```
 
 Doctrine sert au mapping et aux requêtes applicatives. Il ne doit jamais créer
@@ -93,11 +94,15 @@ ou modifier le schéma.
 
 ```bash
 make test
+make analyse-statique
 ```
 
-Cette commande reconstruit une base PostgreSQL locale dédiée dont le nom se
+`make test` reconstruit une base PostgreSQL locale dédiée dont le nom se
 termine par `_test`, applique les migrations et exécute PHPUnit. Elle ne modifie
 pas les données de développement.
+
+`make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif. Ces
+deux contrôles sont également exécutés par la CI.
 
 ## Emails locaux
 

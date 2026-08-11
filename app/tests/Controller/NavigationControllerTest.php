@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Repository\UtilisateurRepository;
+use App\VersionApplication;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class NavigationControllerTest extends WebTestCase
@@ -42,7 +43,10 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('.liens-legaux-navigation + .compte-navigation');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/conditions-utilisation"]');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/politique-confidentialite"]');
-        self::assertSelectorTextContains('.pied-page-legal--avec-navigation', 'Version 0.2');
+        self::assertSelectorTextContains(
+            '.pied-page-legal--avec-navigation',
+            'Version '.VersionApplication::VERSION,
+        );
         self::assertSelectorExists('.pied-page-legal--avec-navigation a[href="/conditions-utilisation"]');
         self::assertSelectorExists('.pied-page-legal--avec-navigation a[href="/politique-confidentialite"]');
     }

@@ -44,6 +44,7 @@
         </section>
 
         {% if apercu %}
+        {% set libelles_roles = {BENEVOLE: 'Bénévole', SALARIE_ACCUEIL: 'Salarié accueil', EQUIPE_PILOTE: 'Équipe pilote'} %}
         <section class="carte-apercu-import" id="previsualisation-import">
             <div class="instructions-import"><span class="numero-etape">2</span><div><h2>Prévisualisation</h2><p>Vérifiez les changements détectés avant leur application.</p></div></div>
             <div class="resume-import">
@@ -52,7 +53,22 @@
                 <span><b>{{ apercu|filter(l => l.statut == 'inchange')|length }}</b> inchangés</span>
                 <span class="resume-erreurs"><b>{{ apercu|filter(l => l.statut == 'erreur')|length }}</b> erreurs</span>
             </div>
-            <div class="table-apercu-import"><table><thead><tr><th>État</th><th>Code adhérent</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th></tr></thead><tbody>{% for ligne in apercu %}<tr><td><span class="statut-import statut-{{ ligne.statut }}">{{ ligne.statut == 'creation' ? 'Création' : (ligne.statut == 'mise_a_jour' ? 'Mise à jour' : (ligne.statut == 'inchange' ? 'Inchangé' : ligne.erreur)) }}</span></td><td>{{ ligne.code_adherent }}</td><td>{{ ligne.nom }}</td><td>{{ ligne.prenom }}</td><td>{{ ligne.email }}</td><td>{{ ligne.telephone ?: '—' }}</td></tr>{% endfor %}</tbody></table></div>
+            <div class="table-apercu-import"><table><thead><tr><th>État</th><th>Code adhérent</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Rôle calculé</th></tr></thead><tbody>{% for ligne in apercu %}<tr><td><span class="statut-import statut-{{ ligne.statut }}">{{ ligne.statut == 'creation' ? 'Création' : (ligne.statut == 'mise_a_jour' ? 'Mise à jour' : (ligne.statut == 'inchange' ? 'Inchangé' : ligne.erreur)) }}</span></td><td>{{ ligne.code_adherent }}</td><td>{{ ligne.nom }}</td><td>{{ ligne.prenom }}</td><td>{{ ligne.email }}</td><td>{{ ligne.telephone ?: '—' }}</td><td>{{ libelles_roles[ligne.role_cible] }}{% if not ligne.regle_role_reconnue %}<small class="regle-role-inconnue">Règle non reconnue : rôle bénévole par défaut</small>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+            {% set comptes_mis_a_jour = apercu|filter(l => l.statut == 'mise_a_jour') %}
+            {% if comptes_mis_a_jour %}
+            <section class="details-comptes-mis-a-jour" aria-labelledby="comptes-mis-a-jour-titre">
+                <h3 id="comptes-mis-a-jour-titre">Comptes qui seront mis à jour</h3>
+                <p>Chaque valeur modifiée est affichée avant validation, notamment les changements de rôle.</p>
+                <div class="liste-changements-import">
+                    {% for ligne in comptes_mis_a_jour %}
+                    <article class="changement-import" data-code-adherent="{{ ligne.code_adherent }}">
+                        <h4>{{ ligne.prenom }} {{ ligne.nom }} <small>{{ ligne.code_adherent }}</small></h4>
+                        <ul>{% for modification in ligne.modifications %}<li class="{{ modification.champ == 'Rôle' ? 'changement-role-import' }}"><strong>{{ modification.champ }}</strong> : <span>{{ modification.avant ?: '—' }}</span> → <span>{{ modification.apres ?: '—' }}</span></li>{% endfor %}</ul>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
             <p class="note-apercu-import">Cette étape est une prévisualisation : aucune donnée n’a encore été modifiée.</p>
             {% if peutAppliquer %}<div class="actions-validation-import"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles_importer') }}">Choisir un autre fichier</a><button class="bouton-principal" type="button" data-ouvrir-confirmation-import>Valider et importer</button></div>
             <dialog class="dialog-confirmation-import" data-dialog-confirmation-import><section><div class="icone-confirmation-import">!</div><h2>Confirmer l’import</h2><p>Vous allez créer <strong>{{ apercu|filter(l => l.statut == 'creation')|length }}</strong> compte{{ apercu|filter(l => l.statut == 'creation')|length > 1 ? 's' }} et mettre à jour <strong>{{ apercu|filter(l => l.statut == 'mise_a_jour')|length }}</strong> profil{{ apercu|filter(l => l.statut == 'mise_a_jour')|length > 1 ? 's' }}.</p><p class="information-email-import">Les personnes nouvellement ajoutées recevront un email contenant leur accès à la plateforme.</p><div class="actions-dialog-import"><button class="bouton-secondaire" type="button" data-fermer-confirmation-import>Annuler</button><form method="post" action="{{ path('app_admin_benevoles_importer_appliquer') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token('appliquer-import-benevoles') }}"><button class="bouton-principal" type="submit">Confirmer l’import</button></form></div></section></dialog>

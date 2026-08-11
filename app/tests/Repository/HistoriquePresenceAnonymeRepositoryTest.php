@@ -103,11 +103,34 @@ final class HistoriquePresenceAnonymeRepositoryTest extends KernelTestCase
                 new \DateTimeImmutable('2100-08-31'),
             );
 
-            self::assertSame(0, $nombreDeuxiemeExecution);
+            self::assertNull($nombreDeuxiemeExecution);
             self::assertSame(2, (int) $connexion->fetchOne(<<<'SQL'
                 SELECT nombre_compagnons
                 FROM benevole_jambville.historique_presence_anonyme
                 WHERE date_journee = '2099-09-01' AND thematique IS NULL
+                SQL));
+        } finally {
+            $connexion->rollBack();
+        }
+    }
+
+    public function testUneCampagneVideNestMarqueeQuUneFoisCommePurgee(): void
+    {
+        self::bootKernel();
+        $connexion = self::getContainer()->get(Connection::class);
+        $connexion->beginTransaction();
+
+        try {
+            $repository = self::getContainer()->get(HistoriquePresenceAnonymeRepository::class);
+            $debut = new \DateTimeImmutable('2200-09-01');
+            $fin = new \DateTimeImmutable('2201-08-31');
+
+            self::assertSame(0, $repository->archiverEtPurgerCampagne($debut, $fin));
+            self::assertNull($repository->archiverEtPurgerCampagne($debut, $fin));
+            self::assertSame(1, (int) $connexion->fetchOne(<<<'SQL'
+                SELECT COUNT(*)
+                FROM benevole_jambville.purge_campagne
+                WHERE date_debut = '2200-09-01' AND date_fin = '2201-08-31'
                 SQL));
         } finally {
             $connexion->rollBack();
