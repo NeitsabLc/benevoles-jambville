@@ -23,7 +23,7 @@ env:
 
 jobs:
   tests:
-    name: Qualite, tests et accessibilite
+    name: Qualite et tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -110,12 +110,13 @@ jobs:
 
       - name: Reinitialiser la base de tests
         run: |
+          BASE_TEST="$(docker compose exec --no-TTY database printenv POSTGRES_DB)_test"
           docker compose exec --no-TTY database sh -c \
-            'dropdb --username="$POSTGRES_USER" --force --if-exists benevole_jambville_test'
+            'dropdb --username="$POSTGRES_USER" --force --if-exists "$1"' sh "${BASE_TEST}"
           docker compose exec --no-TTY database sh -c \
-            'createdb --username="$POSTGRES_USER" --owner="$POSTGRES_USER" benevole_jambville_test'
+            'createdb --username="$POSTGRES_USER" --owner="$POSTGRES_USER" "$1"' sh "${BASE_TEST}"
           docker compose --profile outils run --rm \
-            -e LIQUIBASE_COMMAND_URL=jdbc:postgresql://database:5432/benevole_jambville_test \
+            -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/${BASE_TEST}" \
             liquibase update --context-filter=dev
 
       - name: Executer les tests

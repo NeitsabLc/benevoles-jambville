@@ -12,10 +12,10 @@ dans le même changement.
 
 ## État actuel du projet
 
-État de référence au 11 août 2026 :
+État de référence au 12 août 2026 :
 
 - l’application est utilisée en production ;
-- la version stable de référence est `1.1.0` ;
+- la version stable de référence est `1.1.1` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -42,7 +42,9 @@ dans le même changement.
 - la CI GitHub Actions valide les configurations Docker Compose, Composer, les
   changelogs Liquibase, les mappings Doctrine, la compilation des assets et la
   suite PHPUnit sur `dev` et `main` ; elle exécute également PHPStan au niveau
-  6, `composer audit` et un scan Trivy de l'image PHP.
+  6, `composer audit`, un scan Trivy de l'image PHP et quatre parcours
+  d’accessibilité Playwright/Axe couvrant les pages publiques et les trois rôles
+  applicatifs.
 
 Le `README.md` est réservé au développement local. Les informations
 opérationnelles de livraison et d’infrastructure de production ne doivent pas
@@ -518,9 +520,9 @@ Pour une évolution d’interface :
 
 ## 13. Gestion des branches et des versions
 
-- `main` représente exclusivement l’état stable livrable en production.
-- `dev` est la branche d’intégration et la branche par défaut du dépôt pour les
-  travaux de développement.
+- `main` représente exclusivement l’état stable livrable en production et
+  constitue la branche GitHub par défaut.
+- `dev` est la branche d’intégration pour les travaux de développement.
 - Une branche de fonctionnalité ou de correction est créée depuis `dev` et
   fusionnée dans `dev` après validation.
 - Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour

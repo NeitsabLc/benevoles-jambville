@@ -11,6 +11,32 @@ et le projet suit une numérotation de version sémantique.
 
 Aucun changement pour le moment.
 
+## 1.1.1 — 2026-08-12
+
+### Ajouté
+
+- contrôles automatisés d’accessibilité avec Playwright et Axe sur les pages
+  publiques et les parcours des trois rôles applicatifs.
+
+### Modifié
+
+- amélioration des contrastes, de la taille des actions du calendrier et des
+  associations entre libellés et champs de formulaire ;
+- découverte dynamique du port Nginx par la CI, maintien du nom de contrôle
+  requis par la protection de `main` et alignement du port local sur `8081`
+  dans les configurations et la documentation ;
+- reconstruction de la base de tests à partir du nom PostgreSQL configuré,
+  sans dépendre du nom par défaut ;
+- alignement de la documentation du modèle de branches sur `main`, désormais
+  branche GitHub par défaut ;
+- clarification de la politique de confidentialité : la purge annuelle est
+  exécutée à partir du 10 octobre, au premier cycle de maintenance disponible.
+
+### Sécurité
+
+- masquage des mots de passe PostgreSQL temporaires dans les journaux GitHub
+  Actions.
+
 ## 1.1.0 — 2026-08-11
 
 ### Ajouté
