@@ -8,6 +8,7 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class SecuriteControllerTest extends WebTestCase
@@ -22,6 +23,14 @@ final class SecuriteControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="email"]');
         self::assertSelectorExists('input[name="mot_de_passe"]');
         self::assertSelectorExists('input[name="_csrf_token"]');
+    }
+
+    public function testUnNomDhoteNonAutoriseEstRejete(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', '/connexion', server: ['HTTP_HOST' => 'attaquant.example']);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
     public function testLaPageDAccueilNecessiteUneConnexion(): void

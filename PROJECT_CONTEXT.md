@@ -441,6 +441,8 @@ la couleur.
 - Hacher les mots de passe avec le composant Symfony prévu à cet effet.
 - Stocker uniquement le hash des jetons d’activation et de réinitialisation.
 - Limiter la durée de vie des liens temporaires.
+- Refuser les noms d’hôte non conformes à `TRUSTED_HOST_PATTERN`, notamment
+  avant toute génération d’URL absolue d’activation.
 - Ne jamais journaliser les mots de passe, jetons bruts ou données médicales.
 - Appliquer les durées de conservation validées aux sauvegardes et aux journaux
   sans les exposer dans la documentation versionnée du dépôt.

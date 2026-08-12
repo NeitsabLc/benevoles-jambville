@@ -12,6 +12,8 @@ services:
       DATABASE_TEST_NAME: "${POSTGRES_DB}_test"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
+      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127\\.0\\.0\\.1)$}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-REMOTE_ADDR}"
     volumes:
       - ./app:/var/www/app
     depends_on:
