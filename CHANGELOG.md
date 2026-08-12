@@ -48,6 +48,8 @@ Aucun changement pour le moment.
 - export direct des images construites pour Trivy sur un runner vierge et
   restauration des sauvegardes avec l'utilisateur propriétaire de l'archive ;
 - initialisation de la base applicative de contrôle avant les tests E2E de la CI.
+- téléchargement effectif des images PHP et Nginx lors d'une livraison GHCR,
+  sans hériter de la politique de construction locale.
 
 ### Ajouté
 
