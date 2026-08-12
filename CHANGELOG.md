@@ -45,6 +45,8 @@ Aucun changement pour le moment.
   le chiffrement `age`.
 - préparation des rôles PostgreSQL dédiés avant la reconstruction locale de la
   base de test, y compris lors d'une mise à niveau d'un volume existant.
+- export direct des images construites pour Trivy sur un runner vierge et
+  restauration des sauvegardes avec l'utilisateur propriétaire de l'archive.
 
 ### Ajouté
 

@@ -103,17 +103,11 @@ jobs:
         run: |
           docker compose -f compose.yaml -f compose.prod.yaml --profile outils \
             build php nginx database liquibase backup
-          production_compose() { docker compose -f compose.yaml -f compose.prod.yaml "$@"; }
-          docker tag "$(production_compose images --quiet php)" benevole-jambville-php-ci:scan
-          docker tag "$(production_compose images --quiet nginx)" benevole-jambville-nginx-ci:scan
-          docker tag "$(production_compose images --quiet database)" benevole-jambville-postgres-ci:scan
-          docker tag "$(production_compose images --quiet liquibase)" benevole-jambville-liquibase-ci:scan
-          docker tag "$(production_compose images --quiet backup)" benevole-jambville-backup-ci:scan
-          docker save benevole-jambville-php-ci:scan --output /tmp/php.tar
-          docker save benevole-jambville-nginx-ci:scan --output /tmp/nginx.tar
-          docker save benevole-jambville-postgres-ci:scan --output /tmp/postgres.tar
-          docker save benevole-jambville-liquibase-ci:scan --output /tmp/liquibase.tar
-          docker save benevole-jambville-backup-ci:scan --output /tmp/backup.tar
+          docker save benevole-jambville-php-production:local --output /tmp/php.tar
+          docker save benevole-jambville-nginx-production:local --output /tmp/nginx.tar
+          docker save benevole-jambville-postgres:local --output /tmp/postgres.tar
+          docker save benevole-jambville-liquibase:local --output /tmp/liquibase.tar
+          docker save benevole-jambville-backup:local --output /tmp/backup.tar
 
       - name: Analyser les vulnerabilites des images d'execution
         run: |
