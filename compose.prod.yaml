@@ -76,6 +76,8 @@ services:
       DATABASE_NAME: "${POSTGRES_DB}"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
+      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127\\.0\\.0\\.1)$}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-REMOTE_ADDR}"
     depends_on:
       database:
         condition: service_healthy
@@ -115,11 +117,15 @@ services:
     logging: *production-logging
     restart: unless-stopped
     init: true
+    user: postgres
     security_opt:
       - no-new-privileges:true
     mem_limit: 1g
     cpus: 2.0
     pids_limit: 256
+    environment:
+      POSTGRES_INITDB_ARGS: "--auth-local=scram-sha-256 --auth-host=scram-sha-256"
+      PGPASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD doit être défini}"
 
   backup:
     logging: *production-logging

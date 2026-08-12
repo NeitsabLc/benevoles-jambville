@@ -550,6 +550,10 @@ Pour une évolution d’interface :
   de restauration est conservée hors de l’hôte applicatif.
 - La CI doit produire une sauvegarde chiffrée et la restaurer réellement dans
   une base temporaire afin de vérifier son intégrité et son exploitabilité.
+- La superposition `compose.yaml` + `compose.prod.yaml` est démarrée dans un job
+  CI isolé. Ce smoke test vérifie ensemble les migrations, le HBA SCRAM, les
+  rôles limités, les conteneurs immuables, la maintenance, la sauvegarde, la
+  restauration et une requête HTTP avant de supprimer la pile et ses volumes.
 
 ## 14. Principes de maintenance
 

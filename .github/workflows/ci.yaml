@@ -145,9 +145,6 @@ jobs:
       - name: Initialiser les donnees de controle
         run: docker compose --profile outils run --rm liquibase update --context-filter=dev
 
-      - name: Verifier une sauvegarde chiffree par restauration
-        run: ./scripts/ci-backup-restore.sh
-
       - name: Installer les dependances d'accessibilite
         run: npm ci
 
@@ -175,3 +172,32 @@ jobs:
       - name: Arreter les services
         if: always()
         run: docker compose down --volumes --remove-orphans
+
+  production-smoke:
+    name: Configuration de production
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Preparer la configuration de production isolee
+        run: |
+          cp .env.example .env
+          cp app/.env.example app/.env
+          APP_SECRET_CI="$(openssl rand -hex 32)"
+          sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
+          sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+            valeur="$(openssl rand -hex 24)"
+            echo "::add-mask::${valeur}"
+            echo "${variable}=${valeur}" >> "$GITHUB_ENV"
+          done
+
+      - name: Tester la superposition Compose de production
+        env:
+          COMPOSE_PROJECT_NAME: benevole-jambville-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          NGINX_HOST_PORT: 18082
+          POSTGRES_HOST_PORT: 15436
+        run: ./scripts/ci-production-smoke.sh
