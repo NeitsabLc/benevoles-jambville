@@ -9,7 +9,39 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
-Aucun changement pour le moment.
+### Ajouté
+
+- smoke test CI de la superposition Compose de production, incluant migrations,
+  rôles PostgreSQL limités, HBA SCRAM, durcissement des conteneurs, maintenance,
+  requête HTTP, sauvegarde chiffrée et restauration réelle ;
+- audits de sécurité des dépendances npm et ImportMap, analyse Trivy des images
+  PHP, Nginx, PostgreSQL, Liquibase et sauvegarde, et mises à jour Dependabot ;
+- chiffrement des sauvegardes PostgreSQL avec `age` et commande locale de test
+  de restauration avec une identité éphémère ;
+- contrôle de style PHP automatisé dans la CI.
+
+### Modifié
+
+- compilation systématique des assets de production avant les contrôles
+  d’accessibilité Playwright et Axe ;
+- extraction de l’analyse des imports CSV et des validations de profil et de
+  présence dans des services dédiés, avec des limites explicites sur les
+  saisies persistées ;
+- images tierces référencées par tag et digest immuable, et images de production
+  PHP et Nginx construites sans montage du code applicatif ;
+- validation silencieuse des configurations Compose afin de ne plus exposer les
+  secrets résolus dans les journaux de CI.
+
+### Sécurité
+
+- restriction des hôtes et proxies de confiance par configuration Symfony et
+  rejet des en-têtes `Host` non autorisés ;
+- protection CSRF de la déconnexion ;
+- exécution non privilégiée des services PHP et Nginx avec racine en lecture
+  seule, capacités Linux retirées, élévation de privilèges interdite et limites
+  explicites de ressources ;
+- authentification PostgreSQL de production en SCRAM et vérification automatisée
+  des privilèges des rôles applicatif et sauvegarde.
 
 ## 1.1.1 — 2026-08-12
 
