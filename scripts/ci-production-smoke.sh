@@ -26,6 +26,16 @@ assert_hardened() {
     test "$(docker inspect --format '{{json .Mounts}}' "$conteneur")" = '[]'
 }
 
+assert_database_hardened() {
+    conteneur=$(compose ps --quiet database)
+
+    test -n "$conteneur"
+    test "$(docker inspect --format '{{.Config.User}}' "$conteneur")" = postgres
+    test "$(docker inspect --format '{{.HostConfig.ReadonlyRootfs}}' "$conteneur")" = true
+    docker inspect --format '{{json .HostConfig.CapDrop}}' "$conteneur" | grep -q ALL
+    docker inspect --format '{{json .HostConfig.SecurityOpt}}' "$conteneur" | grep -q 'no-new-privileges:true'
+}
+
 : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD doit etre defini}"
 : "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit etre defini}"
 : "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit etre defini}"
@@ -79,6 +89,7 @@ compose exec --no-TTY php php bin/console cache:warmup --env=prod --no-debug
 test "$(compose exec --no-TTY php id -un)" = www-data
 assert_hardened php www-data
 assert_hardened nginx nginx
+assert_database_hardened
 
 compose exec --no-TTY database sh -ec '
     hba_file=$(psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --tuples-only --no-align --command="SHOW hba_file")

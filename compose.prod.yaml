@@ -118,8 +118,13 @@ services:
     restart: unless-stopped
     init: true
     user: postgres
+    read_only: true
+    cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/run/postgresql:mode=1777
     mem_limit: 1g
     cpus: 2.0
     pids_limit: 256
@@ -165,9 +170,13 @@ services:
   liquibase:
     logging: *production-logging
     init: true
+    user: liquibase:liquibase
+    read_only: true
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
     mem_limit: 512m
     cpus: 1.0
     pids_limit: 128

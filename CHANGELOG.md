@@ -37,9 +37,10 @@ et le projet suit une numérotation de version sémantique.
 - restriction des hôtes et proxies de confiance par configuration Symfony et
   rejet des en-têtes `Host` non autorisés ;
 - protection CSRF de la déconnexion ;
-- exécution non privilégiée des services PHP et Nginx avec racine en lecture
-  seule, capacités Linux retirées, élévation de privilèges interdite et limites
-  explicites de ressources ;
+- exécution non privilégiée des services PHP, Nginx, PostgreSQL, Liquibase,
+  maintenance et sauvegarde avec racine en lecture seule, capacités Linux
+  retirées, élévation de privilèges interdite et limites explicites de
+  ressources ;
 - authentification PostgreSQL de production en SCRAM et vérification automatisée
   des privilèges des rôles applicatif et sauvegarde.
 
