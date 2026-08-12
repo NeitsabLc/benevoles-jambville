@@ -64,7 +64,15 @@ services:
       - ./docker/postgres/sync-role-passwords.sh:/usr/local/bin/sync-role-passwords:ro
       - ./docker/postgres/finalize-role-hardening.sh:/usr/local/bin/finalize-role-hardening:ro
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test:
+        - CMD-SHELL
+        - >-
+          PGPASSWORD="$${POSTGRES_HEALTHCHECK_PASSWORD}"
+          psql --host=127.0.0.1
+          --username="$${POSTGRES_HEALTHCHECK_USER}"
+          --dbname="$${POSTGRES_DB}"
+          --tuples-only --no-align
+          --command='SELECT 1' >/dev/null
       interval: 5s
       timeout: 5s
       retries: 10

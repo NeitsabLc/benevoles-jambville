@@ -98,6 +98,16 @@ compose --profile outils run --rm \
     liquibase update
 compose exec --no-TTY database /usr/local/bin/finalize-role-hardening
 compose --profile outils run --rm liquibase update
+sleep 6
+database_container=$(compose ps --quiet database)
+test "$(docker inspect --format '{{.State.Health.Status}}' "$database_container")" = healthy
+docker inspect --format '{{json .Config.Healthcheck.Test}}' "$database_container" \
+    | grep -q 'POSTGRES_HEALTHCHECK_USER'
+if compose logs --no-color database \
+    | grep -q 'role "benevole_jambville" is not permitted to log in'; then
+    echo "Le healthcheck utilise encore le compte d'amorcage desactive." >&2
+    exit 1
+fi
 compose exec --no-TTY database sh -ec '
     migrator=$(PGPASSWORD="$POSTGRES_MIGRATOR_PASSWORD" psql --host=127.0.0.1 \
         --username="$POSTGRES_MIGRATOR_USER" --dbname="$POSTGRES_DB" \
