@@ -122,7 +122,15 @@ jobs:
           for image in php nginx postgres liquibase backup; do
             depot="ghcr.io/${proprietaire}/benevole-jambville-${image}"
             candidat="${depot}:sha-${GITHUB_SHA}"
-            digest=$(docker buildx imagetools inspect "$candidat" | awk '$1 == "Digest:" { print $2; exit }')
+            digest=""
+            for tentative in 1 2 3 4 5 6; do
+              digest=$(docker buildx imagetools inspect "$candidat" 2>/dev/null | awk '$1 == "Digest:" { print $2; exit }') || true
+              if printf '%s\n' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+                break
+              fi
+              echo "Candidat pas encore disponible (${tentative}/6) : ${candidat}"
+              sleep 10
+            done
             if ! printf '%s\n' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
               echo "Digest candidat invalide : ${candidat}" >&2
               exit 1
