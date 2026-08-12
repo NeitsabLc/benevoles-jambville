@@ -467,6 +467,10 @@ Priorités de test :
 - inscription uniquement pour soi-même ;
 - création compagnon réservée à l’équipe pilote ;
 - génération et recalcul des repas selon la période ;
+- affichage d’une thématique événementielle uniquement lorsque toute la période
+  de présence est comprise entre ses dates, bornes incluses ;
+- masquage des autres thématiques lorsqu’une présence est entièrement comprise
+  dans la période d’une thématique événementielle exclusive ;
 - prise en compte des enfants et des effectifs compagnons ;
 - interdiction du chevauchement des inscriptions individuelles ;
 - calcul quotidien des synthèses ;

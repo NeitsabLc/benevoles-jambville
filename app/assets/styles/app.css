@@ -344,7 +344,7 @@ body {
 .ligne-benevole { min-height: 4rem; color: var(--bleu-sgdf); text-decoration: none; transition: background .15s; }
 .conteneur-ligne-benevole { position: relative; }
 .conteneur-ligne-benevole + .conteneur-ligne-benevole { border-top: 1px solid #e3eaed; }
-.conteneur-ligne-benevole.inactive .ligne-benevole > * { opacity: .58; }
+.conteneur-ligne-benevole.inactive .ligne-benevole { color: var(--texte-secondaire); background: #f7f9fa; }
 .ligne-benevole { position: relative; z-index: 1; padding-right: 8rem; background: #fff; transition: background .15s, transform .18s ease; touch-action: pan-y; }
 .ligne-benevole:hover, .ligne-benevole:focus-visible { outline: 0; background: #eef8f5; }
 .ligne-benevole strong, .ligne-benevole span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

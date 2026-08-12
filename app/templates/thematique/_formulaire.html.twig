@@ -5,7 +5,7 @@
 </div>
 <fieldset class="periode-thematique">
     <legend>Événement <small>(facultatif)</small></legend>
-    <p>Une thématique événementielle est proposée en premier lorsque toute la présence est comprise dans cette période.</p>
+    <p>Une thématique événementielle est proposée uniquement lorsque toute la présence est comprise dans cette période, dates limites incluses.</p>
     <div class="grille-thematique">
         <div class="champ"><label for="date_debut_evenement">Du</label><input id="date_debut_evenement" name="date_debut_evenement" type="date" value="{{ app.request.request.get('date_debut_evenement', thematique and thematique.dateDebutEvenement ? thematique.dateDebutEvenement|date('Y-m-d') : '') }}"></div>
         <div class="champ"><label for="date_fin_evenement">Au</label><input id="date_fin_evenement" name="date_fin_evenement" type="date" value="{{ app.request.request.get('date_fin_evenement', thematique and thematique.dateFinEvenement ? thematique.dateFinEvenement|date('Y-m-d') : '') }}"></div>

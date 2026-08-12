@@ -14,6 +14,10 @@ et le projet suit une numérotation de version sémantique.
 - restauration du générateur de repas et des autres interactions JavaScript en
   supprimant un import CSS redondant bloqué par la CSP, avec une initialisation
   compatible avec les chargements directs et la navigation Turbo.
+- couverture E2E du filtrage des thématiques événementielles : elles ne sont
+  proposées que lorsque toute la présence est comprise dans leur période, et
+  une thématique exclusive masque alors les autres choix.
+- contraste de la ligne d’un compte désactivé dans la liste des bénévoles.
 
 ### Ajouté
 
