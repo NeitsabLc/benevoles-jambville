@@ -69,6 +69,9 @@ et le projet suit une numérotation de version sémantique.
 
 ### Sécurité
 
+- suppression des mots de passe d'exemple et des valeurs de secours faibles :
+  les secrets PostgreSQL et Symfony doivent désormais être fournis explicitement ;
+- épinglage par digest de PostgreSQL dans le fichier Compose Symfony secondaire ;
 - restriction des hôtes et proxies de confiance par configuration Symfony et
   rejet des en-têtes `Host` non autorisés ;
 - protection CSRF de la déconnexion ;

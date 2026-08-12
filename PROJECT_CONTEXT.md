@@ -551,6 +551,9 @@ Pour une évolution d’interface :
   dédiés au cache, aux journaux et aux fichiers temporaires.
 - Toute image tierce est référencée par un tag lisible et un digest immuable.
   Lors d'une mise à jour, les deux valeurs doivent être actualisées ensemble.
+- Cette règle s'applique aussi aux fichiers Compose secondaires conservés dans
+  `app/`. Les fichiers d'exemple laissent les secrets vides et ne proposent
+  aucune valeur de secours utilisable.
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
 - Un tag `vX.Y.Z` rattaché à `main` publie ces cinq images dans GHCR avec une
