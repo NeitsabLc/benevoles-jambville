@@ -6,6 +6,9 @@ services:
       target: php-development
       args:
         PHP_VERSION: "${PHP_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     working_dir: /var/www/app
     environment:
       DATABASE_HOST: database
@@ -23,7 +26,7 @@ services:
     networks: [benevole_jambville]
 
   nginx:
-    image: "nginx:${NGINX_VERSION}"
+    image: "nginx:${NGINX_VERSION}@${NGINX_IMAGE_DIGEST}"
     ports:
       - "${NGINX_BIND_ADDRESS:-127.0.0.1}:${NGINX_HOST_PORT:-8081}:8080"
     volumes:
@@ -33,7 +36,14 @@ services:
     networks: [benevole_jambville]
 
   database:
-    image: "postgres:${POSTGRES_VERSION}"
+    image: "benevole-jambville-postgres:${POSTGRES_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+      target: postgres-runtime
+      args:
+        POSTGRES_VERSION: "${POSTGRES_VERSION}"
+        POSTGRES_IMAGE_DIGEST: "${POSTGRES_IMAGE_DIGEST}"
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "${POSTGRES_USER}"
@@ -57,7 +67,16 @@ services:
     networks: [benevole_jambville]
 
   liquibase:
-    image: "liquibase:${LIQUIBASE_VERSION}"
+    image: "benevole-jambville-liquibase:${LIQUIBASE_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/liquibase/Dockerfile
+      target: liquibase-runtime
+      args:
+        LIQUIBASE_VERSION: "${LIQUIBASE_VERSION}"
+        LIQUIBASE_IMAGE_DIGEST: "${LIQUIBASE_IMAGE_DIGEST}"
+        PGJDBC_VERSION: "${PGJDBC_VERSION}"
+        PGJDBC_SHA256: "${PGJDBC_SHA256}"
     profiles: [outils]
     working_dir: /liquibase/changelog
     volumes:

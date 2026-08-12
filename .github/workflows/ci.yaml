@@ -74,6 +74,9 @@ jobs:
       - name: Auditer les dependances Composer
         run: docker compose exec --no-TTY php composer audit --locked --no-interaction
 
+      - name: Auditer les dependances ImportMap
+        run: docker compose exec --no-TTY php php bin/console importmap:audit
+
       - name: Valider les changelogs Liquibase
         run: docker compose --profile outils run --rm liquibase validate
 
@@ -93,21 +96,31 @@ jobs:
           docker compose exec --no-TTY php php bin/console cache:warmup --env=dev
           docker compose exec --no-TTY php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
-      - name: Preparer l'image PHP pour l'analyse de vulnerabilites
+      - name: Preparer les images pour l'analyse de vulnerabilites
         run: |
           docker tag "$(docker compose images --quiet php)" benevole-jambville-php-ci:scan
-          docker save benevole-jambville-php-ci:scan --output /tmp/benevole-jambville-php.tar
+          docker tag "$(docker compose images --quiet nginx)" benevole-jambville-nginx-ci:scan
+          docker tag "$(docker compose images --quiet database)" benevole-jambville-postgres-ci:scan
+          docker tag benevole-jambville-liquibase:local benevole-jambville-liquibase-ci:scan
+          docker save benevole-jambville-php-ci:scan --output /tmp/php.tar
+          docker save benevole-jambville-nginx-ci:scan --output /tmp/nginx.tar
+          docker save benevole-jambville-postgres-ci:scan --output /tmp/postgres.tar
+          docker save benevole-jambville-liquibase-ci:scan --output /tmp/liquibase.tar
 
-      - name: Analyser les vulnerabilites de l'image PHP
-        run: >-
-          docker run --rm
-          --volume /tmp:/scan:ro
-          ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
-          image --input /scan/benevole-jambville-php.tar
-          --scanners vuln
-          --severity HIGH,CRITICAL
-          --ignore-unfixed
-          --exit-code 1
+      - name: Analyser les vulnerabilites des images d'execution
+        run: |
+          set -euo pipefail
+          for archive in php nginx postgres liquibase; do
+            docker run --rm \
+              --volume /tmp:/scan:ro \
+              --volume trivy-cache:/root/.cache/trivy \
+              ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+              image --input "/scan/${archive}.tar" \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --ignore-unfixed \
+              --exit-code 1
+          done
 
       - name: Reinitialiser la base de tests
         run: |
@@ -128,6 +141,9 @@ jobs:
 
       - name: Installer les dependances d'accessibilite
         run: npm ci
+
+      - name: Auditer les dependances npm
+        run: npm audit --audit-level=high
 
       - name: Installer Chromium
         run: npx playwright install --with-deps chromium

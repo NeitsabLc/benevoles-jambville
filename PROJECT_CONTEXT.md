@@ -541,6 +541,10 @@ Pour une évolution d’interface :
   privilèges interdite et des limites explicites de mémoire, CPU et processus.
 - Les seuls emplacements d'écriture de PHP en production sont des `tmpfs`
   dédiés au cache, aux journaux et aux fichiers temporaires.
+- Toute image tierce est référencée par un tag lisible et un digest immuable.
+  Lors d'une mise à jour, les deux valeurs doivent être actualisées ensemble.
+- La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
+  images PHP, Nginx, PostgreSQL et Liquibase avec Trivy.
 
 ## 14. Principes de maintenance
 

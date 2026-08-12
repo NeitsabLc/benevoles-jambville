@@ -1,7 +1,12 @@
 ARG PHP_VERSION=8.4
-ARG NGINX_VERSION=1.29-alpine
+ARG NGINX_VERSION=1.30.4-alpine
+ARG PHP_IMAGE_DIGEST=sha256:9467f10bf42897dec0abb73ee20c747ebd45463ec9d6fcc4044cb83eba6dade7
+ARG COMPOSER_IMAGE_DIGEST=sha256:4d71c3c2109c61d5415544264b59ad4087e4c5b7244481723664138fd36d5040
+ARG NGINX_IMAGE_DIGEST=sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
 
-FROM php:${PHP_VERSION}-fpm AS php-base
+FROM composer:2@${COMPOSER_IMAGE_DIGEST} AS composer-bin
+
+FROM php:${PHP_VERSION}-fpm@${PHP_IMAGE_DIGEST} AS php-base
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -18,7 +23,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 COPY docker/php/entrypoint.sh /usr/local/bin/benevole-jambville-entrypoint
 RUN chmod 0755 /usr/local/bin/benevole-jambville-entrypoint
 
@@ -31,7 +36,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 COPY app/composer.json app/composer.lock app/symfony.lock ./
 RUN composer install \
         --no-dev \
@@ -88,7 +93,7 @@ USER www-data
 ENTRYPOINT ["docker-php-entrypoint"]
 CMD ["php-fpm"]
 
-FROM nginx:${NGINX_VERSION} AS nginx-production
+FROM nginx:${NGINX_VERSION}@${NGINX_IMAGE_DIGEST} AS nginx-production
 
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=app-builder /var/www/app/public /var/www/app/public

@@ -46,6 +46,9 @@ services:
       target: php-production
       args:
         PHP_VERSION: "${PHP_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     working_dir: /var/www/app
     entrypoint: ["benevole-jambville-maintenance"]
     env_file:
@@ -89,6 +92,9 @@ services:
       args:
         PHP_VERSION: "${PHP_VERSION}"
         NGINX_VERSION: "${NGINX_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     restart: unless-stopped
     read_only: true
     user: nginx
@@ -118,7 +124,14 @@ services:
   backup:
     logging: *production-logging
     restart: unless-stopped
-    image: "postgres:${POSTGRES_VERSION}"
+    image: "benevole-jambville-postgres:${POSTGRES_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+      target: postgres-runtime
+      args:
+        POSTGRES_VERSION: "${POSTGRES_VERSION}"
+        POSTGRES_IMAGE_DIGEST: "${POSTGRES_IMAGE_DIGEST}"
     entrypoint: ["/bin/sh", "/usr/local/bin/benevole-jambville-backup"]
     user: postgres
     init: true
