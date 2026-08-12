@@ -142,9 +142,6 @@ jobs:
       - name: Executer les tests
         run: docker compose exec --no-TTY php php bin/phpunit
 
-      - name: Initialiser les donnees de controle
-        run: docker compose --profile outils run --rm liquibase update --context-filter=dev
-
       - name: Installer les dependances d'accessibilite
         run: npm ci
 

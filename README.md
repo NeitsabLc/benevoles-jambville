@@ -115,9 +115,9 @@ pas les données de développement.
 `make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
 `make test-accessibility` reconstruit d'abord les assets de production, puis
 contrôle avec Playwright et Axe les pages publiques
-et les parcours des trois rôles ; l’application doit être démarrée et le jeu de
-démonstration chargé avec `make db-dev-update`. Ces contrôles sont également
-exécutés par la CI.
+et les parcours des trois rôles ; l’application doit être démarrée. La commande
+applique et réinitialise elle-même les données de démonstration nécessaires aux
+scénarios E2E. Ces contrôles sont également exécutés par la CI.
 
 ## Emails locaux
 

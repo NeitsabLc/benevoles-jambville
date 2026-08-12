@@ -135,7 +135,7 @@ assets-compile: ## Reconstruire proprement les assets de production
 	$(PHP) php bin/console asset-map:compile --env=prod --no-debug
 
 .PHONY: test-accessibility
-test-accessibility: assets-compile ## Tester l'accessibilité sur l'application démarrée et les données de démonstration
+test-accessibility: db-dev-update assets-compile ## Tester l'accessibilité et les parcours E2E sur les données de démonstration
 	npm run test:accessibility
 
 .PHONY: backup-now

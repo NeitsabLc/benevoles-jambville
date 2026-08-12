@@ -17,7 +17,10 @@ et le projet suit une numérotation de version sémantique.
 - couverture E2E du filtrage des thématiques événementielles : elles ne sont
   proposées que lorsque toute la présence est comprise dans leur période, et
   une thématique exclusive masque alors les autres choix.
-- contraste de la ligne d’un compte désactivé dans la liste des bénévoles.
+- contraste des lignes désactivées dans les listes des bénévoles et des
+  thématiques ;
+- réinitialisation automatique des fixtures événementielles avant les scénarios
+  E2E afin que leur résultat ne dépende pas de l’état de la base locale.
 
 ### Ajouté
 
