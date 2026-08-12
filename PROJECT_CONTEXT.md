@@ -534,6 +534,13 @@ Pour une évolution d’interface :
   dans `dev` afin d’éviter toute divergence.
 - Les procédures de livraison et les paramètres de production restent dans le
   dossier opérationnel externe au dépôt.
+- Les images applicatives de production embarquent le code et les assets
+  compilés : aucun montage du dépôt applicatif en écriture n'est autorisé.
+- Les services HTTP et PHP de production s'exécutent sans privilège, avec une
+  racine en lecture seule, toutes les capacités Linux retirées, l'élévation de
+  privilèges interdite et des limites explicites de mémoire, CPU et processus.
+- Les seuls emplacements d'écriture de PHP en production sont des `tmpfs`
+  dédiés au cache, aux journaux et aux fichiers temporaires.
 
 ## 14. Principes de maintenance
 

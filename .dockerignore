@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.local
+.env
+.env.*
+!.env.example
+app/.env
+app/.env.*
+!app/.env.example
+app/.phpunit.cache
+app/public/assets
+app/var
+app/vendor
+node_modules
+playwright-report
+test-results

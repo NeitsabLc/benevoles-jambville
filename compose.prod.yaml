@@ -1,19 +1,71 @@
+x-production-logging: &production-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   php:
+    logging: *production-logging
+    image: "benevole-jambville-php-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
+    build:
+      target: php-production
+    env_file:
+      - path: ./app/.env
+        required: true
+      - path: ./app/.env.local
+        required: false
     restart: unless-stopped
+    read_only: true
+    user: www-data
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes: !override []
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/www/app/var/cache:mode=0770,uid=33,gid=33
+      - /var/www/app/var/log:mode=0770,uid=33,gid=33
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
 
   maintenance:
+    logging: *production-logging
     restart: unless-stopped
+    image: "benevole-jambville-php-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      target: php-production
       args:
         PHP_VERSION: "${PHP_VERSION}"
     working_dir: /var/www/app
     entrypoint: ["benevole-jambville-maintenance"]
+    env_file:
+      - path: ./app/.env
+        required: true
+      - path: ./app/.env.local
+        required: false
+    read_only: true
+    user: www-data
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/www/app/var/cache:mode=0770,uid=33,gid=33
+      - /var/www/app/var/log:mode=0770,uid=33,gid=33
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
@@ -21,26 +73,64 @@ services:
       DATABASE_NAME: "${POSTGRES_DB}"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
-    volumes:
-      - ./app:/var/www/app
     depends_on:
       database:
         condition: service_healthy
     networks: [benevole_jambville]
 
   nginx:
+    logging: *production-logging
+    image: "benevole-jambville-nginx-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: nginx-production
+      args:
+        PHP_VERSION: "${PHP_VERSION}"
+        NGINX_VERSION: "${NGINX_VERSION}"
     restart: unless-stopped
+    read_only: true
+    user: nginx
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes: !override []
+    tmpfs:
+      - /var/cache/nginx:mode=0750,uid=101,gid=101
+      - /var/log/nginx:mode=0750,uid=101,gid=101
+      - /var/run:mode=0750,uid=101,gid=101
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
 
   database:
+    logging: *production-logging
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 2.0
+    pids_limit: 256
 
   backup:
+    logging: *production-logging
     restart: unless-stopped
     image: "postgres:${POSTGRES_VERSION}"
     entrypoint: ["/bin/sh", "/usr/local/bin/benevole-jambville-backup"]
+    user: postgres
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
-      POSTGRES_USER: "benevole_jambville_backup"
+      POSTGRES_USER: benevole_jambville_backup
       PGPASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
     volumes:
       - ./docker/postgres/backup.sh:/usr/local/bin/benevole-jambville-backup:ro
@@ -49,3 +139,13 @@ services:
       database:
         condition: service_healthy
     networks: [benevole_jambville]
+
+  liquibase:
+    logging: *production-logging
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128

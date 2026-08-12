@@ -134,7 +134,7 @@ jobs:
 
       - name: Attendre que l'application soit disponible
         run: |
-          APP_BASE_URL="http://$(docker compose port nginx 80)"
+          APP_BASE_URL="http://$(docker compose port nginx 8080)"
           echo "APP_BASE_URL=${APP_BASE_URL}" >> "$GITHUB_ENV"
           curl --fail --retry 30 --retry-delay 2 --retry-all-errors "${APP_BASE_URL}/connexion"
 
