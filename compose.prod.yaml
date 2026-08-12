@@ -124,7 +124,7 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:mode=1777
-      - /var/run/postgresql:mode=1777
+      - /var/run/postgresql:mode=0775,uid=70,gid=70
     mem_limit: 1g
     cpus: 2.0
     pids_limit: 256
