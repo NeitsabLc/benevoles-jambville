@@ -16,13 +16,27 @@ final class SecuriteControllerTest extends WebTestCase
     public function testLaPageDeConnexionEstAccessible(): void
     {
         $client = self::createClient();
-        $client->request('GET', '/connexion');
+        $crawler = $client->request('GET', '/connexion');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Ravi de vous revoir');
         self::assertSelectorExists('input[name="email"]');
         self::assertSelectorExists('input[name="mot_de_passe"]');
         self::assertSelectorExists('input[name="_csrf_token"]');
+
+        $politique = $client->getResponse()->headers->get('Content-Security-Policy');
+        self::assertNotNull($politique);
+        self::assertMatchesRegularExpression("/'nonce-[A-Za-z0-9+\/=]+'/", $politique);
+        self::assertStringNotContainsString("'unsafe-inline'", $politique);
+
+        $nonces = $crawler->filter('script[nonce]')->each(
+            static fn ($script): string => (string) $script->attr('nonce'),
+        );
+        self::assertNotEmpty($nonces);
+        foreach ($nonces as $nonce) {
+            self::assertNotSame('', $nonce);
+            self::assertStringContainsString("'nonce-{$nonce}'", $politique);
+        }
     }
 
     public function testUnNomDhoteNonAutoriseEstRejete(): void

@@ -6,5 +6,5 @@ namespace App;
 
 final class VersionApplication
 {
-    public const string VERSION = '1.2.0';
+    public const string VERSION = '1.2.1';
 }
