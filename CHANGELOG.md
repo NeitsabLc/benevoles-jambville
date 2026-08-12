@@ -9,6 +9,10 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+Aucun changement pour le moment.
+
+## 1.2.0 — 2026-08-12
+
 ### Corrigé
 
 - restauration du générateur de repas et des autres interactions JavaScript en
