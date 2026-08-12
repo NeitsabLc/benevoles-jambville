@@ -78,6 +78,8 @@ Aucun changement pour le moment.
 
 - suppression des mots de passe d'exemple et des valeurs de secours faibles :
   les secrets PostgreSQL et Symfony doivent désormais être fournis explicitement ;
+- suppression du forçage du mode debug dans l'exemple d'environnement afin
+  qu'il soit automatiquement désactivé lorsque `APP_ENV=prod` ;
 - épinglage par digest de PostgreSQL dans le fichier Compose Symfony secondaire ;
 - restriction des hôtes et proxies de confiance par configuration Symfony et
   rejet des en-têtes `Host` non autorisés ;
