@@ -124,17 +124,18 @@ services:
   backup:
     logging: *production-logging
     restart: unless-stopped
-    image: "benevole-jambville-postgres:${POSTGRES_IMAGE_TAG:-local}"
+    image: "benevole-jambville-backup:${BACKUP_IMAGE_TAG:-local}"
     build:
       context: .
       dockerfile: docker/postgres/Dockerfile
-      target: postgres-runtime
+      target: backup-runtime
       args:
         POSTGRES_VERSION: "${POSTGRES_VERSION}"
         POSTGRES_IMAGE_DIGEST: "${POSTGRES_IMAGE_DIGEST}"
-    entrypoint: ["/bin/sh", "/usr/local/bin/benevole-jambville-backup"]
+        AGE_PACKAGE_VERSION: "${AGE_PACKAGE_VERSION}"
     user: postgres
     init: true
+    read_only: true
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
@@ -145,9 +146,11 @@ services:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: benevole_jambville_backup
       PGPASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
+      BACKUP_AGE_RECIPIENT: "${BACKUP_AGE_RECIPIENT:?BACKUP_AGE_RECIPIENT doit être défini}"
     volumes:
-      - ./docker/postgres/backup.sh:/usr/local/bin/benevole-jambville-backup:ro
       - "${BACKUP_DIR:-./var/backups}:/backups"
+    tmpfs:
+      - /tmp:mode=1777
     depends_on:
       database:
         condition: service_healthy

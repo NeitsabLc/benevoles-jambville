@@ -97,10 +97,16 @@ ou modifier le schéma.
 make test
 make analyse-statique
 make style
+make backup-restore-test
 npm ci
 npx playwright install chromium
 make test-accessibility
 ```
+
+Le test de sauvegarde génère une paire de clés `age` éphémère, produit un dump
+chiffré puis le restaure dans une base temporaire. En production, seule la clé
+publique `BACKUP_AGE_RECIPIENT` est fournie au service de sauvegarde ; la clé
+privée de restauration doit être conservée séparément de l’hôte.
 
 `make test` reconstruit une base PostgreSQL locale dédiée dont le nom se
 termine par `_test`, applique les migrations et exécute PHPUnit. Elle ne modifie

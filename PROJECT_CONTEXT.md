@@ -544,7 +544,12 @@ Pour une évolution d’interface :
 - Toute image tierce est référencée par un tag lisible et un digest immuable.
   Lors d'une mise à jour, les deux valeurs doivent être actualisées ensemble.
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
-  images PHP, Nginx, PostgreSQL et Liquibase avec Trivy.
+  images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
+- Les sauvegardes PostgreSQL sont chiffrées avec `age` avant toute écriture sur
+  le volume hôte. La production ne reçoit que la clé publique ; la clé privée
+  de restauration est conservée hors de l’hôte applicatif.
+- La CI doit produire une sauvegarde chiffrée et la restaurer réellement dans
+  une base temporaire afin de vérifier son intégrité et son exploitabilité.
 
 ## 14. Principes de maintenance
 

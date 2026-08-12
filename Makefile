@@ -142,6 +142,10 @@ test-accessibility: assets-compile ## Tester l'accessibilité sur l'application 
 backup-now: ## Créer immédiatement une sauvegarde via le service de production
 	$(DOCKER_COMPOSE_PROD) run --rm -e BACKUP_ONCE=1 backup
 
+.PHONY: backup-restore-test
+backup-restore-test: ## Chiffrer puis restaurer une sauvegarde dans une base temporaire
+	./scripts/ci-backup-restore.sh
+
 .PHONY: maintenance-now
 maintenance-now: ## Exécuter immédiatement un cycle de maintenance de production
 	$(DOCKER_COMPOSE_PROD) run --rm -e MAINTENANCE_ONCE=1 maintenance
