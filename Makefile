@@ -30,8 +30,8 @@ ps: ## Afficher l'état des conteneurs
 	$(DOCKER_COMPOSE) ps
 
 .PHONY: prod-config
-prod-config: ## Valider et afficher la configuration Compose de production
-	$(DOCKER_COMPOSE_PROD) config
+prod-config: ## Valider silencieusement la configuration Compose de production
+	$(DOCKER_COMPOSE_PROD) config --quiet
 
 .PHONY: prod-up
 prod-up: ## Démarrer les services avec la configuration de production
