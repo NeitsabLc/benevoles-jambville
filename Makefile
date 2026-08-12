@@ -94,7 +94,7 @@ db-sync-role-passwords: ## Synchroniser explicitement les mots de passe des rôl
 	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/sync-role-passwords
 
 .PHONY: db-finalize-role-hardening
-db-finalize-role-hardening: ## Retirer explicitement les attributs élevés après la bascule vérifiée
+db-finalize-role-hardening: ## Transférer les objets au rôle migrateur et vérifier les rôles limités
 	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/finalize-role-hardening
 
 .PHONY: db-dev-update
@@ -106,7 +106,7 @@ db-shell: ## Ouvrir une console PostgreSQL
 	$(DOCKER_COMPOSE) exec database psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
 
 .PHONY: test-db-reset
-test-db-reset: ## Reconstruire la base de test isolée
+test-db-reset: db-prepare-roles ## Reconstruire la base de test isolée après création des rôles dédiés manquants
 	$(DOCKER_COMPOSE) exec -T database sh -c 'base_test="$${POSTGRES_DB}_test"; dropdb --if-exists --force --username="$$POSTGRES_USER" "$$base_test" && createdb --username="$$POSTGRES_USER" --owner="$$POSTGRES_USER" "$$base_test"'
 	@base_test="$$($(DOCKER_COMPOSE) exec -T database printenv POSTGRES_DB)_test"; \
 		$(DOCKER_COMPOSE) --profile outils run --rm -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/$$base_test" liquibase update --context-filter=dev

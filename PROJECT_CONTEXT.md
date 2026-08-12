@@ -543,17 +543,41 @@ Pour une évolution d’interface :
 - Tous les services de production s'exécutent sans privilège, avec une racine
   en lecture seule, toutes les capacités Linux retirées, l'élévation de
   privilèges interdite et des limites explicites de mémoire, CPU et processus.
+- Le smoke test inspecte les six services de production et échoue si leur
+  utilisateur, racine en lecture seule, capacités, option
+  `no-new-privileges`, mémoire, CPU ou limite de processus divergent de la
+  configuration attendue.
 - Les seuls emplacements d'écriture de PHP en production sont des `tmpfs`
   dédiés au cache, aux journaux et aux fichiers temporaires.
 - Toute image tierce est référencée par un tag lisible et un digest immuable.
   Lors d'une mise à jour, les deux valeurs doivent être actualisées ensemble.
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
+- Un tag `vX.Y.Z` rattaché à `main` publie ces cinq images dans GHCR avec une
+  nomenclature stable, un SBOM, une provenance GitHub et une signature Cosign
+  sans clé persistante. Ce workflow ne déploie rien et n'accède à aucune base.
+- En production, Liquibase utilise le rôle dédié
+  `benevole_jambville_migrator`, sans privilège administrateur. Après
+  l'amorçage initial, les objets applicatifs et les tables de suivi Liquibase
+  lui sont transférés ; les rôles applicatif et sauvegarde restent limités aux
+  droits nécessaires.
+- Le compte PostgreSQL d'amorçage est placé en `NOLOGIN` après la bascule. Les
+  restaurations et vérifications privilégiées utilisent un compte administratif
+  opérationnel distinct, avec un secret dédié.
+- La reconstruction locale de la base de test crée d'abord les éventuels rôles
+  dédiés manquants afin de prendre en charge les volumes antérieurs à leur
+  introduction.
+- Le réseau Compose de production possède un sous-réseau explicite. Le HBA
+  PostgreSQL autorise seulement les rôles applicatif, migrateur, sauvegarde,
+  amorçage et administration depuis ce réseau avec SCRAM, puis rejette toute
+  autre connexion IPv4 ou IPv6.
 - Les sauvegardes PostgreSQL sont chiffrées avec `age` avant toute écriture sur
   le volume hôte. La production ne reçoit que la clé publique ; la clé privée
   de restauration est conservée hors de l’hôte applicatif.
 - La CI doit produire une sauvegarde chiffrée et la restaurer réellement dans
   une base temporaire afin de vérifier son intégrité et son exploitabilité.
+- Le smoke test échoue si un dump, une archive claire ou un fichier temporaire
+  subsiste dans le répertoire de sauvegarde après le chiffrement.
 - La superposition `compose.yaml` + `compose.prod.yaml` est démarrée dans un job
   CI isolé. Ce smoke test vérifie ensemble les migrations, le HBA SCRAM, les
   rôles limités, les conteneurs immuables, la maintenance, la sauvegarde, la

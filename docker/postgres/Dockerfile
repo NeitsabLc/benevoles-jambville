@@ -8,6 +8,10 @@ USER root
 RUN apk upgrade --no-cache c-ares \
     && rm -f /usr/local/bin/gosu
 
+COPY --chmod=0755 docker/postgres/init-roles.sh /docker-entrypoint-initdb.d/10-init-roles.sh
+COPY --chmod=0755 docker/postgres/sync-role-passwords.sh /usr/local/bin/sync-role-passwords
+COPY --chmod=0755 docker/postgres/finalize-role-hardening.sh /usr/local/bin/finalize-role-hardening
+
 USER postgres
 
 FROM postgres-runtime AS backup-runtime

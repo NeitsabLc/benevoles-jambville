@@ -21,9 +21,31 @@ et le projet suit une numérotation de version sémantique.
   thématiques ;
 - réinitialisation automatique des fixtures événementielles avant les scénarios
   E2E afin que leur résultat ne dépende pas de l’état de la base locale.
+- correction du motif d’hôtes de confiance utilisé par la CI pour accepter
+  `127.0.0.1` sans autoriser d’hôte supplémentaire ;
+- construction explicite de PostgreSQL et Liquibase par le smoke test de
+  production afin qu’il fonctionne sur un runner Docker vierge.
+- refus des en-têtes `X-Forwarded-*` provenant directement des clients et test
+  du contournement de la validation d’hôte par `X-Forwarded-Host`.
+- analyse Trivy des cibles PHP et Nginx de production effectives, en plus des
+  images PostgreSQL, Liquibase et sauvegarde.
+- rôle PostgreSQL dédié aux migrations, avec transfert de propriété des objets
+  applicatifs et contrôle CI de ses privilèges limités.
+- vérification des utilisateurs, capacités, racines en lecture seule et quotas
+  mémoire, CPU et processus des six services de production.
+- désactivation du compte PostgreSQL d’amorçage après transfert des objets au
+  migrateur et utilisation d’un compte administratif opérationnel distinct.
+- HBA PostgreSQL de production limité aux rôles attendus et au sous-réseau
+  Compose dédié, avec rejet explicite des autres connexions.
+- échec du smoke test si une sauvegarde en clair ou temporaire subsiste après
+  le chiffrement `age`.
+- préparation des rôles PostgreSQL dédiés avant la reconstruction locale de la
+  base de test, y compris lors d'une mise à niveau d'un volume existant.
 
 ### Ajouté
 
+- publication sur GHCR des cinq images de production lors d'un tag issu de
+  `main`, avec SBOM, attestation de provenance et signature Cosign sans clé ;
 - smoke test CI de la superposition Compose de production, incluant migrations,
   rôles PostgreSQL limités, HBA SCRAM, durcissement des conteneurs, maintenance,
   requête HTTP, sauvegarde chiffrée et restauration réelle ;

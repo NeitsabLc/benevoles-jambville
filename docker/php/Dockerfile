@@ -64,8 +64,8 @@ RUN : > .env \
        DEFAULT_URI=http://localhost:8081 \
        MAILER_DSN=null://null \
        MAILER_FROM=no-reply@example.com \
-       TRUSTED_HOST_PATTERN='^(localhost|127\\.0\\.0\\.1)$' \
-       TRUSTED_PROXIES=REMOTE_ADDR \
+       TRUSTED_HOST_PATTERN='^(localhost|127[.]0[.]0[.]1)$' \
+       TRUSTED_PROXIES=127.0.0.1 \
        php bin/console importmap:install --no-interaction \
     && APP_ENV=prod \
        APP_SECRET=build-only-not-used-at-runtime \
@@ -77,8 +77,8 @@ RUN : > .env \
        DEFAULT_URI=http://localhost:8081 \
        MAILER_DSN=null://null \
        MAILER_FROM=no-reply@example.com \
-       TRUSTED_HOST_PATTERN='^(localhost|127\\.0\\.0\\.1)$' \
-       TRUSTED_PROXIES=REMOTE_ADDR \
+       TRUSTED_HOST_PATTERN='^(localhost|127[.]0[.]0[.]1)$' \
+       TRUSTED_PROXIES=127.0.0.1 \
        php bin/console asset-map:compile --env=prod --no-debug --no-interaction \
     && rm -rf var/cache/* var/log/* \
     && install -d -o www-data -g www-data -m 0770 var/cache var/log

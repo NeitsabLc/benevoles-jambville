@@ -16,8 +16,8 @@ services:
       DATABASE_TEST_NAME: "${POSTGRES_DB}_test"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
-      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127\\.0\\.0\\.1)$}"
-      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-REMOTE_ADDR}"
+      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127[.]0[.]0[.]1)$}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1}"
     volumes:
       - ./app:/var/www/app
     depends_on:
@@ -50,8 +50,12 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_APP_USER: "benevole_jambville_app"
       POSTGRES_APP_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
+      POSTGRES_MIGRATOR_USER: "benevole_jambville_migrator"
+      POSTGRES_MIGRATOR_PASSWORD: "${POSTGRES_MIGRATOR_PASSWORD:-change-me-migrator}"
       POSTGRES_BACKUP_USER: "benevole_jambville_backup"
       POSTGRES_BACKUP_PASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
+      POSTGRES_HEALTHCHECK_USER: "${POSTGRES_HEALTHCHECK_USER:-benevole_jambville_admin}"
+      POSTGRES_HEALTHCHECK_PASSWORD: "${POSTGRES_HEALTHCHECK_PASSWORD:-change-me-admin-operations}"
     ports:
       - "127.0.0.1:${POSTGRES_HOST_PORT:-5434}:5432"
     volumes:

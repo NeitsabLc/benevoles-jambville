@@ -44,7 +44,7 @@ jobs:
           APP_SECRET_CI="$(openssl rand -hex 32)"
           sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
           sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
-          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_MIGRATOR_PASSWORD POSTGRES_BACKUP_PASSWORD POSTGRES_HEALTHCHECK_PASSWORD; do
             valeur="$(openssl rand -hex 24)"
             echo "::add-mask::${valeur}"
             echo "${variable}=${valeur}" >> "$GITHUB_ENV"
@@ -101,12 +101,14 @@ jobs:
 
       - name: Preparer les images pour l'analyse de vulnerabilites
         run: |
-          docker compose -f compose.yaml -f compose.prod.yaml build backup
-          docker tag "$(docker compose images --quiet php)" benevole-jambville-php-ci:scan
-          docker tag "$(docker compose images --quiet nginx)" benevole-jambville-nginx-ci:scan
-          docker tag "$(docker compose images --quiet database)" benevole-jambville-postgres-ci:scan
-          docker tag benevole-jambville-liquibase:local benevole-jambville-liquibase-ci:scan
-          docker tag benevole-jambville-backup:local benevole-jambville-backup-ci:scan
+          docker compose -f compose.yaml -f compose.prod.yaml --profile outils \
+            build php nginx database liquibase backup
+          production_compose() { docker compose -f compose.yaml -f compose.prod.yaml "$@"; }
+          docker tag "$(production_compose images --quiet php)" benevole-jambville-php-ci:scan
+          docker tag "$(production_compose images --quiet nginx)" benevole-jambville-nginx-ci:scan
+          docker tag "$(production_compose images --quiet database)" benevole-jambville-postgres-ci:scan
+          docker tag "$(production_compose images --quiet liquibase)" benevole-jambville-liquibase-ci:scan
+          docker tag "$(production_compose images --quiet backup)" benevole-jambville-backup-ci:scan
           docker save benevole-jambville-php-ci:scan --output /tmp/php.tar
           docker save benevole-jambville-nginx-ci:scan --output /tmp/nginx.tar
           docker save benevole-jambville-postgres-ci:scan --output /tmp/postgres.tar
@@ -186,7 +188,7 @@ jobs:
           APP_SECRET_CI="$(openssl rand -hex 32)"
           sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
           sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
-          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_MIGRATOR_PASSWORD POSTGRES_BACKUP_PASSWORD POSTGRES_HEALTHCHECK_PASSWORD; do
             valeur="$(openssl rand -hex 24)"
             echo "::add-mask::${valeur}"
             echo "${variable}=${valeur}" >> "$GITHUB_ENV"

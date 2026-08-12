@@ -88,6 +88,17 @@ make db-update
 make db-sync-role-passwords
 ```
 
+En production, la première migration d’une base vierge est exécutée avec le
+compte d’amorçage PostgreSQL. Exécuter ensuite
+`make db-finalize-role-hardening` pour transférer les objets au rôle migrateur
+limité. Toutes les migrations suivantes utilisent
+`benevole_jambville_migrator` et son secret `POSTGRES_MIGRATOR_PASSWORD`.
+La bascule crée également le compte administratif opérationnel défini par
+`POSTGRES_HEALTHCHECK_USER`, puis désactive la connexion au compte d’amorçage
+`POSTGRES_USER`. Les restaurations utilisent uniquement ce compte opérationnel.
+Le HBA de production autorise uniquement ces rôles depuis le sous-réseau
+`BENEVOLE_NETWORK_SUBNET`, avec SCRAM, puis rejette toute autre connexion.
+
 Doctrine sert au mapping et aux requêtes applicatives. Il ne doit jamais créer
 ou modifier le schéma.
 
