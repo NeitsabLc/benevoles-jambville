@@ -88,6 +88,17 @@ make db-update
 make db-sync-role-passwords
 ```
 
+En production, la première migration d’une base vierge est exécutée avec le
+compte d’amorçage PostgreSQL. Exécuter ensuite
+`make db-finalize-role-hardening` pour transférer les objets au rôle migrateur
+limité. Toutes les migrations suivantes utilisent
+`benevole_jambville_migrator` et son secret `POSTGRES_MIGRATOR_PASSWORD`.
+La bascule crée également le compte administratif opérationnel défini par
+`POSTGRES_HEALTHCHECK_USER`, puis désactive la connexion au compte d’amorçage
+`POSTGRES_USER`. Les restaurations utilisent uniquement ce compte opérationnel.
+Le HBA de production autorise uniquement ces rôles depuis le sous-réseau
+`BENEVOLE_NETWORK_SUBNET`, avec SCRAM, puis rejette toute autre connexion.
+
 Doctrine sert au mapping et aux requêtes applicatives. Il ne doit jamais créer
 ou modifier le schéma.
 
@@ -96,20 +107,28 @@ ou modifier le schéma.
 ```bash
 make test
 make analyse-statique
+make style
+make backup-restore-test
 npm ci
 npx playwright install chromium
-npm run test:accessibility
+make test-accessibility
 ```
+
+Le test de sauvegarde génère une paire de clés `age` éphémère, produit un dump
+chiffré puis le restaure dans une base temporaire. En production, seule la clé
+publique `BACKUP_AGE_RECIPIENT` est fournie au service de sauvegarde ; la clé
+privée de restauration doit être conservée séparément de l’hôte.
 
 `make test` reconstruit une base PostgreSQL locale dédiée dont le nom se
 termine par `_test`, applique les migrations et exécute PHPUnit. Elle ne modifie
 pas les données de développement.
 
 `make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
-`npm run test:accessibility` contrôle avec Playwright et Axe les pages publiques
-et les parcours des trois rôles ; l’application doit être démarrée et le jeu de
-démonstration chargé avec `make db-dev-update`. Ces contrôles sont également
-exécutés par la CI.
+`make test-accessibility` reconstruit d'abord les assets de production, puis
+contrôle avec Playwright et Axe les pages publiques
+et les parcours des trois rôles ; l’application doit être démarrée. La commande
+applique et réinitialise elle-même les données de démonstration nécessaires aux
+scénarios E2E. Ces contrôles sont également exécutés par la CI.
 
 ## Emails locaux
 
@@ -139,6 +158,32 @@ hors de ce dépôt.
 - une livraison fusionne `dev` dans `main`, met à jour la version et le
   changelog, puis crée un tag annoté `vX.Y.Z` ;
 - un correctif urgent part de `main` et doit ensuite être reporté dans `dev`.
+
+## Livraison manuelle par images
+
+Chaque commit de `main` publie dans GHCR cinq images candidates immuables
+(PHP, Nginx, PostgreSQL, Liquibase et sauvegarde), puis les teste ensemble avec
+la configuration de production. Un tag `vX.Y.Z` ne reconstruit rien : il
+attribue les étiquettes de version aux digests déjà validés.
+
+Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
+les cinq références `ghcr.io/...@sha256:...` affichées par GitHub. La livraison
+reste entièrement manuelle :
+
+```bash
+make release-pull
+make release-backup-now
+make release-db-status
+make release-db-update
+make release-up
+make release-ps
+```
+
+`release-pull` vérifie la signature Cosign et l'attestation GitHub de chaque
+image avant son téléchargement. La surcharge `compose.release.yaml` supprime
+toutes les constructions locales et `release-up` interdit explicitement toute
+reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde
+précède obligatoirement l'application des migrations Liquibase.
 
 Après un clonage destiné au développement local :
 

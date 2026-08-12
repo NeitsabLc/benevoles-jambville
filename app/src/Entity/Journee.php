@@ -34,9 +34,20 @@ final class Journee
         $this->modifiePar = $modifiePar;
     }
 
-    public function getDateJournee(): \DateTimeImmutable { return new \DateTimeImmutable($this->dateJournee); }
-    public function getPersonnePermanence(): ?PersonnePermanence { return $this->personnePermanence; }
-    public function getCommentaire(): ?string { return $this->commentaire; }
+    public function getDateJournee(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable($this->dateJournee);
+    }
+
+    public function getPersonnePermanence(): ?PersonnePermanence
+    {
+        return $this->personnePermanence;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
 
     public function definirPermanence(?PersonnePermanence $personne, Utilisateur $modifiePar): void
     {
@@ -47,12 +58,12 @@ final class Journee
     public function definirCommentaire(?string $commentaire, Utilisateur $modifiePar): void
     {
         $commentaire = trim((string) $commentaire);
-        $this->commentaire = $commentaire === '' ? null : $commentaire;
+        $this->commentaire = '' === $commentaire ? null : $commentaire;
         $this->modifiePar = $modifiePar;
     }
 
     public function estVide(): bool
     {
-        return $this->personnePermanence === null && $this->commentaire === null;
+        return null === $this->personnePermanence && null === $this->commentaire;
     }
 }

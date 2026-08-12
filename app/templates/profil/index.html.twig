@@ -60,12 +60,12 @@
                     <label><input type="checkbox" name="allergie_oeuf" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_oeuf') : utilisateurProfil.allergieOeuf) ? 'checked' }}> Allergie aux œufs</label>
                     <label><input type="checkbox" name="allergie_arachide" value="1" {{ (app.request.isMethod('POST') ? app.request.request.getBoolean('allergie_arachide') : utilisateurProfil.allergieArachide) ? 'checked' }}> Allergie aux arachides</label>
                 </div>
-                <div class="champ"><label for="regime_autre">Autre régime ou allergie alimentaire</label><textarea id="regime_autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', utilisateurProfil.regimeAutre) }}</textarea></div>
+                <div class="champ"><label for="regime_autre">Autre régime ou allergie alimentaire</label><textarea id="regime_autre" name="regime_autre" maxlength="1000" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre', utilisateurProfil.regimeAutre) }}</textarea></div>
             </section>
 
             <section class="carte-profil" aria-labelledby="couchage-titre">
                 <header><h2 id="couchage-titre">Couchage</h2><p>Signalez ici les besoins à anticiper pour votre hébergement.</p></header>
-                <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', utilisateurProfil.besoinCouchage) }}</textarea></div>
+                <div class="champ"><label for="besoin_couchage">Besoin spécifique de couchage</label><textarea id="besoin_couchage" name="besoin_couchage" maxlength="1000" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage', utilisateurProfil.besoinCouchage) }}</textarea></div>
             </section>
 
             {% if app.user.equipePilote %}

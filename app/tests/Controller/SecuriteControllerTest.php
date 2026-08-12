@@ -8,6 +8,7 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class SecuriteControllerTest extends WebTestCase
@@ -24,12 +25,45 @@ final class SecuriteControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="_csrf_token"]');
     }
 
+    public function testUnNomDhoteNonAutoriseEstRejete(): void
+    {
+        $client = self::createClient();
+        $client->request('GET', '/connexion', server: ['HTTP_HOST' => 'attaquant.example']);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
     public function testLaPageDAccueilNecessiteUneConnexion(): void
     {
         $client = self::createClient();
         $client->request('GET', '/');
 
         self::assertResponseRedirects('http://localhost/connexion');
+    }
+
+    public function testLaDeconnexionSansJetonCsrfEstRefusee(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $client->loginUser($utilisateur);
+
+        $client->request('POST', '/deconnexion');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testLaDeconnexionAvecJetonCsrfEstAcceptee(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $client->loginUser($utilisateur);
+
+        $crawler = $client->request('GET', '/');
+        $client->submit($crawler->filter('form[action="/deconnexion"]')->form());
+
+        self::assertResponseRedirects('/connexion');
     }
 
     public function testLaDesactivationRevoqueUneSessionDejaOuverte(): void
@@ -148,7 +182,7 @@ final class SecuriteControllerTest extends WebTestCase
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
             $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
-            if ($utilisateur !== null && $ancienMotDePasse !== null) {
+            if (null !== $utilisateur && null !== $ancienMotDePasse) {
                 $utilisateur->setPassword($ancienMotDePasse);
                 $utilisateur->terminerActivation();
                 $utilisateur->terminerInformationsAccueil();

@@ -108,3 +108,18 @@ test("les pages de l'equipe pilote ne presentent pas de violation serieuse ou cr
     await test.step(chemin, () => verifierPage(page, chemin));
   }
 });
+
+test('les repas sont generes apres un chargement direct du formulaire', async ({ page }) => {
+  await seConnecter(page, 'pilote@jambville.test');
+  await page.goto('/presences/ajouter');
+
+  const lignes = page.locator('[data-repas-lignes] tr');
+  await expect(lignes).toContainText('Choisissez une période valide');
+
+  await page.getByLabel('Du', { exact: true }).fill('2026-08-04');
+  await page.getByLabel('Au', { exact: true }).fill('2026-08-14');
+  await page.getByLabel('Au', { exact: true }).press('Tab');
+
+  await expect(lignes).toHaveCount(11);
+  await expect(page.locator('[data-repas-lignes] input[type="checkbox"]')).toHaveCount(33);
+});

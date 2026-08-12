@@ -3,8 +3,12 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      target: php-development
       args:
         PHP_VERSION: "${PHP_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     working_dir: /var/www/app
     environment:
       DATABASE_HOST: database
@@ -12,6 +16,8 @@ services:
       DATABASE_TEST_NAME: "${POSTGRES_DB}_test"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
+      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127[.]0[.]0[.]1)$}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1}"
     volumes:
       - ./app:/var/www/app
     depends_on:
@@ -20,9 +26,9 @@ services:
     networks: [benevole_jambville]
 
   nginx:
-    image: "nginx:${NGINX_VERSION}"
+    image: "nginx:${NGINX_VERSION}@${NGINX_IMAGE_DIGEST}"
     ports:
-      - "${NGINX_BIND_ADDRESS:-127.0.0.1}:${NGINX_HOST_PORT:-8081}:80"
+      - "${NGINX_BIND_ADDRESS:-127.0.0.1}:${NGINX_HOST_PORT:-8081}:8080"
     volumes:
       - ./app:/var/www/app:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -30,15 +36,26 @@ services:
     networks: [benevole_jambville]
 
   database:
-    image: "postgres:${POSTGRES_VERSION}"
+    image: "benevole-jambville-postgres:${POSTGRES_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+      target: postgres-runtime
+      args:
+        POSTGRES_VERSION: "${POSTGRES_VERSION}"
+        POSTGRES_IMAGE_DIGEST: "${POSTGRES_IMAGE_DIGEST}"
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD doit être défini}"
       POSTGRES_APP_USER: "benevole_jambville_app"
       POSTGRES_APP_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
+      POSTGRES_MIGRATOR_USER: "benevole_jambville_migrator"
+      POSTGRES_MIGRATOR_PASSWORD: "${POSTGRES_MIGRATOR_PASSWORD:?POSTGRES_MIGRATOR_PASSWORD doit être défini}"
       POSTGRES_BACKUP_USER: "benevole_jambville_backup"
       POSTGRES_BACKUP_PASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
+      POSTGRES_HEALTHCHECK_USER: "${POSTGRES_HEALTHCHECK_USER:-benevole_jambville_admin}"
+      POSTGRES_HEALTHCHECK_PASSWORD: "${POSTGRES_HEALTHCHECK_PASSWORD:?POSTGRES_HEALTHCHECK_PASSWORD doit être défini}"
     ports:
       - "127.0.0.1:${POSTGRES_HOST_PORT:-5434}:5432"
     volumes:
@@ -54,7 +71,16 @@ services:
     networks: [benevole_jambville]
 
   liquibase:
-    image: "liquibase:${LIQUIBASE_VERSION}"
+    image: "benevole-jambville-liquibase:${LIQUIBASE_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/liquibase/Dockerfile
+      target: liquibase-runtime
+      args:
+        LIQUIBASE_VERSION: "${LIQUIBASE_VERSION}"
+        LIQUIBASE_IMAGE_DIGEST: "${LIQUIBASE_IMAGE_DIGEST}"
+        PGJDBC_VERSION: "${PGJDBC_VERSION}"
+        PGJDBC_SHA256: "${PGJDBC_SHA256}"
     profiles: [outils]
     working_dir: /liquibase/changelog
     volumes:
@@ -62,7 +88,7 @@ services:
     environment:
       LIQUIBASE_COMMAND_URL: "jdbc:postgresql://database:5432/${POSTGRES_DB}"
       LIQUIBASE_COMMAND_USERNAME: "${POSTGRES_USER}"
-      LIQUIBASE_COMMAND_PASSWORD: "${POSTGRES_PASSWORD}"
+      LIQUIBASE_COMMAND_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD doit être défini}"
       LIQUIBASE_COMMAND_CHANGELOG_FILE: db.changelog-master.yaml
       LIQUIBASE_LIQUIBASE_SCHEMA_NAME: public
     depends_on:

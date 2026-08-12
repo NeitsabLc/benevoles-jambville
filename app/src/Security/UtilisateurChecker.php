@@ -22,7 +22,7 @@ final class UtilisateurChecker implements UserCheckerInterface
             throw new CustomUserMessageAccountStatusException('Ce compte est désactivé. Contactez l’équipe de Jambville.');
         }
 
-        if ($user->getPassword() === null || $user->isChangementMotDePasseRequis()) {
+        if (null === $user->getPassword() || $user->isChangementMotDePasseRequis()) {
             throw new CustomUserMessageAccountStatusException('Votre compte doit d’abord être activé avec le lien de première connexion reçu par e-mail.');
         }
     }

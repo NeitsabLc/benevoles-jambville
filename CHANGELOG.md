@@ -11,6 +11,90 @@ et le projet suit une numérotation de version sémantique.
 
 Aucun changement pour le moment.
 
+## 1.2.0 — 2026-08-12
+
+### Corrigé
+
+- restauration du générateur de repas et des autres interactions JavaScript en
+  supprimant un import CSS redondant bloqué par la CSP, avec une initialisation
+  compatible avec les chargements directs et la navigation Turbo.
+- couverture E2E du filtrage des thématiques événementielles : elles ne sont
+  proposées que lorsque toute la présence est comprise dans leur période, et
+  une thématique exclusive masque alors les autres choix.
+- contraste des lignes désactivées dans les listes des bénévoles et des
+  thématiques ;
+- réinitialisation automatique des fixtures événementielles avant les scénarios
+  E2E afin que leur résultat ne dépende pas de l’état de la base locale.
+- correction du motif d’hôtes de confiance utilisé par la CI pour accepter
+  `127.0.0.1` sans autoriser d’hôte supplémentaire ;
+- construction explicite de PostgreSQL et Liquibase par le smoke test de
+  production afin qu’il fonctionne sur un runner Docker vierge.
+- refus des en-têtes `X-Forwarded-*` provenant directement des clients et test
+  du contournement de la validation d’hôte par `X-Forwarded-Host`.
+- analyse Trivy des cibles PHP et Nginx de production effectives, en plus des
+  images PostgreSQL, Liquibase et sauvegarde.
+- rôle PostgreSQL dédié aux migrations, avec transfert de propriété des objets
+  applicatifs et contrôle CI de ses privilèges limités.
+- vérification des utilisateurs, capacités, racines en lecture seule et quotas
+  mémoire, CPU et processus des six services de production.
+- désactivation du compte PostgreSQL d’amorçage après transfert des objets au
+  migrateur et utilisation d’un compte administratif opérationnel distinct.
+- HBA PostgreSQL de production limité aux rôles attendus et au sous-réseau
+  Compose dédié, avec rejet explicite des autres connexions.
+- échec du smoke test si une sauvegarde en clair ou temporaire subsiste après
+  le chiffrement `age`.
+- préparation des rôles PostgreSQL dédiés avant la reconstruction locale de la
+  base de test, y compris lors d'une mise à niveau d'un volume existant.
+- export direct des images construites pour Trivy sur un runner vierge et
+  restauration des sauvegardes avec l'utilisateur propriétaire de l'archive ;
+- initialisation de la base applicative de contrôle avant les tests E2E de la CI.
+
+### Ajouté
+
+- publication sur GHCR des cinq images candidates de production à chaque commit
+  de `main`, avec SBOM, attestation de provenance et signature Cosign sans clé ;
+- test conjoint des cinq images candidates et promotion sans reconstruction lors
+  d'un tag issu de `main` ;
+- livraison manuelle par références GHCR immuables, avec vérification des
+  signatures et attestations, sauvegarde préalable et migrations Liquibase ;
+- smoke test CI de la superposition Compose de production, incluant migrations,
+  rôles PostgreSQL limités, HBA SCRAM, durcissement des conteneurs, maintenance,
+  requête HTTP, sauvegarde chiffrée et restauration réelle ;
+- audits de sécurité des dépendances npm et ImportMap, analyse Trivy des images
+  PHP, Nginx, PostgreSQL, Liquibase et sauvegarde, et mises à jour Dependabot ;
+- chiffrement des sauvegardes PostgreSQL avec `age` et commande locale de test
+  de restauration avec une identité éphémère ;
+- contrôle de style PHP automatisé dans la CI.
+
+### Modifié
+
+- compilation systématique des assets de production avant les contrôles
+  d’accessibilité Playwright et Axe ;
+- extraction de l’analyse des imports CSV et des validations de profil et de
+  présence dans des services dédiés, avec des limites explicites sur les
+  saisies persistées ;
+- images tierces référencées par tag et digest immuable, et images de production
+  PHP et Nginx construites sans montage du code applicatif ;
+- validation silencieuse des configurations Compose afin de ne plus exposer les
+  secrets résolus dans les journaux de CI.
+
+### Sécurité
+
+- suppression des mots de passe d'exemple et des valeurs de secours faibles :
+  les secrets PostgreSQL et Symfony doivent désormais être fournis explicitement ;
+- suppression du forçage du mode debug dans l'exemple d'environnement afin
+  qu'il soit automatiquement désactivé lorsque `APP_ENV=prod` ;
+- épinglage par digest de PostgreSQL dans le fichier Compose Symfony secondaire ;
+- restriction des hôtes et proxies de confiance par configuration Symfony et
+  rejet des en-têtes `Host` non autorisés ;
+- protection CSRF de la déconnexion ;
+- exécution non privilégiée des services PHP, Nginx, PostgreSQL, Liquibase,
+  maintenance et sauvegarde avec racine en lecture seule, capacités Linux
+  retirées, élévation de privilèges interdite et limites explicites de
+  ressources ;
+- authentification PostgreSQL de production en SCRAM et vérification automatisée
+  des privilèges des rôles applicatif et sauvegarde.
+
 ## 1.1.1 — 2026-08-12
 
 ### Ajouté

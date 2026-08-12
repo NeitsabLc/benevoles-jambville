@@ -35,7 +35,7 @@ final class ThematiqueController extends AbstractController
             }
             $thematique = new Thematique($request->request->getString('nom'));
             $erreurs = [...$erreurs, ...$this->renseigner($thematique, $request)];
-            if ($erreurs === []) {
+            if ([] === $erreurs) {
                 try {
                     $entityManager->persist($thematique);
                     $entityManager->flush();
@@ -44,6 +44,7 @@ final class ThematiqueController extends AbstractController
                     return $this->redirectToRoute('app_admin_thematiques');
                 } catch (UniqueConstraintViolationException) {
                     $this->addFlash('erreur', 'Une thématique portant ce nom existe déjà.');
+
                     return $this->redirectToRoute('app_admin_thematiques');
                 }
             }
@@ -57,20 +58,24 @@ final class ThematiqueController extends AbstractController
     {
         $this->garantirAcces();
         $thematique = $repository->find($id);
-        if (!$thematique instanceof Thematique) throw $this->createNotFoundException();
+        if (!$thematique instanceof Thematique) {
+            throw $this->createNotFoundException();
+        }
         $erreurs = [];
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('modifier-thematique-'.$id, $request->request->getString('_csrf_token'))) {
                 $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
             }
             $erreurs = [...$erreurs, ...$this->renseigner($thematique, $request)];
-            if ($erreurs === []) {
+            if ([] === $erreurs) {
                 try {
                     $entityManager->flush();
                     $this->addFlash('succes', 'La thématique a bien été modifiée.');
+
                     return $this->redirectToRoute('app_admin_thematiques');
                 } catch (UniqueConstraintViolationException) {
                     $this->addFlash('erreur', 'Une thématique portant ce nom existe déjà.');
+
                     return $this->redirectToRoute('app_admin_thematique_modifier', ['id' => $id]);
                 }
             }
@@ -84,7 +89,9 @@ final class ThematiqueController extends AbstractController
     {
         $this->garantirAcces();
         $thematique = $repository->find($id);
-        if (!$thematique instanceof Thematique) throw $this->createNotFoundException();
+        if (!$thematique instanceof Thematique) {
+            throw $this->createNotFoundException();
+        }
         if (!$this->isCsrfTokenValid('activation-thematique-'.$id, $request->request->getString('_csrf_token'))) {
             throw $this->createAccessDeniedException('Le formulaire a expiré.');
         }
@@ -104,24 +111,39 @@ final class ThematiqueController extends AbstractController
         $debut = $this->lireDate($debutBrut);
         $fin = $this->lireDate($finBrut);
         $erreurs = [];
-        if ($nom === '' || mb_strlen($nom) > 120) $erreurs[] = 'Le nom est obligatoire et limité à 120 caractères.';
-        if (($debutBrut === '') !== ($finBrut === '')) $erreurs[] = 'Renseignez les deux dates de la période événementielle.';
-        if (($debutBrut !== '' && $debut === null) || ($finBrut !== '' && $fin === null)) $erreurs[] = 'La période événementielle contient une date invalide.';
-        if ($debut !== null && $fin !== null && $fin < $debut) $erreurs[] = 'La fin de la période doit être postérieure ou égale au début.';
-        if ($erreurs === []) $thematique->modifier($nom, max(0, $request->request->getInt('ordre_affichage')), $debut, $fin, $request->request->getBoolean('exclusive_sur_periode'));
+        if ('' === $nom || mb_strlen($nom) > 120) {
+            $erreurs[] = 'Le nom est obligatoire et limité à 120 caractères.';
+        }
+        if (('' === $debutBrut) !== ('' === $finBrut)) {
+            $erreurs[] = 'Renseignez les deux dates de la période événementielle.';
+        }
+        if (('' !== $debutBrut && null === $debut) || ('' !== $finBrut && null === $fin)) {
+            $erreurs[] = 'La période événementielle contient une date invalide.';
+        }
+        if (null !== $debut && null !== $fin && $fin < $debut) {
+            $erreurs[] = 'La fin de la période doit être postérieure ou égale au début.';
+        }
+        if ([] === $erreurs) {
+            $thematique->modifier($nom, max(0, $request->request->getInt('ordre_affichage')), $debut, $fin, $request->request->getBoolean('exclusive_sur_periode'));
+        }
 
         return $erreurs;
     }
 
     private function lireDate(string $valeur): ?\DateTimeImmutable
     {
-        if ($valeur === '') return null;
+        if ('' === $valeur) {
+            return null;
+        }
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $valeur);
-        return $date !== false && $date->format('Y-m-d') === $valeur ? $date : null;
+
+        return false !== $date && $date->format('Y-m-d') === $valeur ? $date : null;
     }
 
     private function garantirAcces(): void
     {
-        if (!$this->isGranted('ROLE_EQUIPE_PILOTE')) throw $this->createAccessDeniedException();
+        if (!$this->isGranted('ROLE_EQUIPE_PILOTE')) {
+            throw $this->createAccessDeniedException();
+        }
     }
 }

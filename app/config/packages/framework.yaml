@@ -1,5 +1,7 @@
 framework:
     secret: '%env(APP_SECRET)%'
+    trusted_hosts:
+        - '%env(TRUSTED_HOST_PATTERN)%'
     trusted_proxies: '%env(TRUSTED_PROXIES)%'
     trusted_headers:
         - 'x-forwarded-for'

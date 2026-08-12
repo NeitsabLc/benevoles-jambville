@@ -1,19 +1,74 @@
+x-production-logging: &production-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   php:
+    logging: *production-logging
+    image: "benevole-jambville-php-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
+    build:
+      target: php-production
+    env_file:
+      - path: ./app/.env
+        required: true
+      - path: ./app/.env.local
+        required: false
     restart: unless-stopped
+    read_only: true
+    user: www-data
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes: !override []
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/www/app/var/cache:mode=0770,uid=33,gid=33
+      - /var/www/app/var/log:mode=0770,uid=33,gid=33
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
 
   maintenance:
+    logging: *production-logging
     restart: unless-stopped
+    image: "benevole-jambville-php-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      target: php-production
       args:
         PHP_VERSION: "${PHP_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     working_dir: /var/www/app
     entrypoint: ["benevole-jambville-maintenance"]
+    env_file:
+      - path: ./app/.env
+        required: true
+      - path: ./app/.env.local
+        required: false
+    read_only: true
+    user: www-data
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/www/app/var/cache:mode=0770,uid=33,gid=33
+      - /var/www/app/var/log:mode=0770,uid=33,gid=33
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
@@ -21,31 +76,126 @@ services:
       DATABASE_NAME: "${POSTGRES_DB}"
       DATABASE_USER: benevole_jambville_app
       DATABASE_PASSWORD: "${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD doit être défini}"
-    volumes:
-      - ./app:/var/www/app
+      TRUSTED_HOST_PATTERN: "${TRUSTED_HOST_PATTERN:-^(localhost|127[.]0[.]0[.]1)$}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-127.0.0.1}"
     depends_on:
       database:
         condition: service_healthy
     networks: [benevole_jambville]
 
   nginx:
+    logging: *production-logging
+    image: "benevole-jambville-nginx-production:${APP_IMAGE_TAG:-local}"
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: nginx-production
+      args:
+        PHP_VERSION: "${PHP_VERSION}"
+        NGINX_VERSION: "${NGINX_VERSION}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST}"
+        COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST}"
+        NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST}"
     restart: unless-stopped
+    read_only: true
+    user: nginx
+    init: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes: !override []
+    tmpfs:
+      - /var/cache/nginx:mode=0750,uid=101,gid=101
+      - /var/log/nginx:mode=0750,uid=101,gid=101
+      - /var/run:mode=0750,uid=101,gid=101
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
 
   database:
+    logging: *production-logging
     restart: unless-stopped
+    init: true
+    user: postgres
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/run/postgresql:mode=1777
+    mem_limit: 1g
+    cpus: 2.0
+    pids_limit: 256
+    environment:
+      POSTGRES_INITDB_ARGS: "--auth-local=scram-sha-256 --auth-host=scram-sha-256"
+      PGPASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD doit être défini}"
+      POSTGRES_MIGRATOR_PASSWORD: "${POSTGRES_MIGRATOR_PASSWORD:?POSTGRES_MIGRATOR_PASSWORD doit être défini}"
+      POSTGRES_HEALTHCHECK_USER: "${POSTGRES_HEALTHCHECK_USER:-benevole_jambville_admin}"
+      POSTGRES_HEALTHCHECK_PASSWORD: "${POSTGRES_HEALTHCHECK_PASSWORD:?POSTGRES_HEALTHCHECK_PASSWORD doit être défini}"
+    command:
+      - postgres
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+    volumes: !override
+      - donnees_postgresql:/var/lib/postgresql
+      - "${POSTGRES_HBA_FILE:-./docker/postgres/pg_hba.prod.conf.example}:/etc/postgresql/pg_hba.conf:ro"
 
   backup:
+    logging: *production-logging
     restart: unless-stopped
-    image: "postgres:${POSTGRES_VERSION}"
-    entrypoint: ["/bin/sh", "/usr/local/bin/benevole-jambville-backup"]
+    image: "benevole-jambville-backup:${BACKUP_IMAGE_TAG:-local}"
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+      target: backup-runtime
+      args:
+        POSTGRES_VERSION: "${POSTGRES_VERSION}"
+        POSTGRES_IMAGE_DIGEST: "${POSTGRES_IMAGE_DIGEST}"
+        AGE_PACKAGE_VERSION: "${AGE_PACKAGE_VERSION}"
+    user: postgres
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
-      POSTGRES_USER: "benevole_jambville_backup"
+      POSTGRES_USER: benevole_jambville_backup
       PGPASSWORD: "${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD doit être défini}"
+      BACKUP_AGE_RECIPIENT: "${BACKUP_AGE_RECIPIENT:?BACKUP_AGE_RECIPIENT doit être défini}"
     volumes:
-      - ./docker/postgres/backup.sh:/usr/local/bin/benevole-jambville-backup:ro
       - "${BACKUP_DIR:-./var/backups}:/backups"
+    tmpfs:
+      - /tmp:mode=1777
     depends_on:
       database:
         condition: service_healthy
     networks: [benevole_jambville]
+
+  liquibase:
+    logging: *production-logging
+    init: true
+    user: liquibase:liquibase
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
+    environment:
+      LIQUIBASE_COMMAND_USERNAME: benevole_jambville_migrator
+      LIQUIBASE_COMMAND_PASSWORD: "${POSTGRES_MIGRATOR_PASSWORD:?POSTGRES_MIGRATOR_PASSWORD doit être défini}"
+
+networks:
+  benevole_jambville:
+    ipam:
+      config:
+        - subnet: "${BENEVOLE_NETWORK_SUBNET:-172.29.0.0/24}"

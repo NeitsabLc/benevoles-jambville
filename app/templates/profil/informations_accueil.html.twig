@@ -24,11 +24,11 @@
             </div>
             <div class="champ">
                 <label for="regime-autre">Autre régime ou allergie alimentaire</label>
-                <textarea id="regime-autre" name="regime_autre" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre') }}</textarea>
+                <textarea id="regime-autre" name="regime_autre" maxlength="1000" rows="3" placeholder="Précisez toute autre contrainte alimentaire">{{ app.request.request.get('regime_autre') }}</textarea>
             </div>
             <div class="champ">
                 <label for="besoin-couchage">Information particulière de couchage</label>
-                <textarea id="besoin-couchage" name="besoin_couchage" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage') }}</textarea>
+                <textarea id="besoin-couchage" name="besoin_couchage" maxlength="1000" rows="3" placeholder="Accessibilité, matériel ou autre besoin particulier">{{ app.request.request.get('besoin_couchage') }}</textarea>
             </div>
             <p class="note-authentification">Ces informations pourront être modifiées à tout moment depuis votre profil.</p>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('informations-accueil') }}">

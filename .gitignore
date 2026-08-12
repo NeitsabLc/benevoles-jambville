@@ -1,10 +1,9 @@
 /.idea/
-/DEPLOIEMENT.md
-/DEPLOIEMENT_PRODUCTION.md
-/LIVRAISON_PRODUCTION.md
+/.local/
 /.env
 /.env.*
 !/.env.example
+!/.env.release.example
 /app/.env
 /app/.env.*
 !/app/.env.example

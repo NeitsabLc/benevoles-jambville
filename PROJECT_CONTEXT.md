@@ -15,7 +15,7 @@ dans le même changement.
 État de référence au 12 août 2026 :
 
 - l’application est utilisée en production ;
-- la version stable de référence est `1.1.1` ;
+- la version préparée pour la prochaine livraison est `1.2.0` ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -441,6 +441,8 @@ la couleur.
 - Hacher les mots de passe avec le composant Symfony prévu à cet effet.
 - Stocker uniquement le hash des jetons d’activation et de réinitialisation.
 - Limiter la durée de vie des liens temporaires.
+- Refuser les noms d’hôte non conformes à `TRUSTED_HOST_PATTERN`, notamment
+  avant toute génération d’URL absolue d’activation.
 - Ne jamais journaliser les mots de passe, jetons bruts ou données médicales.
 - Appliquer les durées de conservation validées aux sauvegardes et aux journaux
   sans les exposer dans la documentation versionnée du dépôt.
@@ -465,6 +467,10 @@ Priorités de test :
 - inscription uniquement pour soi-même ;
 - création compagnon réservée à l’équipe pilote ;
 - génération et recalcul des repas selon la période ;
+- affichage d’une thématique événementielle uniquement lorsque toute la période
+  de présence est comprise entre ses dates, bornes incluses ;
+- masquage des autres thématiques lorsqu’une présence est entièrement comprise
+  dans la période d’une thématique événementielle exclusive ;
 - prise en compte des enfants et des effectifs compagnons ;
 - interdiction du chevauchement des inscriptions individuelles ;
 - calcul quotidien des synthèses ;
@@ -532,6 +538,61 @@ Pour une évolution d’interface :
   dans `dev` afin d’éviter toute divergence.
 - Les procédures de livraison et les paramètres de production restent dans le
   dossier opérationnel externe au dépôt.
+- Les images applicatives de production embarquent le code et les assets
+  compilés : aucun montage du dépôt applicatif en écriture n'est autorisé.
+- Tous les services de production s'exécutent sans privilège, avec une racine
+  en lecture seule, toutes les capacités Linux retirées, l'élévation de
+  privilèges interdite et des limites explicites de mémoire, CPU et processus.
+- Le smoke test inspecte les six services de production et échoue si leur
+  utilisateur, racine en lecture seule, capacités, option
+  `no-new-privileges`, mémoire, CPU ou limite de processus divergent de la
+  configuration attendue.
+- Les seuls emplacements d'écriture de PHP en production sont des `tmpfs`
+  dédiés au cache, aux journaux et aux fichiers temporaires.
+- Toute image tierce est référencée par un tag lisible et un digest immuable.
+  Lors d'une mise à jour, les deux valeurs doivent être actualisées ensemble.
+- Cette règle s'applique aussi aux fichiers Compose secondaires conservés dans
+  `app/`. Les fichiers d'exemple laissent les secrets vides et ne proposent
+  aucune valeur de secours utilisable.
+- La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
+  images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
+- Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
+  étiquette `sha-<commit>`, avec SBOM, provenance GitHub, attestation et
+  signature Cosign sans clé persistante. Les images candidates sont ensuite
+  vérifiées et testées ensemble par le smoke test de production.
+- Un tag `vX.Y.Z` rattaché à `main` exige les validations du même commit puis
+  ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.
+  Aucun workflow ne déploie ni n'accède à une base de production.
+- La livraison reste manuelle. Le fichier local `.env.release` contient les
+  cinq références GHCR par digest. `compose.release.yaml` supprime les
+  constructions locales ; les commandes `make release-*` vérifient, téléchargent
+  et démarrent ces images, avec sauvegarde préalable et migrations Liquibase.
+- En production, Liquibase utilise le rôle dédié
+  `benevole_jambville_migrator`, sans privilège administrateur. Après
+  l'amorçage initial, les objets applicatifs et les tables de suivi Liquibase
+  lui sont transférés ; les rôles applicatif et sauvegarde restent limités aux
+  droits nécessaires.
+- Le compte PostgreSQL d'amorçage est placé en `NOLOGIN` après la bascule. Les
+  restaurations et vérifications privilégiées utilisent un compte administratif
+  opérationnel distinct, avec un secret dédié.
+- La reconstruction locale de la base de test crée d'abord les éventuels rôles
+  dédiés manquants afin de prendre en charge les volumes antérieurs à leur
+  introduction.
+- Le réseau Compose de production possède un sous-réseau explicite. Le HBA
+  PostgreSQL autorise seulement les rôles applicatif, migrateur, sauvegarde,
+  amorçage et administration depuis ce réseau avec SCRAM, puis rejette toute
+  autre connexion IPv4 ou IPv6.
+- Les sauvegardes PostgreSQL sont chiffrées avec `age` avant toute écriture sur
+  le volume hôte. La production ne reçoit que la clé publique ; la clé privée
+  de restauration est conservée hors de l’hôte applicatif.
+- La CI doit produire une sauvegarde chiffrée et la restaurer réellement dans
+  une base temporaire afin de vérifier son intégrité et son exploitabilité.
+- Le smoke test échoue si un dump, une archive claire ou un fichier temporaire
+  subsiste dans le répertoire de sauvegarde après le chiffrement.
+- La superposition `compose.yaml` + `compose.prod.yaml` est démarrée dans un job
+  CI isolé. Ce smoke test vérifie ensemble les migrations, le HBA SCRAM, les
+  rôles limités, les conteneurs immuables, la maintenance, la sauvegarde, la
+  restauration et une requête HTTP avant de supprimer la pile et ses volumes.
 
 ## 14. Principes de maintenance
 
@@ -545,6 +606,9 @@ Pour une évolution d’interface :
   que le document reste exact avant de commiter.
 - Préférer des services métier explicites aux règles dispersées dans les
   contrôleurs ou templates.
+- Toute saisie libre persistée doit avoir une limite explicite vérifiée côté
+  serveur et reflétée par un attribut `maxlength` dans le formulaire.
+- Le code PHP de `src/` et `tests/` doit satisfaire `make style` avant commit.
 - Centraliser les calculs de repas, rôles et synthèses afin que le CSV, l’API et
   les écrans utilisent les mêmes règles.
 - Ne pas exposer les détails d’intégration externe dans les entités métier.

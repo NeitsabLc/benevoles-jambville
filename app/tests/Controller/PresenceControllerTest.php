@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
-use App\Repository\UtilisateurRepository;
+use App\Entity\Inscription;
 use App\Repository\InscriptionRepository;
 use App\Repository\ThematiqueRepository;
-use App\Entity\Inscription;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -260,7 +260,7 @@ final class PresenceControllerTest extends WebTestCase
             new \DateTimeImmutable('2040-04-11'),
             'compa',
         );
-        $inscription = array_find($inscriptions, static fn ($item) => $item->getNomEquipeCompa() === 'Compas test PHPUnit');
+        $inscription = array_find($inscriptions, static fn ($item) => 'Compas test PHPUnit' === $item->getNomEquipeCompa());
         self::assertNotNull($inscription);
         self::assertSame(6, $inscription->getNombreRepas());
         self::assertSame(2, $inscription->getNombreVegetariens());
@@ -384,5 +384,33 @@ final class PresenceControllerTest extends WebTestCase
         self::assertSame(6, $inscription->getNombreRepas());
         $entityManager->remove($inscription);
         $entityManager->flush();
+    }
+
+    public function testUnCommentaireTropLongEstRefuseCoteServeur(): void
+    {
+        $client = self::createClient();
+        $benevole = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Chantier']);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+        $client->loginUser($benevole);
+
+        $crawler = $client->request('GET', '/presences/ajouter');
+        self::assertSelectorExists('textarea[name="commentaire"][maxlength="1000"]');
+        $jeton = $crawler->filter('input[name="_csrf_token"]')->attr('value');
+        self::assertNotNull($jeton);
+        $client->request('POST', '/presences/ajouter', [
+            '_csrf_token' => $jeton,
+            'mode' => 'benevole',
+            'thematique' => $thematique->getId(),
+            'nombre_enfants' => 0,
+            'date_debut' => '2099-04-10',
+            'date_fin' => '2099-04-10',
+            'type_couchage' => 'DUR',
+            'commentaire' => str_repeat('a', 1_001),
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.alerte-erreur', 'limité à 1 000 caractères');
     }
 }

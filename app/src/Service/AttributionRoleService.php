@@ -21,9 +21,9 @@ final readonly class AttributionRoleService
         );
 
         return [
-            'role' => $regle !== false ? (string) $regle['role_attribue'] : 'BENEVOLE',
-            'version' => $regle !== false ? (string) $regle['version'] : null,
-            'regle_reconnue' => $regle !== false,
+            'role' => false !== $regle ? (string) $regle['role_attribue'] : 'BENEVOLE',
+            'version' => false !== $regle ? (string) $regle['version'] : null,
+            'regle_reconnue' => false !== $regle,
         ];
     }
 }

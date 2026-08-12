@@ -1,0 +1,24 @@
+services:
+  php:
+    image: "${BENEVOLE_RELEASE_PHP_IMAGE:?BENEVOLE_RELEASE_PHP_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null
+
+  nginx:
+    image: "${BENEVOLE_RELEASE_NGINX_IMAGE:?BENEVOLE_RELEASE_NGINX_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null
+
+  maintenance:
+    image: "${BENEVOLE_RELEASE_PHP_IMAGE:?BENEVOLE_RELEASE_PHP_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null
+
+  backup:
+    image: "${BENEVOLE_RELEASE_BACKUP_IMAGE:?BENEVOLE_RELEASE_BACKUP_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null
+
+  database:
+    image: "${BENEVOLE_RELEASE_POSTGRES_IMAGE:?BENEVOLE_RELEASE_POSTGRES_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null
+
+  liquibase:
+    image: "${BENEVOLE_RELEASE_LIQUIBASE_IMAGE:?BENEVOLE_RELEASE_LIQUIBASE_IMAGE doit contenir une reference GHCR par digest}"
+    build: !reset null

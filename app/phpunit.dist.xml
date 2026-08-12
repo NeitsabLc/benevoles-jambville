@@ -16,6 +16,7 @@
         <server name="APP_ENV" value="test" force="true" />
         <server name="KERNEL_CLASS" value="App\Kernel" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <server name="TRUSTED_HOST_PATTERN" value="^(localhost|127\.0\.0\.1)$" />
     </php>
 
     <testsuites>

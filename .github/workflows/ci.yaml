@@ -44,7 +44,7 @@ jobs:
           APP_SECRET_CI="$(openssl rand -hex 32)"
           sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
           sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
-          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_BACKUP_PASSWORD; do
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_MIGRATOR_PASSWORD POSTGRES_BACKUP_PASSWORD POSTGRES_HEALTHCHECK_PASSWORD; do
             valeur="$(openssl rand -hex 24)"
             echo "::add-mask::${valeur}"
             echo "${variable}=${valeur}" >> "$GITHUB_ENV"
@@ -54,6 +54,14 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose -f compose.yaml -f compose.prod.yaml config --quiet
+          digest="sha256:$(printf '0%.0s' {1..64})"
+          export BENEVOLE_RELEASE_PHP_IMAGE="ghcr.io/neitsablc/benevole-jambville-php@${digest}"
+          export BENEVOLE_RELEASE_NGINX_IMAGE="ghcr.io/neitsablc/benevole-jambville-nginx@${digest}"
+          export BENEVOLE_RELEASE_POSTGRES_IMAGE="ghcr.io/neitsablc/benevole-jambville-postgres@${digest}"
+          export BENEVOLE_RELEASE_LIQUIBASE_IMAGE="ghcr.io/neitsablc/benevole-jambville-liquibase@${digest}"
+          export BENEVOLE_RELEASE_BACKUP_IMAGE="ghcr.io/neitsablc/benevole-jambville-backup@${digest}"
+          docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --quiet
+          test -z "$(docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --format json | jq -r '.services[] | select(.build != null) | .image')"
 
       - name: Construire l'image PHP
         run: docker compose build --pull php
@@ -74,6 +82,9 @@ jobs:
       - name: Auditer les dependances Composer
         run: docker compose exec --no-TTY php composer audit --locked --no-interaction
 
+      - name: Auditer les dependances ImportMap
+        run: docker compose exec --no-TTY php php bin/console importmap:audit
+
       - name: Valider les changelogs Liquibase
         run: docker compose --profile outils run --rm liquibase validate
 
@@ -84,29 +95,42 @@ jobs:
 
       - name: Compiler les assets
         run: |
+          docker compose exec --no-TTY php php bin/console cache:clear --env=prod --no-debug
           docker compose exec --no-TTY php php bin/console importmap:install
-          docker compose exec --no-TTY php php bin/console asset-map:compile
+          docker compose exec --no-TTY php php bin/console asset-map:compile --env=prod --no-debug
 
       - name: Analyser statiquement le code PHP
         run: |
           docker compose exec --no-TTY php php bin/console cache:warmup --env=dev
           docker compose exec --no-TTY php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
-      - name: Preparer l'image PHP pour l'analyse de vulnerabilites
-        run: |
-          docker tag "$(docker compose images --quiet php)" benevole-jambville-php-ci:scan
-          docker save benevole-jambville-php-ci:scan --output /tmp/benevole-jambville-php.tar
+      - name: Controler le style PHP
+        run: docker compose exec --no-TTY php composer lint:php
 
-      - name: Analyser les vulnerabilites de l'image PHP
-        run: >-
-          docker run --rm
-          --volume /tmp:/scan:ro
-          ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c
-          image --input /scan/benevole-jambville-php.tar
-          --scanners vuln
-          --severity HIGH,CRITICAL
-          --ignore-unfixed
-          --exit-code 1
+      - name: Preparer les images pour l'analyse de vulnerabilites
+        run: |
+          docker compose -f compose.yaml -f compose.prod.yaml --profile outils \
+            build php nginx database liquibase backup
+          docker save benevole-jambville-php-production:local --output /tmp/php.tar
+          docker save benevole-jambville-nginx-production:local --output /tmp/nginx.tar
+          docker save benevole-jambville-postgres:local --output /tmp/postgres.tar
+          docker save benevole-jambville-liquibase:local --output /tmp/liquibase.tar
+          docker save benevole-jambville-backup:local --output /tmp/backup.tar
+
+      - name: Analyser les vulnerabilites des images d'execution
+        run: |
+          set -euo pipefail
+          for archive in php nginx postgres liquibase backup; do
+            docker run --rm \
+              --volume /tmp:/scan:ro \
+              --volume trivy-cache:/root/.cache/trivy \
+              ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+              image --input "/scan/${archive}.tar" \
+              --scanners vuln \
+              --severity HIGH,CRITICAL \
+              --ignore-unfixed \
+              --exit-code 1
+          done
 
       - name: Reinitialiser la base de tests
         run: |
@@ -128,12 +152,15 @@ jobs:
       - name: Installer les dependances d'accessibilite
         run: npm ci
 
+      - name: Auditer les dependances npm
+        run: npm audit --audit-level=high
+
       - name: Installer Chromium
         run: npx playwright install --with-deps chromium
 
       - name: Attendre que l'application soit disponible
         run: |
-          APP_BASE_URL="http://$(docker compose port nginx 80)"
+          APP_BASE_URL="http://$(docker compose port nginx 8080)"
           echo "APP_BASE_URL=${APP_BASE_URL}" >> "$GITHUB_ENV"
           curl --fail --retry 30 --retry-delay 2 --retry-all-errors "${APP_BASE_URL}/connexion"
 
@@ -149,3 +176,32 @@ jobs:
       - name: Arreter les services
         if: always()
         run: docker compose down --volumes --remove-orphans
+
+  production-smoke:
+    name: Configuration de production
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Preparer la configuration de production isolee
+        run: |
+          cp .env.example .env
+          cp app/.env.example app/.env
+          APP_SECRET_CI="$(openssl rand -hex 32)"
+          sed -i "s/^APP_ENV=.*/APP_ENV=prod/" app/.env
+          sed -i "s/^APP_SECRET=.*/APP_SECRET=${APP_SECRET_CI}/" app/.env
+          for variable in POSTGRES_PASSWORD POSTGRES_APP_PASSWORD POSTGRES_MIGRATOR_PASSWORD POSTGRES_BACKUP_PASSWORD POSTGRES_HEALTHCHECK_PASSWORD; do
+            valeur="$(openssl rand -hex 24)"
+            echo "::add-mask::${valeur}"
+            echo "${variable}=${valeur}" >> "$GITHUB_ENV"
+          done
+
+      - name: Tester la superposition Compose de production
+        env:
+          COMPOSE_PROJECT_NAME: benevole-jambville-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          NGINX_HOST_PORT: 18082
+          POSTGRES_HOST_PORT: 15436
+        run: ./scripts/ci-production-smoke.sh

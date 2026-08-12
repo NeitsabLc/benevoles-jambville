@@ -34,9 +34,9 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->addOrderBy('i.dateDebut', 'ASC')
             ->addOrderBy('i.id', 'ASC');
 
-        if ($filtre === 'compa') {
+        if ('compa' === $filtre) {
             $requete->andWhere('i.type = :type')->setParameter('type', 'COMPAGNON');
-        } elseif ($filtre !== null) {
+        } elseif (null !== $filtre) {
             $requete->andWhere('t.id = :thematique')->setParameter('thematique', $filtre);
         }
 
@@ -75,7 +75,7 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->setParameter('debut', $debut)
             ->setParameter('fin', $fin);
 
-        if ($inscriptionIgnoree !== null) {
+        if (null !== $inscriptionIgnoree) {
             $requete->andWhere('i.id != :inscriptionIgnoree')->setParameter('inscriptionIgnoree', $inscriptionIgnoree->getId());
         }
 

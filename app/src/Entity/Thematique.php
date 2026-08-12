@@ -55,11 +55,30 @@ final class Thematique
         return $this->actif;
     }
 
-    public function getOrdreAffichage(): int { return $this->ordreAffichage; }
-    public function getDateDebutEvenement(): ?\DateTimeImmutable { return $this->dateDebutEvenement; }
-    public function getDateFinEvenement(): ?\DateTimeImmutable { return $this->dateFinEvenement; }
-    public function isEvenement(): bool { return $this->dateDebutEvenement !== null; }
-    public function isExclusiveSurPeriode(): bool { return $this->exclusiveSurPeriode; }
+    public function getOrdreAffichage(): int
+    {
+        return $this->ordreAffichage;
+    }
+
+    public function getDateDebutEvenement(): ?\DateTimeImmutable
+    {
+        return $this->dateDebutEvenement;
+    }
+
+    public function getDateFinEvenement(): ?\DateTimeImmutable
+    {
+        return $this->dateFinEvenement;
+    }
+
+    public function isEvenement(): bool
+    {
+        return null !== $this->dateDebutEvenement;
+    }
+
+    public function isExclusiveSurPeriode(): bool
+    {
+        return $this->exclusiveSurPeriode;
+    }
 
     public function modifier(string $nom, int $ordreAffichage, ?\DateTimeImmutable $dateDebut, ?\DateTimeImmutable $dateFin, bool $exclusive): void
     {
@@ -67,10 +86,13 @@ final class Thematique
         $this->ordreAffichage = max(0, $ordreAffichage);
         $this->dateDebutEvenement = $dateDebut;
         $this->dateFinEvenement = $dateFin;
-        $this->exclusiveSurPeriode = $dateDebut !== null && $dateFin !== null && $exclusive;
+        $this->exclusiveSurPeriode = null !== $dateDebut && null !== $dateFin && $exclusive;
     }
 
-    public function basculerActivation(): void { $this->actif = !$this->actif; }
+    public function basculerActivation(): void
+    {
+        $this->actif = !$this->actif;
+    }
 
     public function estCompatibleAvec(\DateTimeImmutable $debut, \DateTimeImmutable $fin): bool
     {
@@ -81,5 +103,4 @@ final class Thematique
     {
         return $this->isEvenement() && $debut <= $this->dateFinEvenement && $fin >= $this->dateDebutEvenement;
     }
-
 }

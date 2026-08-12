@@ -1,11 +1,4 @@
 import './stimulus_bootstrap.js';
-/*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
- */
-import './styles/app.css';
 
 const initialiserFormulairePresence = () => {
     document.querySelectorAll('[data-presence-form]').forEach((formulaire) => {
@@ -367,27 +360,24 @@ const initialiserAffichageNomFichier = () => {
     });
 };
 
-document.addEventListener('DOMContentLoaded', initialiserFormulairePresence);
-document.addEventListener('turbo:load', initialiserFormulairePresence);
-document.addEventListener('DOMContentLoaded', initialiserSuppressionPresence);
-document.addEventListener('turbo:load', initialiserSuppressionPresence);
-document.addEventListener('DOMContentLoaded', initialiserDesactivationCompte);
-document.addEventListener('turbo:load', initialiserDesactivationCompte);
-document.addEventListener('DOMContentLoaded', initialiserMenuMobile);
-document.addEventListener('turbo:load', initialiserMenuMobile);
-document.addEventListener('DOMContentLoaded', initialiserLignesPresence);
-document.addEventListener('turbo:load', initialiserLignesPresence);
-document.addEventListener('DOMContentLoaded', initialiserGlissieresThematiques);
-document.addEventListener('turbo:load', initialiserGlissieresThematiques);
-document.addEventListener('DOMContentLoaded', initialiserValidationTelephone);
-document.addEventListener('turbo:load', initialiserValidationTelephone);
-document.addEventListener('DOMContentLoaded', initialiserConfirmationImport);
-document.addEventListener('turbo:load', initialiserConfirmationImport);
-document.addEventListener('DOMContentLoaded', initialiserConfirmationCalendrier);
-document.addEventListener('turbo:load', initialiserConfirmationCalendrier);
-document.addEventListener('DOMContentLoaded', initialiserGlissieresBenevoles);
-document.addEventListener('turbo:load', initialiserGlissieresBenevoles);
-document.addEventListener('DOMContentLoaded', initialiserSoumissionAutomatique);
-document.addEventListener('turbo:load', initialiserSoumissionAutomatique);
-document.addEventListener('DOMContentLoaded', initialiserAffichageNomFichier);
-document.addEventListener('turbo:load', initialiserAffichageNomFichier);
+const initialiserPage = () => {
+    initialiserFormulairePresence();
+    initialiserSuppressionPresence();
+    initialiserDesactivationCompte();
+    initialiserMenuMobile();
+    initialiserLignesPresence();
+    initialiserGlissieresThematiques();
+    initialiserValidationTelephone();
+    initialiserConfirmationImport();
+    initialiserConfirmationCalendrier();
+    initialiserGlissieresBenevoles();
+    initialiserSoumissionAutomatique();
+    initialiserAffichageNomFichier();
+};
+
+document.addEventListener('turbo:load', initialiserPage);
+if ('loading' === document.readyState) {
+    document.addEventListener('DOMContentLoaded', initialiserPage, {once: true});
+} else {
+    initialiserPage();
+}

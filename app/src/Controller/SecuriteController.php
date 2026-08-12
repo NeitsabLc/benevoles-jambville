@@ -18,7 +18,7 @@ final class SecuriteController extends AbstractController
     #[Route('/connexion', name: 'app_connexion', methods: ['GET', 'POST'])]
     public function connexion(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->getUser() !== null) {
+        if (null !== $this->getUser()) {
             return $this->redirectToRoute('app_accueil');
         }
 
@@ -38,8 +38,8 @@ final class SecuriteController extends AbstractController
     ): Response {
         $utilisateur = $utilisateurs->findByActivationToken($token);
 
-        if ($utilisateur === null || !$utilisateur->activationEstValideA(new \DateTimeImmutable())) {
-            return $this->redirectToRoute($this->getUser() !== null ? 'app_accueil' : 'app_connexion');
+        if (null === $utilisateur || !$utilisateur->activationEstValideA(new \DateTimeImmutable())) {
+            return $this->redirectToRoute(null !== $this->getUser() ? 'app_accueil' : 'app_connexion');
         }
 
         $erreurs = [];
@@ -58,7 +58,7 @@ final class SecuriteController extends AbstractController
                 $erreurs[] = 'Les deux mots de passe ne correspondent pas.';
             }
 
-            if ($erreurs === []) {
+            if ([] === $erreurs) {
                 $utilisateur->setPassword($hasher->hashPassword($utilisateur, $motDePasse));
                 $utilisateur->terminerActivation();
                 $entityManager->flush();
