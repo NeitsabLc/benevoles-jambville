@@ -159,6 +159,32 @@ hors de ce dépôt.
   changelog, puis crée un tag annoté `vX.Y.Z` ;
 - un correctif urgent part de `main` et doit ensuite être reporté dans `dev`.
 
+## Livraison manuelle par images
+
+Chaque commit de `main` publie dans GHCR cinq images candidates immuables
+(PHP, Nginx, PostgreSQL, Liquibase et sauvegarde), puis les teste ensemble avec
+la configuration de production. Un tag `vX.Y.Z` ne reconstruit rien : il
+attribue les étiquettes de version aux digests déjà validés.
+
+Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
+les cinq références `ghcr.io/...@sha256:...` affichées par GitHub. La livraison
+reste entièrement manuelle :
+
+```bash
+make release-pull
+make release-backup-now
+make release-db-status
+make release-db-update
+make release-up
+make release-ps
+```
+
+`release-pull` vérifie la signature Cosign et l'attestation GitHub de chaque
+image avant son téléchargement. La surcharge `compose.release.yaml` supprime
+toutes les constructions locales et `release-up` interdit explicitement toute
+reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde
+précède obligatoirement l'application des migrations Liquibase.
+
 Après un clonage destiné au développement local :
 
 ```bash

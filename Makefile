@@ -2,6 +2,8 @@
 
 DOCKER_COMPOSE := docker compose
 DOCKER_COMPOSE_PROD := docker compose -f compose.yaml -f compose.prod.yaml
+RELEASE_ENV ?= .env.release
+DOCKER_COMPOSE_RELEASE := docker compose --env-file .env --env-file $(RELEASE_ENV) -f compose.yaml -f compose.prod.yaml -f compose.release.yaml
 PHP := $(DOCKER_COMPOSE) exec php
 PHP_RUN := $(DOCKER_COMPOSE) run --rm php
 LIQUIBASE := $(DOCKER_COMPOSE) --profile outils run --rm liquibase
@@ -40,6 +42,38 @@ prod-up: ## Démarrer les services avec la configuration de production
 .PHONY: prod-ps
 prod-ps: ## Afficher l'état des services de production
 	$(DOCKER_COMPOSE_PROD) ps
+
+.PHONY: release-config
+release-config: ## Valider la configuration de livraison utilisant GHCR
+	@$(DOCKER_COMPOSE_RELEASE) config --quiet
+
+.PHONY: release-verify
+release-verify: ## Vérifier les digests, signatures et attestations GHCR
+	@set -a; . ./$(RELEASE_ENV); set +a; ./scripts/verify-release-images.sh
+
+.PHONY: release-pull
+release-pull: release-config release-verify ## Télécharger manuellement les cinq images vérifiées
+	$(DOCKER_COMPOSE_RELEASE) --profile outils pull php nginx database liquibase backup
+
+.PHONY: release-backup-now
+release-backup-now: release-config ## Sauvegarder la base avant une livraison par images
+	$(DOCKER_COMPOSE_RELEASE) run --rm --no-deps -e BACKUP_ONCE=1 backup
+
+.PHONY: release-db-status
+release-db-status: release-config ## Contrôler les migrations avec l'image Liquibase livrée
+	$(DOCKER_COMPOSE_RELEASE) --profile outils run --rm liquibase status
+
+.PHONY: release-db-update
+release-db-update: release-config ## Appliquer les migrations avec l'image Liquibase livrée
+	$(DOCKER_COMPOSE_RELEASE) --profile outils run --rm liquibase update
+
+.PHONY: release-up
+release-up: release-config ## Démarrer manuellement les images GHCR sans reconstruction
+	$(DOCKER_COMPOSE_RELEASE) up -d --no-build database php nginx backup maintenance
+
+.PHONY: release-ps
+release-ps: ## Afficher l'état des conteneurs issus des images GHCR
+	$(DOCKER_COMPOSE_RELEASE) ps
 
 .PHONY: logs
 logs: ## Afficher les journaux

@@ -54,6 +54,14 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose -f compose.yaml -f compose.prod.yaml config --quiet
+          digest="sha256:$(printf '0%.0s' {1..64})"
+          export BENEVOLE_RELEASE_PHP_IMAGE="ghcr.io/neitsablc/benevole-jambville-php@${digest}"
+          export BENEVOLE_RELEASE_NGINX_IMAGE="ghcr.io/neitsablc/benevole-jambville-nginx@${digest}"
+          export BENEVOLE_RELEASE_POSTGRES_IMAGE="ghcr.io/neitsablc/benevole-jambville-postgres@${digest}"
+          export BENEVOLE_RELEASE_LIQUIBASE_IMAGE="ghcr.io/neitsablc/benevole-jambville-liquibase@${digest}"
+          export BENEVOLE_RELEASE_BACKUP_IMAGE="ghcr.io/neitsablc/benevole-jambville-backup@${digest}"
+          docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --quiet
+          test -z "$(docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --format json | jq -r '.services[] | select(.build != null) | .image')"
 
       - name: Construire l'image PHP
         run: docker compose build --pull php

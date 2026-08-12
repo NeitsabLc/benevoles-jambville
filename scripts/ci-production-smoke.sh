@@ -10,7 +10,11 @@ case "${COMPOSE_PROJECT_NAME:-}" in
 esac
 
 compose() {
-    docker compose -f compose.yaml -f compose.prod.yaml "$@"
+    if [ "${USE_RELEASE_IMAGES:-0}" = "1" ]; then
+        docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml "$@"
+    else
+        docker compose -f compose.yaml -f compose.prod.yaml "$@"
+    fi
 }
 
 assert_container_hardened() {
@@ -70,14 +74,20 @@ nettoyer() {
 trap nettoyer EXIT INT TERM
 
 compose config --quiet
-compose --profile outils build --quiet database liquibase php nginx backup
+if [ "${USE_RELEASE_IMAGES:-0}" = "1" ]; then
+    compose --profile outils pull php nginx database liquibase backup
+else
+    compose --profile outils build --quiet database liquibase php nginx backup
+fi
 
 fichier_identite="$repertoire_temporaire/identity.txt"
+backup_image=${SMOKE_BACKUP_IMAGE:-benevole-jambville-backup:local}
+postgres_image=${SMOKE_POSTGRES_IMAGE:-benevole-jambville-postgres:local}
 docker run --rm --user root --entrypoint age-keygen \
-    benevole-jambville-backup:local >"$fichier_identite"
+    "$backup_image" >"$fichier_identite"
 BACKUP_AGE_RECIPIENT=$(docker run --rm --user root \
     --volume "$fichier_identite:/run/identity.txt:ro" \
-    --entrypoint age-keygen benevole-jambville-backup:local \
+    --entrypoint age-keygen "$backup_image" \
     -y /run/identity.txt)
 export BACKUP_AGE_RECIPIENT
 
@@ -155,7 +165,7 @@ compose exec --no-TTY database sh -ec '
 '
 
 if docker run --rm --network "${COMPOSE_PROJECT_NAME}_benevole_jambville" \
-    --entrypoint psql benevole-jambville-postgres:local \
+    --entrypoint psql "$postgres_image" \
     "postgresql://role_interdit:mot-de-passe@database:5432/${POSTGRES_DB}" \
     --command='SELECT 1'; then
     echo "Le HBA accepte un role PostgreSQL non autorise." >&2

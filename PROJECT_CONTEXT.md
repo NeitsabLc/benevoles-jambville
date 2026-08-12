@@ -556,9 +556,17 @@ Pour une évolution d’interface :
   aucune valeur de secours utilisable.
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
-- Un tag `vX.Y.Z` rattaché à `main` publie ces cinq images dans GHCR avec une
-  nomenclature stable, un SBOM, une provenance GitHub et une signature Cosign
-  sans clé persistante. Ce workflow ne déploie rien et n'accède à aucune base.
+- Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
+  étiquette `sha-<commit>`, avec SBOM, provenance GitHub, attestation et
+  signature Cosign sans clé persistante. Les images candidates sont ensuite
+  vérifiées et testées ensemble par le smoke test de production.
+- Un tag `vX.Y.Z` rattaché à `main` exige les validations du même commit puis
+  ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.
+  Aucun workflow ne déploie ni n'accède à une base de production.
+- La livraison reste manuelle. Le fichier local `.env.release` contient les
+  cinq références GHCR par digest. `compose.release.yaml` supprime les
+  constructions locales ; les commandes `make release-*` vérifient, téléchargent
+  et démarrent ces images, avec sauvegarde préalable et migrations Liquibase.
 - En production, Liquibase utilise le rôle dédié
   `benevole_jambville_migrator`, sans privilège administrateur. Après
   l'amorçage initial, les objets applicatifs et les tables de suivi Liquibase
