@@ -182,7 +182,7 @@ final class SecuriteControllerTest extends WebTestCase
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
             $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
-            if ($utilisateur !== null && $ancienMotDePasse !== null) {
+            if (null !== $utilisateur && null !== $ancienMotDePasse) {
                 $utilisateur->setPassword($ancienMotDePasse);
                 $utilisateur->terminerActivation();
                 $utilisateur->terminerInformationsAccueil();

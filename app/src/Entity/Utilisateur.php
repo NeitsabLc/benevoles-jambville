@@ -265,7 +265,7 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
 
     public function isEquipePilote(): bool
     {
-        return $this->role === 'EQUIPE_PILOTE';
+        return 'EQUIPE_PILOTE' === $this->role;
     }
 
     public function doitCompleterInformationsAccueil(): bool
@@ -336,8 +336,8 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
 
     public function activationEstValideA(\DateTimeImmutable $date): bool
     {
-        return $this->jetonActivation !== null
-            && $this->expirationJetonActivation !== null
+        return null !== $this->jetonActivation
+            && null !== $this->expirationJetonActivation
             && $this->expirationJetonActivation >= $date
             && $this->actif;
     }

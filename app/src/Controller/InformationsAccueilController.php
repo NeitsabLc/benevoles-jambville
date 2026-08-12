@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use App\Service\ValidationProfilService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +15,11 @@ use Symfony\Component\Routing\Attribute\Route;
 final class InformationsAccueilController extends AbstractController
 {
     #[Route('/bienvenue/informations-pratiques', name: 'app_informations_accueil', methods: ['GET', 'POST'])]
-    public function __invoke(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function __invoke(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ValidationProfilService $validationProfil,
+    ): Response {
         $utilisateur = $this->getUser();
         if (!$utilisateur instanceof Utilisateur || !$utilisateur->doitCompleterInformationsAccueil()) {
             return $this->redirectToRoute('app_accueil');
@@ -27,14 +31,21 @@ final class InformationsAccueilController extends AbstractController
                 $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
             }
 
-            if ($erreurs === []) {
+            $profil = $validationProfil->valider(
+                '',
+                $request->request->getString('regime_autre'),
+                $request->request->getString('besoin_couchage'),
+            );
+            $erreurs = [...$erreurs, ...$profil['erreurs']];
+
+            if ([] === $erreurs) {
                 $utilisateur->modifierProfil(
                     $utilisateur->getTelephone(),
                     $request->request->getBoolean('vegetarien'),
                     $request->request->getBoolean('allergie_oeuf'),
                     $request->request->getBoolean('allergie_arachide'),
-                    trim($request->request->getString('regime_autre')) ?: null,
-                    trim($request->request->getString('besoin_couchage')) ?: null,
+                    $profil['regime_autre'],
+                    $profil['besoin_couchage'],
                 );
                 $utilisateur->terminerInformationsAccueil();
                 $entityManager->flush();

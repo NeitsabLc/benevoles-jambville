@@ -17,7 +17,7 @@ final class HistoriquePresenceAnonymeRepository
     }
 
     /**
-     * @return int|null Nombre d'inscriptions supprimées, ou null si la campagne avait déjà été purgée.
+     * @return int|null nombre d'inscriptions supprimées, ou null si la campagne avait déjà été purgée
      */
     public function archiverEtPurgerCampagne(\DateTimeImmutable $debut, \DateTimeImmutable $fin): ?int
     {

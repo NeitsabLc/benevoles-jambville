@@ -96,6 +96,7 @@ ou modifier le schéma.
 ```bash
 make test
 make analyse-statique
+make style
 npm ci
 npx playwright install chromium
 make test-accessibility

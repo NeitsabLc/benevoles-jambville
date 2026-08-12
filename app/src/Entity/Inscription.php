@@ -123,7 +123,7 @@ final class Inscription
 
     public function modifierIndividuelle(Utilisateur $utilisateur, Thematique $thematique, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreEnfants, ?string $commentaire, Utilisateur $auteur): void
     {
-        if ($this->type !== 'INDIVIDUELLE') {
+        if ('INDIVIDUELLE' !== $this->type) {
             throw new \LogicException('Une inscription compa ne peut pas devenir individuelle.');
         }
 
@@ -135,7 +135,7 @@ final class Inscription
 
     public function modifierCompagnon(string $nomEquipe, int $nombrePersonnes, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreVegetariens, int $nombreAllergieOeuf, int $nombreAllergieArachide, ?string $commentaire, Utilisateur $auteur): void
     {
-        if ($this->type !== 'COMPAGNON') {
+        if ('COMPAGNON' !== $this->type) {
             throw new \LogicException('Une inscription individuelle ne peut pas devenir compa.');
         }
 
@@ -211,23 +211,94 @@ final class Inscription
         return $selectionnes;
     }
 
-    public function getId(): string { return $this->id; }
-    public function getType(): string { return $this->type; }
-    public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
-    public function getThematique(): ?Thematique { return $this->thematique; }
-    public function getNomEquipeCompa(): ?string { return $this->nomEquipeCompa; }
-    public function getNombrePersonnes(): ?int { return $this->nombrePersonnes; }
-    public function getDateDebut(): \DateTimeImmutable { return $this->dateDebut; }
-    public function getDateFin(): \DateTimeImmutable { return $this->dateFin; }
-    public function getTypeCouchage(): string { return $this->typeCouchage; }
-    public function getNombreEnfants(): int { return $this->nombreEnfants; }
-    public function getNombreVegetariens(): int { return $this->nombreVegetariens; }
-    public function getNombreAllergieOeuf(): int { return $this->nombreAllergieOeuf; }
-    public function getNombreAllergieArachide(): int { return $this->nombreAllergieArachide; }
-    public function getCommentaire(): ?string { return $this->commentaire; }
-    public function isActif(): bool { return $this->actif; }
-    public function getNombreRepas(): int { return $this->repas->count(); }
-    public function getNombreRepasSelectionnes(): int { return count($this->getRepasSelectionnes()); }
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function getThematique(): ?Thematique
+    {
+        return $this->thematique;
+    }
+
+    public function getNomEquipeCompa(): ?string
+    {
+        return $this->nomEquipeCompa;
+    }
+
+    public function getNombrePersonnes(): ?int
+    {
+        return $this->nombrePersonnes;
+    }
+
+    public function getDateDebut(): \DateTimeImmutable
+    {
+        return $this->dateDebut;
+    }
+
+    public function getDateFin(): \DateTimeImmutable
+    {
+        return $this->dateFin;
+    }
+
+    public function getTypeCouchage(): string
+    {
+        return $this->typeCouchage;
+    }
+
+    public function getNombreEnfants(): int
+    {
+        return $this->nombreEnfants;
+    }
+
+    public function getNombreVegetariens(): int
+    {
+        return $this->nombreVegetariens;
+    }
+
+    public function getNombreAllergieOeuf(): int
+    {
+        return $this->nombreAllergieOeuf;
+    }
+
+    public function getNombreAllergieArachide(): int
+    {
+        return $this->nombreAllergieArachide;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function getNombreRepas(): int
+    {
+        return $this->repas->count();
+    }
+
+    public function getNombreRepasSelectionnes(): int
+    {
+        return count($this->getRepasSelectionnes());
+    }
+
     /** @return Collection<int, RepasInscription> */
-    public function getRepas(): Collection { return $this->repas; }
+    public function getRepas(): Collection
+    {
+        return $this->repas;
+    }
 }

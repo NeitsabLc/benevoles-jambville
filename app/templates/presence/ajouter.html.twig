@@ -98,7 +98,7 @@
                 </div>
             </section>
 
-            <div class="champ"><label for="commentaire">Commentaire <small>(facultatif)</small></label><textarea id="commentaire" name="commentaire" rows="3">{{ app.request.request.get('commentaire', inscription ? inscription.commentaire : '') }}</textarea></div>
+            <div class="champ"><label for="commentaire">Commentaire <small>(facultatif)</small></label><textarea id="commentaire" name="commentaire" maxlength="1000" rows="3">{{ app.request.request.get('commentaire', inscription ? inscription.commentaire : '') }}</textarea></div>
 
         </section>
 

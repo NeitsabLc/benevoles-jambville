@@ -31,8 +31,18 @@ final class PersonnePermanence
         $this->nom = trim($nom);
     }
 
-    public function getId(): string { return $this->id; }
-    public function getNom(): string { return $this->nom; }
-    public function isActif(): bool { return $this->actif; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
 
+    public function getNom(): string
+    {
+        return $this->nom;
+    }
+
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
 }

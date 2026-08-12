@@ -558,6 +558,9 @@ Pour une évolution d’interface :
   que le document reste exact avant de commiter.
 - Préférer des services métier explicites aux règles dispersées dans les
   contrôleurs ou templates.
+- Toute saisie libre persistée doit avoir une limite explicite vérifiée côté
+  serveur et reflétée par un attribut `maxlength` dans le formulaire.
+- Le code PHP de `src/` et `tests/` doit satisfaire `make style` avant commit.
 - Centraliser les calculs de repas, rôles et synthèses afin que le CSV, l’API et
   les écrans utilisent les mêmes règles.
 - Ne pas exposer les détails d’intégration externe dans les entités métier.

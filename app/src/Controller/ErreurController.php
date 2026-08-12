@@ -13,6 +13,6 @@ final class ErreurController extends AbstractController
     #[Route('/{chemin}', name: 'app_page_introuvable', requirements: ['chemin' => '.+'], methods: ['GET'], priority: -1000)]
     public function pageIntrouvable(): Response
     {
-        return $this->redirectToRoute($this->getUser() !== null ? 'app_accueil' : 'app_connexion');
+        return $this->redirectToRoute(null !== $this->getUser() ? 'app_accueil' : 'app_connexion');
     }
 }

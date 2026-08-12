@@ -50,13 +50,14 @@ final class ThematiqueRepository extends ServiceEntityRepository
     {
         $actives = $this->findActives();
         $exclusivesChevauchantes = array_values(array_filter($actives, static fn (Thematique $thematique): bool => $thematique->isExclusiveSurPeriode() && $thematique->chevauche($debut, $fin)));
-        if ($exclusivesChevauchantes !== []) {
+        if ([] !== $exclusivesChevauchantes) {
             return array_values(array_filter($exclusivesChevauchantes, static fn (Thematique $thematique): bool => $thematique->estCompatibleAvec($debut, $fin)));
         }
 
         $compatibles = array_values(array_filter($actives, static fn (Thematique $thematique): bool => $thematique->estCompatibleAvec($debut, $fin)));
 
         usort($compatibles, static fn (Thematique $a, Thematique $b): int => ($b->isEvenement() <=> $a->isEvenement()) ?: ($a->getOrdreAffichage() <=> $b->getOrdreAffichage()) ?: strcasecmp($a->getNom(), $b->getNom()));
+
         return $compatibles;
     }
 

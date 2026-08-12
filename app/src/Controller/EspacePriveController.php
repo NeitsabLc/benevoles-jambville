@@ -13,8 +13,8 @@ use App\Repository\JourneeRepository;
 use App\Repository\PersonnePermanenceRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -58,20 +58,20 @@ final class EspacePriveController extends AbstractController
 
             for ($date = $premierJour; $date <= $dernierJour; $date = $date->modify('+1 day')) {
                 $cle = $date->format('Y-m-d');
-                $besoinCouchage = $inscription->getType() === 'INDIVIDUELLE'
+                $besoinCouchage = 'INDIVIDUELLE' === $inscription->getType()
                     ? trim((string) $inscription->getUtilisateur()?->getBesoinCouchage())
                     : '';
                 $presence = [
                     'libelle' => $libelle,
                     'effectif' => $effectif,
-                    'est_equipe' => $inscription->getType() === 'COMPAGNON',
-                    'besoin_couchage' => $besoinCouchage !== '' ? $besoinCouchage : null,
+                    'est_equipe' => 'COMPAGNON' === $inscription->getType(),
+                    'besoin_couchage' => '' !== $besoinCouchage ? $besoinCouchage : null,
                 ];
                 $jours[$cle]['presences'][] = $presence;
                 $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['total'] += $effectif;
                 $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['presences'][] = $presence;
 
-                if ($inscription->getType() === 'COMPAGNON') {
+                if ('COMPAGNON' === $inscription->getType()) {
                     $jours[$cle]['regimes']['vegetariens'] += $inscription->getNombreVegetariens();
                     $jours[$cle]['regimes']['oeuf'] += $inscription->getNombreAllergieOeuf();
                     $jours[$cle]['regimes']['arachide'] += $inscription->getNombreAllergieArachide();
@@ -81,7 +81,7 @@ final class EspacePriveController extends AbstractController
                     $jours[$cle]['regimes']['oeuf'] += (int) $utilisateur?->hasAllergieOeuf();
                     $jours[$cle]['regimes']['arachide'] += (int) $utilisateur?->hasAllergieArachide();
                     $regimeAutre = trim((string) $utilisateur?->getRegimeAutre());
-                    if ($regimeAutre !== '') {
+                    if ('' !== $regimeAutre) {
                         if (!in_array($regimeAutre, $jours[$cle]['regimes']['commentaires'], true)) {
                             $jours[$cle]['regimes']['commentaires'][] = $regimeAutre;
                         }
@@ -111,22 +111,24 @@ final class EspacePriveController extends AbstractController
         PersonnePermanenceRepository $personnes,
         JourneeRepository $journees,
         EntityManagerInterface $entityManager,
-    ): Response
-    {
+    ): Response {
         $this->garantirAccesEquipe();
         $utilisateur = $this->getUser();
-        if (!$utilisateur instanceof Utilisateur) throw $this->createAccessDeniedException();
+        if (!$utilisateur instanceof Utilisateur) {
+            throw $this->createAccessDeniedException();
+        }
 
         if ($request->isMethod('POST')) {
             $action = $request->request->getString('action');
             if (!$this->isCsrfTokenValid('configurer-calendrier', $request->request->getString('_csrf_token'))) {
                 $this->addFlash('erreur', 'Le formulaire a expiré. Veuillez réessayer.');
+
                 return $this->redirectToRoute('app_admin_calendrier');
             }
 
-            if ($action === 'ajouter_personne') {
+            if ('ajouter_personne' === $action) {
                 $nom = trim($request->request->getString('nom_personne'));
-                if ($nom === '' || mb_strlen($nom) > 150) {
+                if ('' === $nom || mb_strlen($nom) > 150) {
                     $this->addFlash('erreur', 'Le nom est obligatoire et limité à 150 caractères.');
                 } else {
                     try {
@@ -137,41 +139,46 @@ final class EspacePriveController extends AbstractController
                         $this->addFlash('erreur', 'Cette personne figure déjà dans la liste.');
                     }
                 }
+
                 return $this->redirectToRoute('app_admin_calendrier');
             }
 
             $debut = $this->lireDate($request->request->getString('date_debut'));
             $fin = $this->lireDate($request->request->getString('date_fin'));
-            if ($debut === null || $fin === null || $fin < $debut || $fin > $debut->modify('+366 days')) {
+            if (null === $debut || null === $fin || $fin < $debut || $fin > $debut->modify('+366 days')) {
                 $this->addFlash('erreur', 'Choisissez une période valide, limitée à un an.');
+
                 return $this->redirectToRoute('app_admin_calendrier');
             }
 
-            $mode = $request->request->getString('mode') === 'remplacer' ? 'remplacer' : 'completer';
+            $mode = 'remplacer' === $request->request->getString('mode') ? 'remplacer' : 'completer';
             $joursExistants = [];
             foreach ($journees->findEntre($debut, $fin) as $journee) {
                 $joursExistants[$journee->getDateJournee()->format('Y-m-d')] = $journee;
             }
 
-            if ($action === 'permanence') {
+            if ('permanence' === $action) {
                 $personne = $personnes->find($request->request->getString('personne'));
                 if (!$personne instanceof PersonnePermanence || !$personne->isActif()) {
                     $this->addFlash('erreur', 'Choisissez une personne de permanence.');
+
                     return $this->redirectToRoute('app_admin_calendrier');
                 }
                 $modifies = $this->appliquerPeriode($debut, $fin, $joursExistants, $entityManager, $utilisateur, $mode, 'permanence', $personne);
                 $this->addFlash('succes', $modifies.' jour'.($modifies > 1 ? 's ont' : ' a').' été mis à jour pour la permanence.');
-            } elseif ($action === 'commentaire') {
+            } elseif ('commentaire' === $action) {
                 $commentaire = trim($request->request->getString('commentaire'));
                 if (mb_strlen($commentaire) > 1000) {
                     $this->addFlash('erreur', 'Le commentaire est limité à 1 000 caractères.');
+
                     return $this->redirectToRoute('app_admin_calendrier');
                 }
                 $modifies = $this->appliquerPeriode($debut, $fin, $joursExistants, $entityManager, $utilisateur, $mode, 'commentaire', $commentaire);
-                $this->addFlash('succes', $commentaire === '' ? 'Les commentaires de la période ont été retirés.' : $modifies.' jour'.($modifies > 1 ? 's ont' : ' a').' été mis à jour avec ce commentaire.');
+                $this->addFlash('succes', '' === $commentaire ? 'Les commentaires de la période ont été retirés.' : $modifies.' jour'.($modifies > 1 ? 's ont' : ' a').' été mis à jour avec ce commentaire.');
             }
 
             $entityManager->flush();
+
             return $this->redirectToRoute('app_admin_calendrier');
         }
 
@@ -191,12 +198,19 @@ final class EspacePriveController extends AbstractController
         $modifies = 0;
         for ($date = $debut; $date <= $fin; $date = $date->modify('+1 day')) {
             $journee = $existants[$date->format('Y-m-d')] ?? new Journee($date, $utilisateur);
-            $dejaRenseigne = $champ === 'permanence' ? $journee->getPersonnePermanence() !== null : $journee->getCommentaire() !== null;
-            if ($mode === 'completer' && $dejaRenseigne) continue;
-            if ($champ === 'permanence') $journee->definirPermanence($valeur, $utilisateur);
-            else $journee->definirCommentaire($valeur, $utilisateur);
+            $dejaRenseigne = 'permanence' === $champ ? null !== $journee->getPersonnePermanence() : null !== $journee->getCommentaire();
+            if ('completer' === $mode && $dejaRenseigne) {
+                continue;
+            }
+            if ('permanence' === $champ) {
+                $journee->definirPermanence($valeur, $utilisateur);
+            } else {
+                $journee->definirCommentaire($valeur, $utilisateur);
+            }
             if ($journee->estVide()) {
-                if (isset($existants[$date->format('Y-m-d')])) $entityManager->remove($journee);
+                if (isset($existants[$date->format('Y-m-d')])) {
+                    $entityManager->remove($journee);
+                }
             } else {
                 $entityManager->persist($journee);
             }
@@ -215,30 +229,30 @@ final class EspacePriveController extends AbstractController
 
     private function lireDate(string $valeur): ?\DateTimeImmutable
     {
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $valeur) !== 1) {
+        if (1 !== preg_match('/^\d{4}-\d{2}-\d{2}$/', $valeur)) {
             return null;
         }
 
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $valeur);
 
-        return $date !== false && $date->format('Y-m-d') === $valeur ? $date : null;
+        return false !== $date && $date->format('Y-m-d') === $valeur ? $date : null;
     }
 
     private function effectif(Inscription $inscription): int
     {
-        return $inscription->getType() === 'COMPAGNON'
+        return 'COMPAGNON' === $inscription->getType()
             ? (int) $inscription->getNombrePersonnes()
             : 1 + $inscription->getNombreEnfants();
     }
 
     private function libellePresence(Inscription $inscription): ?string
     {
-        if ($inscription->getType() === 'COMPAGNON') {
+        if ('COMPAGNON' === $inscription->getType()) {
             return $inscription->getNomEquipeCompa();
         }
 
         $utilisateur = $inscription->getUtilisateur();
-        if ($utilisateur === null) {
+        if (null === $utilisateur) {
             return null;
         }
 

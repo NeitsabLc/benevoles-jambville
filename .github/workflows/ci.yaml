@@ -96,6 +96,9 @@ jobs:
           docker compose exec --no-TTY php php bin/console cache:warmup --env=dev
           docker compose exec --no-TTY php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
+      - name: Controler le style PHP
+        run: docker compose exec --no-TTY php composer lint:php
+
       - name: Preparer les images pour l'analyse de vulnerabilites
         run: |
           docker tag "$(docker compose images --quiet php)" benevole-jambville-php-ci:scan

@@ -7,8 +7,8 @@ namespace App\Controller;
 use App\Repository\InscriptionRepository;
 use App\Repository\JourneeRepository;
 use App\Repository\ThematiqueRepository;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -20,8 +20,7 @@ final class AccueilController extends AbstractController
         InscriptionRepository $inscriptions,
         JourneeRepository $journees,
         ThematiqueRepository $thematiques,
-    ): Response
-    {
+    ): Response {
         $mois = $this->lireMois($request->query->getString('mois'));
         $debutMois = $mois->modify('first day of this month');
         $finMois = $mois->modify('last day of this month');
@@ -32,7 +31,7 @@ final class AccueilController extends AbstractController
         usort($thematiquesActives, static fn ($a, $b): int => strcasecmp($a->getNom(), $b->getNom()));
         $filtre = $request->query->getString('filtre') ?: null;
         $filtresValides = array_merge(['compa'], array_map(static fn ($thematique) => $thematique->getId(), $thematiquesActives));
-        if ($filtre !== null && !in_array($filtre, $filtresValides, true)) {
+        if (null !== $filtre && !in_array($filtre, $filtresValides, true)) {
             $filtre = null;
         }
 
@@ -82,9 +81,9 @@ final class AccueilController extends AbstractController
 
     private function lireMois(string $valeur): \DateTimeImmutable
     {
-        if (preg_match('/^\d{4}-\d{2}$/', $valeur) === 1) {
+        if (1 === preg_match('/^\d{4}-\d{2}$/', $valeur)) {
             $date = \DateTimeImmutable::createFromFormat('!Y-m', $valeur);
-            if ($date !== false) {
+            if (false !== $date) {
                 return $date;
             }
         }

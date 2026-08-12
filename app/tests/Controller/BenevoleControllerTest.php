@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Repository\UtilisateurRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 

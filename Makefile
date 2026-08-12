@@ -120,6 +120,14 @@ analyse-statique: ## Analyser le code PHP avec PHPStan
 	$(PHP) php bin/console cache:warmup --env=dev
 	$(PHP) vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
+.PHONY: style
+style: ## Vérifier le style du code PHP
+	$(PHP) composer lint:php
+
+.PHONY: style-fix
+style-fix: ## Corriger automatiquement le style du code PHP
+	$(PHP) composer fix:php
+
 .PHONY: assets-compile
 assets-compile: ## Reconstruire proprement les assets de production
 	$(PHP) php bin/console cache:clear --env=prod --no-debug

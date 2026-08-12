@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
+use App\Service\ValidationProfilService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,8 +21,8 @@ final class ProfilController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $hasher,
-    ): Response
-    {
+        ValidationProfilService $validationProfil,
+    ): Response {
         $utilisateur = $this->getUser();
         if (!$utilisateur instanceof Utilisateur) {
             throw $this->createAccessDeniedException();
@@ -33,19 +34,17 @@ final class ProfilController extends AbstractController
                 $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
             }
 
-            $telephone = trim($request->request->getString('telephone')) ?: null;
-            $regimeAutre = trim($request->request->getString('regime_autre')) ?: null;
-            $besoinCouchage = trim($request->request->getString('besoin_couchage')) ?: null;
-            if ($telephone !== null && mb_strlen($telephone) > 30) {
-                $erreurs[] = 'Le numéro de téléphone ne peut pas dépasser 30 caractères.';
-            } elseif ($telephone !== null && !$this->telephoneEstValide($telephone)) {
-                $erreurs[] = 'Le numéro de téléphone doit être un numéro français valide, par exemple 06 12 34 56 78.';
-            }
+            $profil = $validationProfil->valider(
+                $request->request->getString('telephone'),
+                $request->request->getString('regime_autre'),
+                $request->request->getString('besoin_couchage'),
+            );
+            $erreurs = [...$erreurs, ...$profil['erreurs']];
 
             $motDePasseActuel = $request->request->getString('mot_de_passe_actuel');
             $nouveauMotDePasse = $request->request->getString('nouveau_mot_de_passe');
             $confirmationMotDePasse = $request->request->getString('confirmation_mot_de_passe');
-            $modificationMotDePasseDemandee = $motDePasseActuel !== '' || $nouveauMotDePasse !== '' || $confirmationMotDePasse !== '';
+            $modificationMotDePasseDemandee = '' !== $motDePasseActuel || '' !== $nouveauMotDePasse || '' !== $confirmationMotDePasse;
             if ($modificationMotDePasseDemandee) {
                 if (!$hasher->isPasswordValid($utilisateur, $motDePasseActuel)) {
                     $erreurs[] = 'Le mot de passe actuel est incorrect.';
@@ -58,14 +57,14 @@ final class ProfilController extends AbstractController
                 }
             }
 
-            if ($erreurs === []) {
+            if ([] === $erreurs) {
                 $utilisateur->modifierProfil(
-                    $telephone,
+                    $profil['telephone'],
                     $request->request->getBoolean('vegetarien'),
                     $request->request->getBoolean('allergie_oeuf'),
                     $request->request->getBoolean('allergie_arachide'),
-                    $regimeAutre,
-                    $besoinCouchage,
+                    $profil['regime_autre'],
+                    $profil['besoin_couchage'],
                 );
                 if ($utilisateur->isEquipePilote()) {
                     $utilisateur->modifierRemiseEquipement(
@@ -93,33 +92,37 @@ final class ProfilController extends AbstractController
 
     #[Route('/administration/benevoles/{id}/profil', name: 'app_admin_benevole_profil', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_EQUIPE_PILOTE')]
-    public function administrer(Utilisateur $utilisateur, Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function administrer(
+        Utilisateur $utilisateur,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ValidationProfilService $validationProfil,
+    ): Response {
         $erreurs = [];
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('modifier-profil-'.$utilisateur->getId(), $request->request->getString('_csrf_token'))) {
                 $erreurs[] = 'Le formulaire a expiré. Veuillez réessayer.';
             }
 
-            $telephone = trim($request->request->getString('telephone')) ?: null;
             $role = $request->request->getString('role');
-            if ($telephone !== null && mb_strlen($telephone) > 30) {
-                $erreurs[] = 'Le numéro de téléphone ne peut pas dépasser 30 caractères.';
-            } elseif ($telephone !== null && !$this->telephoneEstValide($telephone)) {
-                $erreurs[] = 'Le numéro de téléphone doit être un numéro français valide, par exemple 06 12 34 56 78.';
-            }
+            $profil = $validationProfil->valider(
+                $request->request->getString('telephone'),
+                $request->request->getString('regime_autre'),
+                $request->request->getString('besoin_couchage'),
+            );
+            $erreurs = [...$erreurs, ...$profil['erreurs']];
             if (!in_array($role, ['BENEVOLE', 'EQUIPE_PILOTE', 'SALARIE_ACCUEIL'], true)) {
                 $erreurs[] = 'Choisissez un rôle valide.';
             }
 
-            if ($erreurs === []) {
+            if ([] === $erreurs) {
                 $utilisateur->modifierProfil(
-                    $telephone,
+                    $profil['telephone'],
                     $request->request->getBoolean('vegetarien'),
                     $request->request->getBoolean('allergie_oeuf'),
                     $request->request->getBoolean('allergie_arachide'),
-                    trim($request->request->getString('regime_autre')) ?: null,
-                    trim($request->request->getString('besoin_couchage')) ?: null,
+                    $profil['regime_autre'],
+                    $profil['besoin_couchage'],
                 );
                 $utilisateur->modifierRemiseEquipement(
                     $request->request->getBoolean('foulard_remis'),
@@ -139,10 +142,5 @@ final class ProfilController extends AbstractController
             'profilAdmin' => true,
             'actionProfil' => $this->generateUrl('app_admin_benevole_profil', ['id' => $utilisateur->getId()]),
         ]);
-    }
-
-    private function telephoneEstValide(string $telephone): bool
-    {
-        return preg_match('/^(?:(?:\+33|0033)[ .-]?[1-9]|0[1-9])(?:[ .-]?\d{2}){4}$/', $telephone) === 1;
     }
 }

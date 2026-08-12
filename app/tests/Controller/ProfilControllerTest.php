@@ -47,7 +47,7 @@ final class ProfilControllerTest extends WebTestCase
             $entityManager = self::getContainer()->get(EntityManagerInterface::class);
             $entityManager->clear();
             $benevoleARestaurer = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
-            if ($benevoleARestaurer !== null) {
+            if (null !== $benevoleARestaurer) {
                 $benevoleARestaurer->modifierRole($roleInitial);
                 $entityManager->flush();
             }
@@ -78,6 +78,8 @@ final class ProfilControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="allergie_arachide"]');
         self::assertSelectorExists('textarea[name="regime_autre"]');
         self::assertSelectorExists('textarea[name="besoin_couchage"]');
+        self::assertSelectorExists('textarea[name="regime_autre"][maxlength="1000"]');
+        self::assertSelectorExists('textarea[name="besoin_couchage"][maxlength="1000"]');
         self::assertSelectorNotExists('#equipement-titre');
         self::assertSelectorNotExists('input[name="foulard_remis"]');
         self::assertSelectorNotExists('input[name="tenue_remise"]');
@@ -182,7 +184,7 @@ final class ProfilControllerTest extends WebTestCase
         } finally {
             self::assertNotNull($ancienHash);
             $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
-            if ($utilisateur !== null) {
+            if (null !== $utilisateur) {
                 $utilisateur->setPassword($ancienHash);
                 self::getContainer()->get(EntityManagerInterface::class)->flush();
             }
@@ -205,5 +207,28 @@ final class ProfilControllerTest extends WebTestCase
         $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
         self::assertNotNull($utilisateur);
         self::assertSame($telephoneInitial, $utilisateur->getTelephone());
+    }
+
+    public function testLesTextesLibresTropLongsSontRefusesCoteServeur(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $regimeInitial = $utilisateur->getRegimeAutre();
+        $client->loginUser($utilisateur);
+
+        $crawler = $client->request('GET', '/mon-profil');
+        $jeton = $crawler->filter('input[name="_csrf_token"]')->attr('value');
+        self::assertNotNull($jeton);
+        $client->request('POST', '/mon-profil', [
+            '_csrf_token' => $jeton,
+            'regime_autre' => str_repeat('a', 1_001),
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.alerte-erreur', 'limité à 1 000 caractères');
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        self::assertSame($regimeInitial, $utilisateur->getRegimeAutre());
     }
 }
