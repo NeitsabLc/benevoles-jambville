@@ -62,6 +62,11 @@ jobs:
           export BENEVOLE_RELEASE_BACKUP_IMAGE="ghcr.io/neitsablc/benevole-jambville-backup@${digest}"
           docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --quiet
           test -z "$(docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --format json | jq -r '.services[] | select(.build != null) | .image')"
+          for variable in PHP_IMAGE_DIGEST COMPOSER_IMAGE_DIGEST NGINX_IMAGE_DIGEST POSTGRES_IMAGE_DIGEST LIQUIBASE_IMAGE_DIGEST PGJDBC_VERSION PGJDBC_SHA256 AGE_PACKAGE_VERSION; do
+            sed -i "/^${variable}=/d" .env
+          done
+          sortie="$(docker compose -f compose.yaml -f compose.prod.yaml -f compose.release.yaml config --quiet 2>&1)"
+          test -z "$sortie" || { printf '%s\n' "$sortie" >&2; exit 1; }
 
       - name: Construire l'image PHP
         run: docker compose build --pull php

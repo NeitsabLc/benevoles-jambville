@@ -9,7 +9,11 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
-Aucun changement pour le moment.
+### Corrigé
+
+- valeurs de repli épinglées pour les dépendances de construction Compose afin
+  que les commandes de livraison restent silencieuses avec un ancien fichier
+  `.env`, avec contrôle de non-régression dans la CI.
 
 ## 1.2.1 — 2026-08-12
 
