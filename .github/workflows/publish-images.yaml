@@ -215,6 +215,7 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         image:
           - php
@@ -247,9 +248,22 @@ jobs:
       - name: Promouvoir exactement le digest candidat
         shell: bash
         run: |
+          inspecter_digest() {
+            reference=$1
+            for tentative in 1 2 3 4 5 6; do
+              digest_inspecte=$(docker buildx imagetools inspect "$reference" 2>/dev/null | awk '$1 == "Digest:" { print $2; exit }') || true
+              if printf '%s\n' "$digest_inspecte" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+                printf '%s\n' "$digest_inspecte"
+                return 0
+              fi
+              echo "Image pas encore disponible (${tentative}/6) : ${reference}" >&2
+              sleep 10
+            done
+            return 1
+          }
+
           candidat="${REGISTRY_IMAGE}:${CANDIDATE_TAG}"
-          digest=$(docker buildx imagetools inspect "$candidat" | awk '$1 == "Digest:" { print $2; exit }')
-          if ! printf '%s\n' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+          if ! digest=$(inspecter_digest "$candidat"); then
             echo "Image candidate absente ou digest invalide : ${candidat}" >&2
             exit 1
           fi
@@ -263,8 +277,15 @@ jobs:
             "$source_immuable"
 
           for etiquette in "$VERSION" "$MINOR_VERSION" "$MAJOR_VERSION"; do
-            digest_promu=$(docker buildx imagetools inspect "${REGISTRY_IMAGE}:${etiquette}" | awk '$1 == "Digest:" { print $2; exit }')
-            test "$digest_promu" = "$digest"
+            reference_promue="${REGISTRY_IMAGE}:${etiquette}"
+            if ! digest_promu=$(inspecter_digest "$reference_promue"); then
+              echo "Image promue inaccessible : ${reference_promue}" >&2
+              exit 1
+            fi
+            if [ "$digest_promu" != "$digest" ]; then
+              echo "Digest promu incorrect pour ${reference_promue}: ${digest_promu} (attendu : ${digest})" >&2
+              exit 1
+            fi
           done
 
           echo "${REGISTRY_IMAGE}:${VERSION} -> ${digest}"
