@@ -11,6 +11,14 @@ et le projet suit une numérotation de version sémantique.
 
 Aucun changement pour le moment.
 
+## 1.2.1 — 2026-08-12
+
+### Corrigé
+
+- génération unique du nonce de la politique CSP par Symfony et réutilisation
+  dans les scripts ImportMap, afin de rétablir Turbo et les interactions
+  JavaScript en production sans autoriser les scripts inline non approuvés.
+
 ## 1.2.0 — 2026-08-12
 
 ### Corrigé
