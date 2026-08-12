@@ -120,6 +120,16 @@ analyse-statique: ## Analyser le code PHP avec PHPStan
 	$(PHP) php bin/console cache:warmup --env=dev
 	$(PHP) vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
+.PHONY: assets-compile
+assets-compile: ## Reconstruire proprement les assets de production
+	$(PHP) php bin/console cache:clear --env=prod --no-debug
+	$(PHP) php bin/console importmap:install --env=prod --no-debug
+	$(PHP) php bin/console asset-map:compile --env=prod --no-debug
+
+.PHONY: test-accessibility
+test-accessibility: assets-compile ## Tester l'accessibilité sur l'application démarrée et les données de démonstration
+	npm run test:accessibility
+
 .PHONY: backup-now
 backup-now: ## Créer immédiatement une sauvegarde via le service de production
 	$(DOCKER_COMPOSE_PROD) run --rm -e BACKUP_ONCE=1 backup

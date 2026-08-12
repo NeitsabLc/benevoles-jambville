@@ -84,8 +84,9 @@ jobs:
 
       - name: Compiler les assets
         run: |
+          docker compose exec --no-TTY php php bin/console cache:clear --env=prod --no-debug
           docker compose exec --no-TTY php php bin/console importmap:install
-          docker compose exec --no-TTY php php bin/console asset-map:compile
+          docker compose exec --no-TTY php php bin/console asset-map:compile --env=prod --no-debug
 
       - name: Analyser statiquement le code PHP
         run: |

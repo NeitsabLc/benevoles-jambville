@@ -98,7 +98,7 @@ make test
 make analyse-statique
 npm ci
 npx playwright install chromium
-npm run test:accessibility
+make test-accessibility
 ```
 
 `make test` reconstruit une base PostgreSQL locale dédiée dont le nom se
@@ -106,7 +106,8 @@ termine par `_test`, applique les migrations et exécute PHPUnit. Elle ne modifi
 pas les données de développement.
 
 `make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
-`npm run test:accessibility` contrôle avec Playwright et Axe les pages publiques
+`make test-accessibility` reconstruit d'abord les assets de production, puis
+contrôle avec Playwright et Axe les pages publiques
 et les parcours des trois rôles ; l’application doit être démarrée et le jeu de
 démonstration chargé avec `make db-dev-update`. Ces contrôles sont également
 exécutés par la CI.
