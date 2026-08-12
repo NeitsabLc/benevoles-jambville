@@ -230,14 +230,10 @@ jobs:
         run: |
           proprietaire="${GITHUB_REPOSITORY_OWNER,,}"
           version="${GITHUB_REF_NAME#v}"
-          mineure="${version%.*}"
-          majeure="${version%%.*}"
           {
             echo "REGISTRY_IMAGE=ghcr.io/${proprietaire}/benevole-jambville-${{ matrix.image }}"
             echo "CANDIDATE_TAG=sha-${GITHUB_SHA}"
             echo "VERSION=${version}"
-            echo "MINOR_VERSION=${mineure}"
-            echo "MAJOR_VERSION=${majeure}"
           } >> "$GITHUB_ENV"
 
       - name: Se connecter a GHCR
@@ -272,20 +268,16 @@ jobs:
           docker buildx imagetools create \
             --prefer-index=false \
             --tag "${REGISTRY_IMAGE}:${VERSION}" \
-            --tag "${REGISTRY_IMAGE}:${MINOR_VERSION}" \
-            --tag "${REGISTRY_IMAGE}:${MAJOR_VERSION}" \
             "$source_immuable"
 
-          for etiquette in "$VERSION" "$MINOR_VERSION" "$MAJOR_VERSION"; do
-            reference_promue="${REGISTRY_IMAGE}:${etiquette}"
-            if ! digest_promu=$(inspecter_digest "$reference_promue"); then
-              echo "Image promue inaccessible : ${reference_promue}" >&2
-              exit 1
-            fi
-            if [ "$digest_promu" != "$digest" ]; then
-              echo "Digest promu incorrect pour ${reference_promue}: ${digest_promu} (attendu : ${digest})" >&2
-              exit 1
-            fi
-          done
+          reference_promue="${REGISTRY_IMAGE}:${VERSION}"
+          if ! digest_promu=$(inspecter_digest "$reference_promue"); then
+            echo "Image promue inaccessible : ${reference_promue}" >&2
+            exit 1
+          fi
+          if [ "$digest_promu" != "$digest" ]; then
+            echo "Digest promu incorrect pour ${reference_promue}: ${digest_promu} (attendu : ${digest})" >&2
+            exit 1
+          fi
 
           echo "${REGISTRY_IMAGE}:${VERSION} -> ${digest}"
