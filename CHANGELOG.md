@@ -9,6 +9,12 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+### Corrigé
+
+- restauration du générateur de repas et des autres interactions JavaScript en
+  supprimant un import CSS redondant bloqué par la CSP, avec une initialisation
+  compatible avec les chargements directs et la navigation Turbo.
+
 ### Ajouté
 
 - smoke test CI de la superposition Compose de production, incluant migrations,
