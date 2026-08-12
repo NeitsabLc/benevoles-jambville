@@ -179,8 +179,8 @@ make release-up
 make release-ps
 ```
 
-`release-pull` vérifie la signature Cosign et l'attestation GitHub de chaque
-image avant son téléchargement. La surcharge `compose.release.yaml` supprime
+`release-pull` vérifie l'attestation GitHub signée de chaque image avant son
+téléchargement. La surcharge `compose.release.yaml` supprime
 toutes les constructions locales et `release-up` interdit explicitement toute
 reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde
 précède obligatoirement l'application des migrations Liquibase.

@@ -557,8 +557,8 @@ Pour une évolution d’interface :
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
 - Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
-  étiquette `sha-<commit>`, avec SBOM, provenance GitHub, attestation et
-  signature Cosign sans clé persistante. Les images candidates sont ensuite
+  étiquette `sha-<commit>`, avec SBOM, provenance et attestation GitHub signée.
+  Les images candidates sont ensuite
   vérifiées et testées ensemble par le smoke test de production.
 - Un tag `vX.Y.Z` rattaché à `main` exige les validations du même commit puis
   ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.

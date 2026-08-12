@@ -8,7 +8,7 @@ set -eu
 : "${BENEVOLE_RELEASE_LIQUIBASE_IMAGE:?BENEVOLE_RELEASE_LIQUIBASE_IMAGE doit etre renseignee}"
 : "${BENEVOLE_RELEASE_BACKUP_IMAGE:?BENEVOLE_RELEASE_BACKUP_IMAGE doit etre renseignee}"
 
-for commande in docker cosign gh; do
+for commande in docker gh; do
     if ! command -v "$commande" >/dev/null 2>&1; then
         echo "Commande requise absente : ${commande}" >&2
         exit 1
@@ -17,8 +17,6 @@ done
 
 depot=NeitsabLc/benevoles-jambville
 workflow="${depot}/.github/workflows/publish-images.yaml"
-identite="https://github.com/${workflow}@refs/heads/main"
-emetteur=https://token.actions.githubusercontent.com
 
 verifier_image() {
     nom=$1
@@ -41,10 +39,6 @@ verifier_image() {
 
     echo "Verification de ${nom} (${reference})"
     docker buildx imagetools inspect "$reference" >/dev/null
-    cosign verify \
-        --certificate-identity "$identite" \
-        --certificate-oidc-issuer "$emetteur" \
-        "$reference" >/dev/null
     gh attestation verify "oci://${reference}" \
         --repo "$depot" \
         --signer-workflow "$workflow" \
@@ -59,4 +53,4 @@ verifier_image postgres "$BENEVOLE_RELEASE_POSTGRES_IMAGE"
 verifier_image liquibase "$BENEVOLE_RELEASE_LIQUIBASE_IMAGE"
 verifier_image backup "$BENEVOLE_RELEASE_BACKUP_IMAGE"
 
-echo "Les cinq images, signatures et attestations sont valides."
+echo "Les cinq images et leurs attestations signées sont valides."
