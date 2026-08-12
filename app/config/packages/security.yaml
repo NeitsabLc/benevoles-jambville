@@ -23,6 +23,7 @@ security:
             logout:
                 path: app_deconnexion
                 target: app_connexion
+                enable_csrf: true
 
     providers:
         utilisateurs:

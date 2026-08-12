@@ -41,6 +41,31 @@ final class SecuriteControllerTest extends WebTestCase
         self::assertResponseRedirects('http://localhost/connexion');
     }
 
+    public function testLaDeconnexionSansJetonCsrfEstRefusee(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $client->loginUser($utilisateur);
+
+        $client->request('POST', '/deconnexion');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testLaDeconnexionAvecJetonCsrfEstAcceptee(): void
+    {
+        $client = self::createClient();
+        $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($utilisateur);
+        $client->loginUser($utilisateur);
+
+        $crawler = $client->request('GET', '/');
+        $client->submit($crawler->filter('form[action="/deconnexion"]')->form());
+
+        self::assertResponseRedirects('/connexion');
+    }
+
     public function testLaDesactivationRevoqueUneSessionDejaOuverte(): void
     {
         $client = self::createClient();
