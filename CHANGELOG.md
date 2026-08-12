@@ -52,11 +52,11 @@ Aucun changement pour le moment.
 ### Ajouté
 
 - publication sur GHCR des cinq images candidates de production à chaque commit
-  de `main`, avec SBOM, attestation de provenance et signature Cosign sans clé ;
+  de `main`, avec SBOM et attestation de provenance GitHub signée ;
 - test conjoint des cinq images candidates et promotion sans reconstruction lors
   d'un tag issu de `main` ;
 - livraison manuelle par références GHCR immuables, avec vérification des
-  signatures et attestations, sauvegarde préalable et migrations Liquibase ;
+  attestations signées, sauvegarde préalable et migrations Liquibase ;
 - smoke test CI de la superposition Compose de production, incluant migrations,
   rôles PostgreSQL limités, HBA SCRAM, durcissement des conteneurs, maintenance,
   requête HTTP, sauvegarde chiffrée et restauration réelle ;
