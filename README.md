@@ -164,7 +164,9 @@ hors de ce dépôt.
 Chaque commit de `main` publie dans GHCR cinq images candidates immuables
 (PHP, Nginx, PostgreSQL, Liquibase et sauvegarde), puis les teste ensemble avec
 la configuration de production. Un tag `vX.Y.Z` ne reconstruit rien : il
-attribue les étiquettes de version aux digests déjà validés.
+attribue uniquement l’étiquette exacte `X.Y.Z` aux digests déjà validés. Les
+étiquettes flottantes `X.Y` et `X` ne sont pas publiées afin d’éviter toute mise
+à jour implicite.
 
 Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
 les cinq références `ghcr.io/...@sha256:...` affichées par GitHub. La livraison
