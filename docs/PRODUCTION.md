@@ -589,14 +589,18 @@ docker inspect --format '{{json .State.Health}}' \
   benevole_jambville-database-1
 make release-db-status
 sudo ss -lntp | grep ':8081'
+sudo ss -lntp | grep ':5434'
 ```
 
-Résultats attendus : seul `192.168.2.18:8081` est publié, aucun `:5432` n'est
-présent, et les trois services possédant un healthcheck sont sains. Pour les
-erreurs HTTP, corréler les logs Traefik sur `proxy01`, Nginx/PHP sur `web01`,
-puis PostgreSQL. Les processeurs de logs masquent les jetons d'activation,
-cookies, mots de passe, DSN et adresses email ; ne pas augmenter le niveau de
-log en production sans revue.
+Résultats attendus : Nginx est publié sur `192.168.2.18:8081`, PostgreSQL est
+publié uniquement sur `127.0.0.1:5434` vers le port conteneur `5432`, et aucun
+port PostgreSQL n'écoute sur l'adresse LAN. Dans `v1.2.1`, seul PostgreSQL
+possède le healthcheck effectivement livré ; les healthchecks PHP-FPM et Nginx
+décrits plus haut arriveront avec la prochaine release. Pour les erreurs HTTP,
+corréler les logs Traefik sur `proxy01`, Nginx/PHP sur `web01`, puis
+PostgreSQL. Les processeurs de logs masquent les jetons d'activation, cookies,
+mots de passe, DSN et adresses email ; ne pas augmenter le niveau de log en
+production sans revue.
 
 ## Retour arrière
 

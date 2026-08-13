@@ -149,11 +149,14 @@ Pour tester un serveur SMTP local, adapter uniquement `MAILER_DSN` et
 app/                  application Symfony
 database/changelog/   schéma Liquibase et données de démonstration
 docker/               images et configuration de l’environnement local
+deploy/               exemples et scripts d’infrastructure sans secret
+docs/                 procédures de production et prompt de migration Campement
 compose.yaml          services Docker Compose locaux
 ```
 
-Les procédures opérationnelles de production sont volontairement conservées
-hors de ce dépôt.
+Le guide versionné [docs/PRODUCTION.md](docs/PRODUCTION.md) décrit la production
+sur `web01`. Les secrets, les fichiers d’environnement réels, les sauvegardes,
+la configuration Traefik active et le DAT/DIN/DEX local restent hors du dépôt.
 
 ## Modèle de branches
 

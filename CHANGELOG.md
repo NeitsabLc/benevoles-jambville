@@ -33,6 +33,10 @@ et le projet suit une numérotation de version sémantique.
 - envoi des logs Symfony de production vers `stderr` afin qu'ils soient
   collectés et soumis à la rotation Docker ;
 - maintenance manuelle de production exécutée avec l'image GHCR livrée.
+- alignement du README, du contexte projet, du guide de production et du
+  DAT/DIN/DEX local sur la production `web01` effectivement livrée, en
+  distinguant la release `v1.2.1` des changements encore présents seulement
+  sur `dev`.
 
 ### Sécurité
 
