@@ -4,8 +4,9 @@ Application Symfony de gestion des profils, inscriptions, présences, repas,
 couchages et besoins d’accueil des bénévoles de Jambville.
 
 > Ce document concerne exclusivement l’installation et l’utilisation sur un
-> poste de développement local. Il ne décrit ni l’infrastructure, ni les accès,
-> ni la procédure de livraison de la production.
+> poste de développement local. L’architecture, le déploiement, la migration et
+> l’exploitation sur `web01` sont décrits dans
+> [docs/PRODUCTION.md](docs/PRODUCTION.md).
 
 ## Fonctionnalités disponibles
 

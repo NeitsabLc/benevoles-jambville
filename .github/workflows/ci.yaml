@@ -112,6 +112,19 @@ jobs:
       - name: Controler le style PHP
         run: docker compose exec --no-TTY php composer lint:php
 
+      - name: Rechercher des secrets dans les fichiers versionnes
+        run: |
+          docker run --rm \
+            --volume "$PWD:/src:ro" \
+            --volume trivy-cache:/root/.cache/trivy \
+            ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+            filesystem \
+            --scanners secret \
+            --skip-dirs /src/.git \
+            --exit-code 1 \
+            --no-progress \
+            /src
+
       - name: Preparer les images pour l'analyse de vulnerabilites
         run: |
           docker compose -f compose.yaml -f compose.prod.yaml --profile outils \

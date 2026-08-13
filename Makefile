@@ -69,11 +69,15 @@ release-db-update: release-config ## Appliquer les migrations avec l'image Liqui
 
 .PHONY: release-up
 release-up: release-config ## Démarrer manuellement les images GHCR sans reconstruction
-	$(DOCKER_COMPOSE_RELEASE) up -d --no-build database php nginx backup maintenance
+	$(DOCKER_COMPOSE_RELEASE) up -d --no-build --wait --wait-timeout 120 database php nginx backup maintenance
 
 .PHONY: release-ps
 release-ps: ## Afficher l'état des conteneurs issus des images GHCR
 	$(DOCKER_COMPOSE_RELEASE) ps
+
+.PHONY: release-maintenance-now
+release-maintenance-now: release-config ## Exécuter un cycle de maintenance avec l'image PHP livrée
+	$(DOCKER_COMPOSE_RELEASE) run --rm -e MAINTENANCE_ONCE=1 maintenance
 
 .PHONY: logs
 logs: ## Afficher les journaux
