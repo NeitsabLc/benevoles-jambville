@@ -160,8 +160,8 @@ jobs:
       - name: Auditer les dependances npm
         run: npm audit --audit-level=high
 
-      - name: Installer Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Installer les navigateurs Playwright
+        run: npx playwright install --with-deps chromium firefox
 
       - name: Attendre que l'application soit disponible
         run: |
@@ -171,6 +171,9 @@ jobs:
 
       - name: Executer les controles d'accessibilite
         run: npm run test:accessibility
+
+      - name: Executer les parcours E2E
+        run: npm run test:e2e
 
       - name: Afficher les journaux en cas d'echec
         if: failure()

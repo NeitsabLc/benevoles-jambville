@@ -169,8 +169,16 @@ assets-compile: ## Reconstruire proprement les assets de production
 	$(PHP) php bin/console asset-map:compile --env=prod --no-debug
 
 .PHONY: test-accessibility
-test-accessibility: db-dev-update assets-compile ## Tester l'accessibilité et les parcours E2E sur les données de démonstration
+test-accessibility: db-dev-update assets-compile ## Auditer l'accessibilité des pages sur les données de démonstration
 	npm run test:accessibility
+
+.PHONY: test-e2e
+test-e2e: db-dev-update assets-compile ## Exécuter les parcours métier Playwright sur Chromium, Firefox et mobile
+	npm run test:e2e
+
+.PHONY: test-browser
+test-browser: db-dev-update assets-compile ## Exécuter tous les contrôles navigateur
+	npm run test:browser
 
 .PHONY: backup-now
 backup-now: ## Créer immédiatement une sauvegarde via le service de production

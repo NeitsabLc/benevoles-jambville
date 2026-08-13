@@ -110,8 +110,9 @@ make analyse-statique
 make style
 make backup-restore-test
 npm ci
-npx playwright install chromium
+npx playwright install chromium firefox
 make test-accessibility
+make test-e2e
 ```
 
 Le test de sauvegarde génère une paire de clés `age` éphémère, produit un dump
@@ -125,10 +126,15 @@ pas les données de développement.
 
 `make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
 `make test-accessibility` reconstruit d'abord les assets de production, puis
-contrôle avec Playwright et Axe les pages publiques
-et les parcours des trois rôles ; l’application doit être démarrée. La commande
-applique et réinitialise elle-même les données de démonstration nécessaires aux
-scénarios E2E. Ces contrôles sont également exécutés par la CI.
+contrôle avec Playwright et Axe les pages publiques et les pages des trois
+rôles ; l’application doit être démarrée.
+
+`make test-e2e` exécute les parcours métier complets dans Chromium, complète
+les contrôles de compatibilité dans Firefox, puis vérifie le menu et
+les gestes tactiles dans un viewport mobile. Une fixture SQL strictement
+cantonnée aux identifiants `E2E-*` réinitialise automatiquement ces comptes et données avant et après la
+suite. `make test-browser` enchaîne accessibilité et E2E. Ces contrôles sont
+également exécutés par la CI.
 
 ## Emails locaux
 

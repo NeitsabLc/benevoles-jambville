@@ -1,9 +1,11 @@
 {
-  "name": "benevole-jambville-accessibility-tests",
+  "name": "benevole-jambville-browser-tests",
   "private": true,
   "type": "module",
   "scripts": {
-    "test:accessibility": "playwright test --config=tests/accessibility/playwright.config.js"
+    "test:accessibility": "playwright test --config=tests/accessibility/playwright.config.js",
+    "test:e2e": "playwright test --config=tests/e2e/playwright.config.js",
+    "test:browser": "npm run test:accessibility && npm run test:e2e"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
