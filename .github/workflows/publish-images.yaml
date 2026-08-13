@@ -60,7 +60,9 @@ jobs:
       - name: Se connecter a GHCR
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+        run: |
+          . ./scripts/registry-helpers.sh
+          registry_login_with_retry ghcr.io "$GITHUB_ACTOR" "$GHCR_TOKEN"
 
       - name: Construire et publier le candidat avec SBOM et provenance
         id: build
@@ -109,6 +111,13 @@ jobs:
     steps:
       - name: Recuperer le code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Se connecter a GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          . ./scripts/registry-helpers.sh
+          registry_login_with_retry ghcr.io "$GITHUB_ACTOR" "$GHCR_TOKEN"
 
       - name: Resoudre les cinq digests candidats
         shell: bash
@@ -180,6 +189,8 @@ jobs:
           fetch-depth: 0
 
       - name: Verifier le tag et son appartenance a main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           version="${GITHUB_REF_NAME#v}"
@@ -189,6 +200,19 @@ jobs:
           fi
           git fetch --no-tags origin main:refs/remotes/origin/main
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+
+          objet_tag=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${GITHUB_REF_NAME}")
+          if [ "$(jq -r '.object.type' <<<"$objet_tag")" != "tag" ]; then
+            echo "Le tag de release doit etre annote et signe." >&2
+            exit 1
+          fi
+          signature_valide=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/git/tags/$(jq -r '.object.sha' <<<"$objet_tag")" \
+            --jq '.verification.verified')
+          if [ "$signature_valide" != "true" ]; then
+            echo "La signature du tag de release n'est pas validee par GitHub." >&2
+            exit 1
+          fi
 
       - name: Exiger les validations du commit candidat
         env:
@@ -225,6 +249,9 @@ jobs:
           - backup
 
     steps:
+      - name: Recuperer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Definir les references
         shell: bash
         run: |
@@ -239,7 +266,9 @@ jobs:
       - name: Se connecter a GHCR
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+        run: |
+          . ./scripts/registry-helpers.sh
+          registry_login_with_retry ghcr.io "$GITHUB_ACTOR" "$GHCR_TOKEN"
 
       - name: Promouvoir exactement le digest candidat
         shell: bash
@@ -264,13 +293,19 @@ jobs:
             exit 1
           fi
 
+          reference_promue="${REGISTRY_IMAGE}:${VERSION}"
+          digest_promu=$(docker buildx imagetools inspect "$reference_promue" 2>/dev/null | awk '$1 == "Digest:" { print $2; exit }') || digest_promu=""
+          if [ "$digest_promu" = "$digest" ]; then
+            echo "${reference_promue} pointe deja sur ${digest}"
+            exit 0
+          fi
+
           source_immuable="${REGISTRY_IMAGE}@${digest}"
           docker buildx imagetools create \
             --prefer-index=false \
-            --tag "${REGISTRY_IMAGE}:${VERSION}" \
+            --tag "$reference_promue" \
             "$source_immuable"
 
-          reference_promue="${REGISTRY_IMAGE}:${VERSION}"
           if ! digest_promu=$(inspecter_digest "$reference_promue"); then
             echo "Image promue inaccessible : ${reference_promue}" >&2
             exit 1
