@@ -50,7 +50,11 @@ final class ThematiqueController extends AbstractController
             }
         }
 
-        return $this->render('thematique/ajouter.html.twig', ['erreurs' => $erreurs]);
+        return $this->render(
+            'thematique/ajouter.html.twig',
+            ['erreurs' => $erreurs],
+            [] !== $erreurs ? new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY) : null,
+        );
     }
 
     #[Route('/{id}/modifier', name: 'app_admin_thematique_modifier', methods: ['GET', 'POST'])]
@@ -81,7 +85,11 @@ final class ThematiqueController extends AbstractController
             }
         }
 
-        return $this->render('thematique/modifier.html.twig', ['thematique' => $thematique, 'erreurs' => $erreurs]);
+        return $this->render(
+            'thematique/modifier.html.twig',
+            ['thematique' => $thematique, 'erreurs' => $erreurs],
+            [] !== $erreurs ? new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY) : null,
+        );
     }
 
     #[Route('/{id}/activation', name: 'app_admin_thematique_activation', methods: ['POST'])]
