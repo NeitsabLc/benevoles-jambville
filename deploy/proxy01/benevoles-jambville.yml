@@ -1,0 +1,30 @@
+http:
+  routers:
+    benevoles-jambville-http:
+      rule: "Host(`benevoles-jambville.neitsab.net`)"
+      entryPoints:
+        - web
+      middlewares:
+        - benevoles-jambville-https
+      service: benevoles-jambville
+
+    benevoles-jambville-https:
+      rule: "Host(`benevoles-jambville.neitsab.net`)"
+      entryPoints:
+        - websecure
+      service: benevoles-jambville
+      tls:
+        certResolver: letsencrypt
+
+  middlewares:
+    benevoles-jambville-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    benevoles-jambville:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://192.168.2.18:8081"

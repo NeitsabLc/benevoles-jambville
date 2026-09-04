@@ -8,6 +8,7 @@ use App\Entity\Inscription;
 use App\Repository\InscriptionRepository;
 use App\Repository\ThematiqueRepository;
 use App\Repository\UtilisateurRepository;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -27,28 +28,52 @@ final class PresenceControllerTest extends WebTestCase
         self::assertNotNull($thematique);
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        foreach ([$accueil, $pilote, $benevole] as $utilisateur) {
-            $entityManager->persist(Inscription::individuelle(
-                $utilisateur,
-                $thematique,
-                new \DateTimeImmutable('2095-06-15'),
-                new \DateTimeImmutable('2095-06-16'),
-                'DUR',
-                0,
-                null,
-            ));
-        }
-        $entityManager->flush();
-        $client->loginUser($pilote);
+        $connexion = self::getContainer()->get(Connection::class);
+        $nettoyerInscriptionsDuTest = static function () use ($connexion, $benevole, $accueil, $pilote): void {
+            $connexion->executeStatement(
+                <<<'SQL'
+                    DELETE FROM benevole_jambville.inscription
+                    WHERE date_debut = CAST(:debut AS date)
+                      AND date_fin = CAST(:fin AS date)
+                      AND utilisateur_id IN (:benevole, :accueil, :pilote)
+                    SQL,
+                [
+                    'debut' => '2095-06-15',
+                    'fin' => '2095-06-16',
+                    'benevole' => $benevole->getId(),
+                    'accueil' => $accueil->getId(),
+                    'pilote' => $pilote->getId(),
+                ],
+            );
+        };
+        $nettoyerInscriptionsDuTest();
 
-        $crawler = $client->request('GET', '/?mois=2095-06');
+        try {
+            foreach ([$accueil, $pilote, $benevole] as $utilisateur) {
+                $entityManager->persist(Inscription::individuelle(
+                    $utilisateur,
+                    $thematique,
+                    new \DateTimeImmutable('2095-06-15'),
+                    new \DateTimeImmutable('2095-06-16'),
+                    'DUR',
+                    0,
+                    null,
+                ));
+            }
+            $entityManager->flush();
+            $client->loginUser($pilote);
 
-        self::assertResponseIsSuccessful();
-        foreach (['2095-06-15', '2095-06-16'] as $date) {
-            $noms = $crawler
-                ->filterXPath(sprintf('//article[contains(concat(" ", normalize-space(@class), " "), " jour-calendrier ")][.//time[@datetime="%s"]]//span[contains(concat(" ", normalize-space(@class), " "), " identite-presence ")]/strong', $date))
-                ->each(static fn ($noeud): string => trim($noeud->text()));
-            self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $noms);
+            $crawler = $client->request('GET', '/?mois=2095-06');
+
+            self::assertResponseIsSuccessful();
+            foreach (['2095-06-15', '2095-06-16'] as $date) {
+                $noms = $crawler
+                    ->filterXPath(sprintf('//article[contains(concat(" ", normalize-space(@class), " "), " jour-calendrier ")][.//time[@datetime="%s"]]//span[contains(concat(" ", normalize-space(@class), " "), " identite-presence ")]/strong', $date))
+                    ->each(static fn ($noeud): string => trim($noeud->text()));
+                self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $noms);
+            }
+        } finally {
+            $nettoyerInscriptionsDuTest();
         }
     }
 
@@ -312,7 +337,7 @@ final class PresenceControllerTest extends WebTestCase
             self::assertResponseStatusCodeSame(422);
             self::assertSelectorTextContains('.alerte-erreur', 'chevauchent la période exclusive');
         } finally {
-            self::getContainer()->get(\Doctrine\DBAL\Connection::class)->executeStatement(
+            self::getContainer()->get(Connection::class)->executeStatement(
                 'DELETE FROM benevole_jambville.thematique WHERE id = :id',
                 ['id' => $exclusiveId],
             );

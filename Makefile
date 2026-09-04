@@ -48,7 +48,7 @@ release-config: ## Valider la configuration de livraison utilisant GHCR
 	@$(DOCKER_COMPOSE_RELEASE) config --quiet
 
 .PHONY: release-verify
-release-verify: ## Vérifier les digests et attestations signées GHCR
+release-verify: ## Vérifier les digests et signatures Sigstore
 	@set -a; . ./$(RELEASE_ENV); set +a; ./scripts/verify-release-images.sh
 
 .PHONY: release-pull
@@ -69,11 +69,15 @@ release-db-update: release-config ## Appliquer les migrations avec l'image Liqui
 
 .PHONY: release-up
 release-up: release-config ## Démarrer manuellement les images GHCR sans reconstruction
-	$(DOCKER_COMPOSE_RELEASE) up -d --no-build database php nginx backup maintenance
+	$(DOCKER_COMPOSE_RELEASE) up -d --no-build --wait --wait-timeout 120 database php nginx backup maintenance
 
 .PHONY: release-ps
 release-ps: ## Afficher l'état des conteneurs issus des images GHCR
 	$(DOCKER_COMPOSE_RELEASE) ps
+
+.PHONY: release-maintenance-now
+release-maintenance-now: release-config ## Exécuter un cycle de maintenance avec l'image PHP livrée
+	$(DOCKER_COMPOSE_RELEASE) run --rm -e MAINTENANCE_ONCE=1 maintenance
 
 .PHONY: logs
 logs: ## Afficher les journaux
@@ -169,8 +173,16 @@ assets-compile: ## Reconstruire proprement les assets de production
 	$(PHP) php bin/console asset-map:compile --env=prod --no-debug
 
 .PHONY: test-accessibility
-test-accessibility: db-dev-update assets-compile ## Tester l'accessibilité et les parcours E2E sur les données de démonstration
+test-accessibility: db-dev-update assets-compile ## Auditer l'accessibilité des pages sur les données de démonstration
 	npm run test:accessibility
+
+.PHONY: test-e2e
+test-e2e: db-dev-update assets-compile ## Exécuter les parcours métier Playwright sur Chromium, Firefox et mobile
+	npm run test:e2e
+
+.PHONY: test-browser
+test-browser: db-dev-update assets-compile ## Exécuter tous les contrôles navigateur
+	npm run test:browser
 
 .PHONY: backup-now
 backup-now: ## Créer immédiatement une sauvegarde via le service de production

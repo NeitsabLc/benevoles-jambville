@@ -6,6 +6,7 @@ namespace App\Tests\Controller;
 
 use App\Repository\UtilisateurRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 final class ThematiqueControllerTest extends WebTestCase
 {
@@ -52,5 +53,23 @@ final class ThematiqueControllerTest extends WebTestCase
         $client->loginUser($utilisateur);
         $client->request('GET', '/administration/thematiques');
         self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testUnePeriodeEvenementielleIncompleteEstRendueCommeErreurDeFormulaire(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/administration/thematiques/ajouter');
+        $client->submit($crawler->selectButton('Ajouter la thématique')->form([
+            'nom' => 'Période incomplète de test',
+            'date_debut_evenement' => '2094-05-10',
+            'date_fin_evenement' => '',
+        ]));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertSelectorTextContains('.alerte-erreur', 'Renseignez les deux dates');
     }
 }

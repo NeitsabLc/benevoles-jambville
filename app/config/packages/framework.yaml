@@ -8,6 +8,14 @@ framework:
         - 'x-forwarded-host'
         - 'x-forwarded-proto'
         - 'x-forwarded-port'
+    http_client:
+        scoped_clients:
+            github_advisories.client:
+                base_uri: 'https://api.github.com'
+                auth_bearer: '%env(GITHUB_TOKEN)%'
+                headers:
+                    Accept: 'application/vnd.github+json'
+                    X-GitHub-Api-Version: '2022-11-28'
     router:
         utf8: true
     csrf_protection: true

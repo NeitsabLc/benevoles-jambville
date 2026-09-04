@@ -67,7 +67,7 @@ nettoyer() {
         compose ps >&2 || true
         compose logs --no-color --tail=200 database php nginx maintenance backup >&2 || true
     fi
-    compose down --volumes --remove-orphans >/dev/null 2>&1 || true
+    compose --profile outils down --volumes --remove-orphans >/dev/null 2>&1 || true
     rm -rf "$repertoire_temporaire"
     exit "$statut"
 }
@@ -81,8 +81,13 @@ else
 fi
 
 fichier_identite="$repertoire_temporaire/identity.txt"
-backup_image=${SMOKE_BACKUP_IMAGE:-benevole-jambville-backup:local}
-postgres_image=${SMOKE_POSTGRES_IMAGE:-benevole-jambville-postgres:local}
+if [ "${USE_RELEASE_IMAGES:-0}" = "1" ]; then
+    backup_image=${SMOKE_BACKUP_IMAGE:-$BENEVOLE_RELEASE_BACKUP_IMAGE}
+    postgres_image=${SMOKE_POSTGRES_IMAGE:-$BENEVOLE_RELEASE_POSTGRES_IMAGE}
+else
+    backup_image=${SMOKE_BACKUP_IMAGE:-benevole-jambville-backup:local}
+    postgres_image=${SMOKE_POSTGRES_IMAGE:-benevole-jambville-postgres:local}
+fi
 docker run --rm --user root --entrypoint age-keygen \
     "$backup_image" >"$fichier_identite"
 BACKUP_AGE_RECIPIENT=$(docker run --rm --user root \
@@ -122,10 +127,24 @@ compose exec --no-TTY database sh -ec '
         --set=ON_ERROR_STOP=1 \
         --command="CREATE TABLE benevole_jambville.ci_migrator_privilege_check (id integer); DROP TABLE benevole_jambville.ci_migrator_privilege_check"
 '
-compose up --detach --no-build php nginx
+compose up --detach --no-build --wait --wait-timeout 60 php nginx
+
+php_container=$(compose ps --quiet php)
+nginx_container=$(compose ps --quiet nginx)
+test "$(docker inspect --format '{{.State.Health.Status}}' "$php_container")" = healthy
+test "$(docker inspect --format '{{.State.Health.Status}}' "$nginx_container")" = healthy
+docker inspect --format '{{json .HostConfig.PortBindings}}' "$database_container" \
+    | grep -q '"5432/tcp".*"HostIp":"127.0.0.1"'
+docker inspect --format '{{json .HostConfig.PortBindings}}' "$nginx_container" \
+    | grep -q '"HostIp":"127.0.0.1"'
 
 curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors \
     --output /dev/null "http://127.0.0.1:${NGINX_HOST_PORT}/connexion"
+entetes_connexion=$(curl --silent --show-error --dump-header - --output /dev/null \
+    "http://127.0.0.1:${NGINX_HOST_PORT}/connexion" | tr -d '\r')
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin$'
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin$'
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^X-Permitted-Cross-Domain-Policies:[[:space:]]*none$'
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
     --header 'Host: attaquant.example' "http://127.0.0.1:${NGINX_HOST_PORT}/connexion")" = 400
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \

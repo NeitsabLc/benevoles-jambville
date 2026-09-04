@@ -1,15 +1,49 @@
 # Journal des modifications
 
 Ce fichier recense les changements fonctionnels, techniques et de sécurité
-significatifs. Les détails d’infrastructure et de livraison de production sont
-volontairement conservés hors du dépôt.
+significatifs. Les procédures de l'infrastructure applicative sont versionnées
+avec le projet ; les secrets et la configuration du reverse proxy restent dans
+leurs emplacements dédiés.
 
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
-Aucun changement pour le moment.
+### Corrigé
+
+- valeurs de repli épinglées pour les dépendances de construction Compose afin
+  que les commandes de livraison restent silencieuses avec un ancien fichier
+  `.env`, avec contrôle de non-régression dans la CI.
+- conservation de l'accès d'administration PostgreSQL uniquement sur
+  `127.0.0.1:5434`, sans exposition au réseau local.
+
+### Ajouté
+
+- guide complet de déploiement, migration, sauvegarde, restauration, diagnostic
+  et rollback sur `web01`, avec exemples d'environnement sans secrets et flux
+  dynamique Traefik pour `proxy01` ;
+- scripts versionnés reproduisant la chaîne `DOCKER-USER` et le service systemd
+  effectivement installés sur `web01`, ainsi que la route dynamique Traefik ;
+- healthchecks PHP-FPM et HTTP, attendus par la livraison avant de déclarer la
+  stack disponible.
+
+### Modifié
+
+- envoi des logs Symfony de production vers `stderr` afin qu'ils soient
+  collectés et soumis à la rotation Docker ;
+- maintenance manuelle de production exécutée avec l'image GHCR livrée.
+- alignement du README, du contexte projet, du guide de production et du
+  DAT/DIN/DEX local sur la production `web01` effectivement livrée, en
+  distinguant la release `v1.2.1` des changements encore présents seulement
+  sur `dev`.
+
+### Sécurité
+
+- exclusion des dumps et du répertoire persistant `var/` de Git et du contexte
+  Docker ;
+- détection Trivy des secrets dans les fichiers de la CI et assertions du smoke
+  test sur le bind PostgreSQL exclusivement local.
 
 ## 1.2.1 — 2026-08-12
 
