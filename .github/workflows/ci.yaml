@@ -83,8 +83,17 @@ jobs:
       - name: Installer les dependances navigateur
         run: npm ci --no-audit --no-fund
 
-      - name: Auditer les dependances npm
-        run: npm audit --audit-level=high
+      - name: Auditer les dependances npm avec Trivy
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume "$PWD:/src:ro" \
+            --volume "$GITHUB_WORKSPACE/.cache/trivy:/trivy-cache" \
+            ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
+            --cache-dir /trivy-cache \
+            filesystem --scanners vuln --include-dev-deps \
+            --severity HIGH,CRITICAL --exit-code 1 --no-progress \
+            /src/package-lock.json
 
       - name: Construire l'image PHP
         run: docker compose build --pull php
@@ -106,7 +115,9 @@ jobs:
         run: docker compose exec --no-TTY php composer audit --locked --no-interaction
 
       - name: Auditer les dependances ImportMap
-        run: docker compose exec --no-TTY php php bin/console importmap:audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: docker compose exec --no-TTY -e GITHUB_TOKEN php php bin/console importmap:audit
 
       - name: Valider les changelogs Liquibase
         run: docker compose --profile outils run --rm liquibase validate
