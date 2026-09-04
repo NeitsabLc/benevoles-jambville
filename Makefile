@@ -48,7 +48,7 @@ release-config: ## Valider la configuration de livraison utilisant GHCR
 	@$(DOCKER_COMPOSE_RELEASE) config --quiet
 
 .PHONY: release-verify
-release-verify: ## Vérifier les digests et attestations signées GHCR
+release-verify: ## Vérifier les digests et signatures Sigstore
 	@set -a; . ./$(RELEASE_ENV); set +a; ./scripts/verify-release-images.sh
 
 .PHONY: release-pull

@@ -83,8 +83,8 @@ restauration régulièrement depuis un environnement isolé.
 ## Préparation de `web01`
 
 Prérequis : Docker Engine, le plugin Docker Compose, Git, `make`, UFW,
-`iptables-nft`, le client GitHub `gh` récent fourni par le dépôt officiel pour
-la vérification des attestations, et un accès en lecture aux images privées
+`iptables-nft`, le client `cosign` récent pour la vérification des signatures
+Sigstore, et un accès en lecture aux images privées
 GHCR.
 
 ```bash
@@ -127,30 +127,28 @@ Renseigner aussi :
 - `TRUSTED_PROXIES=192.168.2.6` dans la configuration Compose et Symfony ;
 - `BACKUP_DIR=/srv/backups/benevole-jambville` ;
 - `DEFAULT_URI` et `TRUSTED_HOST_PATTERN` si le domaine diffère ;
-- les cinq références `ghcr.io/...@sha256:...` dans `.env.release`, à partir
-  du workflow GitHub validé pour la version choisie.
+- le SHA Git et les cinq références `ghcr.io/...@sha256:...` dans
+  `.env.release`, à partir du workflow GitHub validé pour la version choisie.
 
 Les mots de passe sont injectés au runtime et ne sont jamais copiés dans les
 images. Les valeurs de construction factices visibles dans le Dockerfile ne
 sont utilisées que pour compiler les assets et ne donnent accès à aucun
 service.
 
-Authentifier ensuite Docker et GitHub avec un compte ou token limité à la
-lecture des packages et attestations :
+Authentifier ensuite Docker avec un compte ou token limité à la lecture des
+packages :
 
 ```bash
 docker login ghcr.io
-gh auth login
 make release-config
 make release-verify
 make release-pull
-gh auth logout --hostname github.com
 ```
 
-Ne pas conserver sur le serveur un jeton GitHub personnel plus longtemps que
-nécessaire. Si les paquets Debian fournissent encore `gh 2.46`, installer la
-version actuelle depuis le dépôt APT officiel `cli.github.com` : cette ancienne
-version ne possède pas `gh attestation verify`.
+Ne pas conserver sur le serveur le jeton GHCR plus longtemps que nécessaire.
+Installer Cosign depuis une distribution officielle et conserver sa version à
+jour : la vérification exige l'identité OIDC exacte du workflow, la branche
+`main` et le SHA Git attendu.
 
 ## Pare-feu de `web01`
 
@@ -528,7 +526,7 @@ make release-ps
 ```
 
 Tester immédiatement la page de connexion et les parcours métier. Les images
-sont vérifiées par digest et par attestation GitHub avant téléchargement ;
+sont vérifiées par digest et par signature Sigstore avant téléchargement ;
 `release-up` interdit les reconstructions locales et attend les healthchecks.
 
 ## Sauvegarde et restauration
@@ -622,8 +620,10 @@ supposer qu'un rollback Liquibase destructif est sans perte.
 La CI existante valide Composer et ImportMap, audite Composer et npm, exécute
 PHPStan, le style, PHPUnit, Axe et Playwright sur Chromium/Firefox/mobile, puis
 analyse les cinq images avec Trivy. Chaque commit de `main` publie des candidats
-GHCR immuables avec SBOM et provenance ; un tag signé promeut les mêmes digests
-sans reconstruction.
+GHCR immuables avec SBOM, provenance et signature Sigstore sans clé ; un tag
+signé attend la validation candidate du même SHA puis promeut les mêmes digests
+sans reconstruction. La qualité s'exécute sur les pull requests vers `dev` et
+le smoke de production sur celles vers `main`, sans doubler les contrôles.
 
 Le déploiement reste volontairement manuel sur `web01` après sauvegarde et
 contrôle des migrations. Cette séparation évite d'exposer SSH ou le socket

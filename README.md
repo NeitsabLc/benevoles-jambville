@@ -179,7 +179,8 @@ attribue uniquement l’étiquette exacte `X.Y.Z` aux digests déjà validés. L
 à jour implicite.
 
 Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
-les cinq références `ghcr.io/...@sha256:...` affichées par GitHub. La livraison
+le SHA Git ainsi que les cinq références `ghcr.io/...@sha256:...` affichées par
+GitHub. La livraison
 reste entièrement manuelle :
 
 ```bash
@@ -191,7 +192,8 @@ make release-up
 make release-ps
 ```
 
-`release-pull` vérifie l'attestation GitHub signée de chaque image avant son
+`release-pull` vérifie la signature Sigstore sans clé de chaque image, son
+workflow, sa branche et le SHA Git attendu avant son
 téléchargement. La surcharge `compose.release.yaml` supprime
 toutes les constructions locales et `release-up` interdit explicitement toute
 reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde

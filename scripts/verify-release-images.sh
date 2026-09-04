@@ -2,55 +2,45 @@
 
 set -eu
 
-: "${BENEVOLE_RELEASE_PHP_IMAGE:?BENEVOLE_RELEASE_PHP_IMAGE doit etre renseignee}"
-: "${BENEVOLE_RELEASE_NGINX_IMAGE:?BENEVOLE_RELEASE_NGINX_IMAGE doit etre renseignee}"
-: "${BENEVOLE_RELEASE_POSTGRES_IMAGE:?BENEVOLE_RELEASE_POSTGRES_IMAGE doit etre renseignee}"
-: "${BENEVOLE_RELEASE_LIQUIBASE_IMAGE:?BENEVOLE_RELEASE_LIQUIBASE_IMAGE doit etre renseignee}"
-: "${BENEVOLE_RELEASE_BACKUP_IMAGE:?BENEVOLE_RELEASE_BACKUP_IMAGE doit etre renseignee}"
+script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+. "$script_dir/registry-helpers.sh"
 
-for commande in docker gh; do
-    if ! command -v "$commande" >/dev/null 2>&1; then
+: "${BENEVOLE_RELEASE_GIT_SHA:?BENEVOLE_RELEASE_GIT_SHA doit etre renseigne}"
+
+for commande in docker cosign; do
+    command -v "$commande" >/dev/null 2>&1 || {
         echo "Commande requise absente : ${commande}" >&2
         exit 1
-    fi
+    }
 done
 
 depot=NeitsabLc/benevoles-jambville
-workflow="${depot}/.github/workflows/publish-images.yaml"
+identite="https://github.com/${depot}/.github/workflows/publish-images.yaml@refs/heads/main"
+emetteur="https://token.actions.githubusercontent.com"
 
-verifier_image() {
-    nom=$1
-    reference=$2
-    prefixe="ghcr.io/neitsablc/benevole-jambville-${nom}@sha256:"
-
-    case "$reference" in
-        "$prefixe"*) ;;
-        *)
-            echo "Reference inattendue pour ${nom} : ${reference}" >&2
-            exit 1
-            ;;
-    esac
-
-    digest=${reference#*@sha256:}
-    if ! printf '%s\n' "$digest" | grep -Eq '^[0-9a-f]{64}$'; then
-        echo "Digest SHA-256 invalide pour ${nom}." >&2
-        exit 1
-    fi
-
-    echo "Verification de ${nom} (${reference})"
-    docker buildx imagetools inspect "$reference" >/dev/null
-    gh attestation verify "oci://${reference}" \
-        --repo "$depot" \
-        --signer-workflow "$workflow" \
-        --source-ref refs/heads/main \
-        --deny-self-hosted-runners \
-        --bundle-from-oci >/dev/null
+printf '%s\n' "$BENEVOLE_RELEASE_GIT_SHA" | grep -Eq '^[0-9a-f]{40}$' || {
+    echo "SHA Git de livraison invalide." >&2
+    exit 1
 }
 
-verifier_image php "$BENEVOLE_RELEASE_PHP_IMAGE"
-verifier_image nginx "$BENEVOLE_RELEASE_NGINX_IMAGE"
-verifier_image postgres "$BENEVOLE_RELEASE_POSTGRES_IMAGE"
-verifier_image liquibase "$BENEVOLE_RELEASE_LIQUIBASE_IMAGE"
-verifier_image backup "$BENEVOLE_RELEASE_BACKUP_IMAGE"
+for image in $(release_image_names); do
+    variable=$(printf '%s' "$image" | tr '[:lower:]' '[:upper:]')
+    variable="BENEVOLE_RELEASE_${variable}_IMAGE"
+    eval "reference=\${${variable}:-}"
+    prefixe="ghcr.io/neitsablc/benevole-jambville-${image}@sha256:"
+    case "$reference" in "$prefixe"*) ;; *) echo "Reference inattendue pour ${image} : ${reference}" >&2; exit 1 ;; esac
+    digest=${reference#*@sha256:}
+    printf '%s\n' "$digest" | grep -Eq '^[0-9a-f]{64}$' || {
+        echo "Digest SHA-256 invalide pour ${image}." >&2
+        exit 1
+    }
+    docker buildx imagetools inspect "$reference" >/dev/null
+    cosign verify "$reference" \
+        --certificate-identity "$identite" \
+        --certificate-oidc-issuer "$emetteur" \
+        --certificate-github-workflow-repository "$depot" \
+        --certificate-github-workflow-ref refs/heads/main \
+        --certificate-github-workflow-sha "$BENEVOLE_RELEASE_GIT_SHA" >/dev/null
+done
 
-echo "Les cinq images et leurs attestations signées sont valides."
+echo "Les cinq images et leurs signatures Sigstore sont valides."

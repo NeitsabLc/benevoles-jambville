@@ -140,6 +140,11 @@ docker inspect --format '{{json .HostConfig.PortBindings}}' "$nginx_container" \
 
 curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors \
     --output /dev/null "http://127.0.0.1:${NGINX_HOST_PORT}/connexion"
+entetes_connexion=$(curl --silent --show-error --dump-header - --output /dev/null \
+    "http://127.0.0.1:${NGINX_HOST_PORT}/connexion" | tr -d '\r')
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin$'
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin$'
+printf '%s\n' "$entetes_connexion" | grep -Eiq '^X-Permitted-Cross-Domain-Policies:[[:space:]]*none$'
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
     --header 'Host: attaquant.example' "http://127.0.0.1:${NGINX_HOST_PORT}/connexion")" = 400
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \

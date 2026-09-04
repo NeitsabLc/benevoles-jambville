@@ -6,14 +6,14 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['github'], ['line'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
+  reporter: process.env.CI ? [['github'], ['line']] : 'list',
+  outputDir: '../../test-results/e2e',
   globalSetup: './global-setup.js',
   globalTeardown: './global-teardown.js',
   use: {
     baseURL: process.env.APP_BASE_URL ?? 'http://127.0.0.1:8081',
     screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
-    video: 'retain-on-failure',
+    trace: 'on-first-retry',
   },
   projects: [
     {

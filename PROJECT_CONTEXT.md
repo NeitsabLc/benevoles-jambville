@@ -565,14 +565,19 @@ Pour une évolution d’interface :
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
 - Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
-  étiquette `sha-<commit>`, avec SBOM, provenance et attestation GitHub signée.
+  étiquette `sha-<commit>`, avec SBOM, provenance et signature Sigstore sans clé
+  liée au dépôt, au workflow, à la branche et au SHA Git.
   Les images candidates sont ensuite
   vérifiées et testées ensemble par le smoke test de production.
-- Un tag `vX.Y.Z` rattaché à `main` exige les validations du même commit puis
+- Un tag `vX.Y.Z` rattaché à `main` attend la validation candidate du même
+  commit puis
   ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.
   Aucun workflow ne déploie ni n'accède à une base de production.
-- La livraison reste manuelle. Le fichier local `.env.release` contient les
-  cinq références GHCR par digest. `compose.release.yaml` supprime les
+- La CI de qualité s’exécute uniquement sur les pull requests visant `dev` ; le
+  smoke de production s’exécute uniquement sur celles visant `main`. Ils
+  publient respectivement `Qualite et tests` et `Configuration de production`.
+- La livraison reste manuelle. Le fichier local `.env.release` contient le SHA
+  Git et les cinq références GHCR par digest. `compose.release.yaml` supprime les
   constructions locales ; les commandes `make release-*` vérifient, téléchargent
   et démarrent ces images, avec sauvegarde préalable et migrations Liquibase.
 - En production, Liquibase utilise le rôle dédié
