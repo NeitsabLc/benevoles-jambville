@@ -1,21 +1,8 @@
 import { expect, test } from '@playwright/test';
-
-async function seConnecter(page) {
-  await page.goto('/connexion');
-  await page.getByLabel('Adresse e-mail').fill('pilote@jambville.test');
-  await page.getByLabel('Mot de passe').fill('Jambville2026!');
-  await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page).not.toHaveURL(/\/connexion$/);
-}
-
-async function choisirPeriode(page, debut, fin) {
-  await page.getByLabel('Du', { exact: true }).fill(debut);
-  await page.getByLabel('Au', { exact: true }).fill(fin);
-  await page.getByLabel('Au', { exact: true }).press('Tab');
-}
+import { choisirPeriode, comptes, seConnecter } from './helpers.js';
 
 test.beforeEach(async ({ page }) => {
-  await seConnecter(page);
+  await seConnecter(page, comptes.pilote);
   await page.goto('/presences/ajouter');
 });
 

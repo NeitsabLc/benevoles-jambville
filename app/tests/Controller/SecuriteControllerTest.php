@@ -28,6 +28,8 @@ final class SecuriteControllerTest extends WebTestCase
         self::assertNotNull($politique);
         self::assertMatchesRegularExpression("/'nonce-[A-Za-z0-9+\/=]+'/", $politique);
         self::assertStringNotContainsString("'unsafe-inline'", $politique);
+        self::assertStringNotContainsString('https://ga.jspm.io', $politique);
+        self::assertStringContainsString("script-src 'self' 'nonce-", $politique);
 
         $nonces = $crawler->filter('script[nonce]')->each(
             static fn ($script): string => (string) $script->attr('nonce'),

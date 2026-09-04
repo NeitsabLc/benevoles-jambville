@@ -1,5 +1,6 @@
 parameters:
     app.version: !php/const App\VersionApplication::VERSION
+    env(GITHUB_TOKEN): ''
 
 services:
     _defaults:
@@ -8,3 +9,13 @@ services:
 
     App\:
         resource: '../src/'
+
+    App\Logging\SensitiveDataProcessor:
+        tags:
+            - { name: monolog.processor }
+
+    asset_mapper.importmap.auditor:
+        class: Symfony\Component\AssetMapper\ImportMap\ImportMapAuditor
+        arguments:
+            $configReader: '@asset_mapper.importmap.config_reader'
+            $httpClient: '@github_advisories.client'

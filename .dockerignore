@@ -15,3 +15,7 @@ app/vendor
 node_modules
 playwright-report
 test-results
+var
+*.dump
+*.dump.age
+*.sql.gz

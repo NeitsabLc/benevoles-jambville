@@ -12,10 +12,14 @@ dans le même changement.
 
 ## État actuel du projet
 
-État de référence au 12 août 2026 :
+État de référence au 14 août 2026 :
 
 - l’application est utilisée en production ;
-- la version préparée pour la prochaine livraison est `1.2.0` ;
+- la version `1.2.1`, commit
+  `d55aa5e8e91d9fdceaca9813d49b890a80deeef3`, est livrée sur la VM Proxmox
+  `web01` depuis le 13 août 2026 ; la branche `dev` contient des améliorations
+  d’exploitation qui nécessitent une nouvelle release et de nouveaux digests
+  GHCR avant d’être déployées ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -28,8 +32,8 @@ dans le même changement.
   utilisent des responsabilités distinctes ; la préparation et le durcissement
   des rôles sont volontairement séparés de la migration du schéma ;
 - les tests fonctionnels utilisent une base `_test` reconstruite séparément de
-  la base locale de développement ; au dernier état de référence, la suite
-  comporte 63 tests et 497 assertions réussies ;
+  la base locale de développement ; les contrôles navigateur utilisent des
+  fixtures `E2E-*` isolées et nettoyées automatiquement ;
 - la purge d’un compte supprime ses inscriptions personnelles mais conserve les
   données métier qu’il a seulement créées ou modifiées, en anonymisant les
   références d’auteur ;
@@ -42,14 +46,16 @@ dans le même changement.
 - la CI GitHub Actions valide les configurations Docker Compose, Composer, les
   changelogs Liquibase, les mappings Doctrine, la compilation des assets et la
   suite PHPUnit sur `dev` et `main` ; elle exécute également PHPStan au niveau
-  6, `composer audit`, un scan Trivy de l'image PHP et quatre parcours
-  d’accessibilité Playwright/Axe couvrant les pages publiques et les trois rôles
-  applicatifs.
+  6, `composer audit`, des scans Trivy des secrets et des cinq images de
+  production, ainsi que les parcours d’accessibilité et métier Playwright/Axe
+  sur Chromium, Firefox et mobile.
 
-Le `README.md` est réservé au développement local. Les informations
-opérationnelles de livraison et d’infrastructure de production ne doivent pas
-être ajoutées au dépôt ; elles sont maintenues dans un document externe à accès
-restreint.
+Le `README.md` est réservé au développement local. Les procédures de
+production sans secret sont versionnées dans `docs/PRODUCTION.md` et les
+exemples d’infrastructure dans `deploy/`. Les fichiers d’environnement réels,
+les sauvegardes, les états actifs de Traefik et du pare-feu, ainsi que le
+DAT/DIN/DEX détaillé sous `.local`, restent hors du dépôt ou dans leurs dépôts
+d’infrastructure dédiés.
 
 ## 2. Profils et autorisations
 
@@ -445,7 +451,8 @@ la couleur.
   avant toute génération d’URL absolue d’activation.
 - Ne jamais journaliser les mots de passe, jetons bruts ou données médicales.
 - Appliquer les durées de conservation validées aux sauvegardes et aux journaux
-  sans les exposer dans la documentation versionnée du dépôt.
+  sans exposer de secret ni de donnée personnelle dans la documentation
+  versionnée.
 - Exécuter les purges depuis le service applicatif prévu à cet effet, sans
   dépendre d’une configuration manuelle non versionnée sur l’hôte.
 - Normaliser les emails en minuscules sans en faire une identité métier.
@@ -536,8 +543,9 @@ Pour une évolution d’interface :
   `vX.Y.Z`.
 - Un correctif urgent est créé depuis `main`, livré sur `main`, puis reporté
   dans `dev` afin d’éviter toute divergence.
-- Les procédures de livraison et les paramètres de production restent dans le
-  dossier opérationnel externe au dépôt.
+- Les procédures de livraison sans secret restent dans `docs/PRODUCTION.md` et
+  les exemples d’infrastructure dans `deploy/`. Les paramètres réels de
+  production restent exclusivement sur les hôtes concernés.
 - Les images applicatives de production embarquent le code et les assets
   compilés : aucun montage du dépôt applicatif en écriture n'est autorisé.
 - Tous les services de production s'exécutent sans privilège, avec une racine
@@ -557,14 +565,19 @@ Pour une évolution d’interface :
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
 - Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
-  étiquette `sha-<commit>`, avec SBOM, provenance et attestation GitHub signée.
+  étiquette `sha-<commit>`, avec SBOM, provenance et signature Sigstore sans clé
+  liée au dépôt, au workflow, à la branche et au SHA Git.
   Les images candidates sont ensuite
   vérifiées et testées ensemble par le smoke test de production.
-- Un tag `vX.Y.Z` rattaché à `main` exige les validations du même commit puis
+- Un tag `vX.Y.Z` rattaché à `main` attend la validation candidate du même
+  commit puis
   ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.
   Aucun workflow ne déploie ni n'accède à une base de production.
-- La livraison reste manuelle. Le fichier local `.env.release` contient les
-  cinq références GHCR par digest. `compose.release.yaml` supprime les
+- La CI de qualité s’exécute uniquement sur les pull requests visant `dev` ; le
+  smoke de production s’exécute uniquement sur celles visant `main`. Ils
+  publient respectivement `Qualite et tests` et `Configuration de production`.
+- La livraison reste manuelle. Le fichier local `.env.release` contient le SHA
+  Git et les cinq références GHCR par digest. `compose.release.yaml` supprime les
   constructions locales ; les commandes `make release-*` vérifient, téléchargent
   et démarrent ces images, avec sauvegarde préalable et migrations Liquibase.
 - En production, Liquibase utilise le rôle dédié

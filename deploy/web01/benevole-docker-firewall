@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+
+IPTABLES=/usr/sbin/iptables
+CHAIN=BENEVOLE_8081
+
+"$IPTABLES" -w -N "$CHAIN" 2>/dev/null || true
+"$IPTABLES" -w -F "$CHAIN"
+
+"$IPTABLES" -w -A "$CHAIN" \
+  -m conntrack \
+  --ctstate RELATED,ESTABLISHED \
+  -j ACCEPT
+
+"$IPTABLES" -w -A "$CHAIN" \
+  -s 192.168.2.6/32 \
+  -j ACCEPT
+
+"$IPTABLES" -w -A "$CHAIN" \
+  -j DROP
+
+if ! "$IPTABLES" -w -C DOCKER-USER \
+  -p tcp \
+  -m conntrack \
+  --ctorigdst 192.168.2.18 \
+  --ctorigdstport 8081 \
+  -j "$CHAIN" 2>/dev/null
+then
+  "$IPTABLES" -w -I DOCKER-USER 1 \
+    -p tcp \
+    -m conntrack \
+    --ctorigdst 192.168.2.18 \
+    --ctorigdstport 8081 \
+    -j "$CHAIN"
+fi

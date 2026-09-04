@@ -43,7 +43,7 @@ final class ContentSecurityPolicySubscriber
             "img-src 'self' data:",
             "manifest-src 'self'",
             "object-src 'none'",
-            "script-src 'self' 'nonce-{$nonce}' https://ga.jspm.io",
+            "script-src 'self' 'nonce-{$nonce}'",
             "style-src 'self'",
             "worker-src 'self' blob:",
         ]));

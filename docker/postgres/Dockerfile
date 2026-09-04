@@ -5,7 +5,7 @@ ARG AGE_PACKAGE_VERSION=1.3.1-r5
 FROM postgres:${POSTGRES_VERSION}@${POSTGRES_IMAGE_DIGEST} AS postgres-runtime
 
 USER root
-RUN apk upgrade --no-cache c-ares \
+RUN apk upgrade --no-cache \
     && rm -f /usr/local/bin/gosu
 
 COPY --chmod=0755 docker/postgres/init-roles.sh /docker-entrypoint-initdb.d/10-init-roles.sh

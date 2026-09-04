@@ -4,8 +4,9 @@ Application Symfony de gestion des profils, inscriptions, présences, repas,
 couchages et besoins d’accueil des bénévoles de Jambville.
 
 > Ce document concerne exclusivement l’installation et l’utilisation sur un
-> poste de développement local. Il ne décrit ni l’infrastructure, ni les accès,
-> ni la procédure de livraison de la production.
+> poste de développement local. L’architecture, le déploiement, la migration et
+> l’exploitation sur `web01` sont décrits dans
+> [docs/PRODUCTION.md](docs/PRODUCTION.md).
 
 ## Fonctionnalités disponibles
 
@@ -110,8 +111,9 @@ make analyse-statique
 make style
 make backup-restore-test
 npm ci
-npx playwright install chromium
+npx playwright install chromium firefox
 make test-accessibility
+make test-e2e
 ```
 
 Le test de sauvegarde génère une paire de clés `age` éphémère, produit un dump
@@ -125,10 +127,15 @@ pas les données de développement.
 
 `make analyse-statique` exécute PHPStan au niveau 6 sur le code applicatif.
 `make test-accessibility` reconstruit d'abord les assets de production, puis
-contrôle avec Playwright et Axe les pages publiques
-et les parcours des trois rôles ; l’application doit être démarrée. La commande
-applique et réinitialise elle-même les données de démonstration nécessaires aux
-scénarios E2E. Ces contrôles sont également exécutés par la CI.
+contrôle avec Playwright et Axe les pages publiques et les pages des trois
+rôles ; l’application doit être démarrée.
+
+`make test-e2e` exécute les parcours métier complets dans Chromium, complète
+les contrôles de compatibilité dans Firefox, puis vérifie le menu et
+les gestes tactiles dans un viewport mobile. Une fixture SQL strictement
+cantonnée aux identifiants `E2E-*` réinitialise automatiquement ces comptes et données avant et après la
+suite. `make test-browser` enchaîne accessibilité et E2E. Ces contrôles sont
+également exécutés par la CI.
 
 ## Emails locaux
 
@@ -142,11 +149,14 @@ Pour tester un serveur SMTP local, adapter uniquement `MAILER_DSN` et
 app/                  application Symfony
 database/changelog/   schéma Liquibase et données de démonstration
 docker/               images et configuration de l’environnement local
+deploy/               exemples et scripts d’infrastructure sans secret
+docs/                 procédures de production et prompt de migration Campement
 compose.yaml          services Docker Compose locaux
 ```
 
-Les procédures opérationnelles de production sont volontairement conservées
-hors de ce dépôt.
+Le guide versionné [docs/PRODUCTION.md](docs/PRODUCTION.md) décrit la production
+sur `web01`. Les secrets, les fichiers d’environnement réels, les sauvegardes,
+la configuration Traefik active et le DAT/DIN/DEX local restent hors du dépôt.
 
 ## Modèle de branches
 
@@ -169,7 +179,8 @@ attribue uniquement l’étiquette exacte `X.Y.Z` aux digests déjà validés. L
 à jour implicite.
 
 Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
-les cinq références `ghcr.io/...@sha256:...` affichées par GitHub. La livraison
+le SHA Git ainsi que les cinq références `ghcr.io/...@sha256:...` affichées par
+GitHub. La livraison
 reste entièrement manuelle :
 
 ```bash
@@ -181,7 +192,8 @@ make release-up
 make release-ps
 ```
 
-`release-pull` vérifie l'attestation GitHub signée de chaque image avant son
+`release-pull` vérifie la signature Sigstore sans clé de chaque image, son
+workflow, sa branche et le SHA Git attendu avant son
 téléchargement. La surcharge `compose.release.yaml` supprime
 toutes les constructions locales et `release-up` interdit explicitement toute
 reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde
