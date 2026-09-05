@@ -19,7 +19,15 @@
         </header>
 
         {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur">{{ message }}</div>{% endfor %}
         {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+
+        {% if profilAdmin and utilisateurProfil.actif %}
+            <form class="action-invitation-benevole" method="post" action="{{ path('app_admin_benevole_invitation', {id: utilisateurProfil.id}) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('invitation-benevole-' ~ utilisateurProfil.id) }}">
+                <button class="bouton-secondaire" type="submit">Renvoyer le lien d’invitation par mail</button>
+            </form>
+        {% endif %}
 
         <form class="formulaire-profil" method="post" action="{{ actionProfil }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token(profilAdmin ? 'modifier-profil-' ~ utilisateurProfil.id : 'modifier-profil') }}">
