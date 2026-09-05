@@ -258,6 +258,7 @@ body {
 .entete-profil { margin: 1.5rem 0 2rem; }
 .entete-profil h1 { margin: .35rem 0 .45rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.04em; }
 .entete-profil > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.action-invitation-benevole { display: flex; justify-content: flex-end; margin: 0 0 1.25rem; }
 .formulaire-profil { display: grid; gap: 1.25rem; }
 .carte-profil { padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #d8e2e6; border-top: .35rem solid var(--menthe-sgdf); border-radius: .75rem; background: #fff; box-shadow: 0 8px 25px rgb(0 58 93 / 5%); }
 .carte-profil > header { margin-bottom: 1.35rem; }
@@ -652,6 +653,7 @@ body {
     .actions-repas { justify-content: flex-start; }
     .champs-alimentation-compa { grid-template-columns: 1fr; }
     .grille-profil { grid-template-columns: 1fr; }
+    .action-invitation-benevole .bouton-secondaire { width: 100%; justify-content: center; }
 }
 .regle-role-inconnue {
     display: block;
