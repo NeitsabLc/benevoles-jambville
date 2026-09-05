@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { choisirPeriode, comptes, jourDeSynthese, jourDuCalendrier, seConnecter } from './helpers.js';
+import { choisirPeriode, comptes, jourDeSynthese, jourDuCalendrier, renseignerDate, seConnecter } from './helpers.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -21,8 +21,7 @@ test('création, modification et suppression d’une présence individuelle', as
 
   await jourDuCalendrier(page, '2094-01-10').locator('a[aria-label="Modifier Élodie Parcours"]').click();
   await expect(page.getByRole('heading', { name: 'Modifier une présence' })).toBeVisible();
-  await page.getByLabel('Au', { exact: true }).fill('2094-01-12');
-  await page.getByLabel('Au', { exact: true }).dispatchEvent('change');
+  await renseignerDate(page.getByLabel('Au', { exact: true }), '2094-01-12');
   await page.getByLabel('Couchage').selectOption('TENTE');
   await page.getByLabel('Nombre d’enfants').fill('1');
   await page.getByLabel(/Commentaire/).fill('Présence E2E modifiée');

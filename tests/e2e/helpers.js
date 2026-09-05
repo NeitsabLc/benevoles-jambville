@@ -22,11 +22,15 @@ export async function seDeconnecter(page) {
   await expect(page).toHaveURL(/\/connexion$/);
 }
 
+export async function renseignerDate(champ, dateIso) {
+  await expect(champ).toHaveAttribute('type', 'text');
+  await champ.fill(dateIso.split('-').reverse().join('/'));
+  await champ.press('Tab');
+}
+
 export async function choisirPeriode(page, debut, fin) {
-  await page.getByLabel('Du', { exact: true }).fill(debut);
-  await page.getByLabel('Au', { exact: true }).fill(fin);
-  await page.getByLabel('Du', { exact: true }).dispatchEvent('change');
-  await page.getByLabel('Au', { exact: true }).dispatchEvent('change');
+  await renseignerDate(page.getByLabel('Du', { exact: true }), debut);
+  await renseignerDate(page.getByLabel('Au', { exact: true }), fin);
 }
 
 export function jourDuCalendrier(page, date) {
