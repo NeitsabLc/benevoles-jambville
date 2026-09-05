@@ -143,6 +143,50 @@ final class BenevoleController extends AbstractController
         return $this->redirectToRoute('app_admin_benevoles');
     }
 
+    #[Route('/{id}/invitation', name: 'app_admin_benevole_invitation', methods: ['POST'])]
+    public function renvoyerInvitation(
+        Utilisateur $utilisateur,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer,
+        #[Autowire('%env(MAILER_FROM)%')] string $adresseExpediteur,
+        #[Autowire('%kernel.project_dir%')] string $repertoireProjet,
+    ): Response {
+        if (!$this->isCsrfTokenValid('invitation-benevole-'.$utilisateur->getId(), $request->request->getString('_csrf_token'))) {
+            throw $this->createAccessDeniedException('Le formulaire a expiré.');
+        }
+
+        if (!$utilisateur->isActif()) {
+            $this->addFlash('erreur', 'Réactivez ce compte avant de renvoyer une invitation.');
+
+            return $this->redirectToRoute('app_admin_benevole_profil', ['id' => $utilisateur->getId()]);
+        }
+
+        $token = $utilisateur->preparerActivation(new \DateTimeImmutable('+7 days'));
+        $entityManager->flush();
+        $url = $this->generateUrl('app_premiere_connexion', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        try {
+            $mailer->send((new TemplatedEmail())
+                ->from(new Address($adresseExpediteur, 'Bénévoles Jambville'))
+                ->to($utilisateur->getEmail())
+                ->subject('Votre nouveau lien d’invitation Bénévoles Jambville')
+                ->htmlTemplate('email/premiere_connexion.html.twig')
+                ->context([
+                    'nom' => $utilisateur->getNomComplet(),
+                    'urlActivation' => $url,
+                    'invitationRenvoyee' => true,
+                ])
+                ->embedFromPath($repertoireProjet.'/assets/images/sgdf-logo-horizontal.png', 'sgdf-logo-horizontal')
+                ->text("Bonjour {$utilisateur->getNomComplet()},\n\nVoici votre nouveau lien d’invitation Bénévoles Jambville. Choisissez votre mot de passe dans les 7 jours :\n{$url}"));
+            $this->addFlash('succes', sprintf('Une nouvelle invitation a été envoyée à %s.', $utilisateur->getEmail()));
+        } catch (TransportExceptionInterface) {
+            $this->addFlash('erreur', sprintf('L’invitation n’a pas pu être envoyée à %s. Veuillez réessayer.', $utilisateur->getEmail()));
+        }
+
+        return $this->redirectToRoute('app_admin_benevole_profil', ['id' => $utilisateur->getId()]);
+    }
+
     #[Route('/importer', name: 'app_admin_benevoles_importer', methods: ['GET', 'POST'])]
     public function importer(
         Request $request,
