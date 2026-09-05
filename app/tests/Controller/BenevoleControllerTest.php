@@ -7,11 +7,14 @@ namespace App\Tests\Controller;
 use App\Repository\UtilisateurRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 final class BenevoleControllerTest extends WebTestCase
 {
+    use MailerAssertionsTrait;
+
     public function testLePiloteVoitLaListeEtPeutOuvrirUnProfilSansMotDePasse(): void
     {
         $client = self::createClient();
@@ -42,6 +45,49 @@ final class BenevoleControllerTest extends WebTestCase
         self::assertSelectorTextContains('a.retour-calendrier[href="/"]', 'Retour au calendrier');
         self::assertSelectorNotExists('#mot-de-passe-titre');
         self::assertSelectorExists('button:contains("Enregistrer le profil")');
+        self::assertSelectorExists(sprintf('form[action="/administration/benevoles/%s/invitation"] button:contains("Renvoyer le lien d’invitation par mail")', $benevole->getId()));
+    }
+
+    public function testLePilotePeutRenvoyerUneInvitationDepuisLeProfilDUnBenevole(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        self::assertFalse($benevole->isChangementMotDePasseRequis());
+        if (!$benevole->isActif()) {
+            $benevole->basculerActivation();
+            $entityManager->flush();
+        }
+        $client->loginUser($pilote);
+
+        try {
+            $crawler = $client->request('GET', sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
+            $formulaire = $crawler->filter(sprintf('form[action="/administration/benevoles/%s/invitation"]', $benevole->getId()))->form();
+            $client->submit($formulaire);
+
+            self::assertEmailCount(1);
+            $email = self::getMailerMessage();
+            self::assertNotNull($email);
+            self::assertEmailAddressContains($email, 'To', $benevole->getEmail());
+            self::assertEmailSubjectContains($email, 'nouveau lien d’invitation');
+            $client->followRedirect();
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextContains('.alerte-succes', 'Une nouvelle invitation a été envoyée');
+            $invitation = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            self::assertNotNull($invitation);
+            self::assertTrue($invitation->isChangementMotDePasseRequis());
+            self::assertTrue($invitation->activationEstValideA(new \DateTimeImmutable()));
+        } finally {
+            $utilisateurARestaurer = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            self::assertNotNull($utilisateurARestaurer);
+            $utilisateurARestaurer->terminerActivation();
+            self::getContainer()->get(EntityManagerInterface::class)->flush();
+        }
     }
 
     public function testLePilotePeutCreerUnCompteUnique(): void
