@@ -1,4 +1,48 @@
 import './stimulus_bootstrap.js';
+import flatpickr from 'flatpickr';
+import { French } from 'flatpickr/dist/l10n/fr.js';
+
+const initialiserSelecteursDate = () => {
+    document.querySelectorAll('input[type="date"]').forEach((champ) => {
+        const identifiantOriginal = champ.id;
+        const libelles = [...champ.labels];
+
+        champ.dataset.selecteurDate = 'true';
+        flatpickr(champ, {
+            allowInput: true,
+            altFormat: 'd/m/Y',
+            altInput: true,
+            ariaDateFormat: 'l j F Y',
+            dateFormat: 'Y-m-d',
+            disableMobile: true,
+            locale: {
+                ...French,
+                firstDayOfWeek: 1,
+                hourAriaLabel: 'Heure',
+                minuteAriaLabel: 'Minute',
+                monthAriaLabel: 'Mois',
+                yearAriaLabel: 'Année',
+            },
+            onDestroy: (_dates, _valeur, instance) => {
+                libelles.forEach((libelle) => { libelle.htmlFor = identifiantOriginal; });
+                delete instance.input.dataset.selecteurDate;
+            },
+            onReady: (_dates, _valeur, instance) => {
+                if (!instance.altInput) return;
+
+                instance.altInput.id = `${identifiantOriginal}-affichage`;
+                instance.altInput.lang = 'fr-FR';
+                instance.altInput.placeholder = 'jj/mm/aaaa';
+                instance.altInput.inputMode = 'numeric';
+                libelles.forEach((libelle) => { libelle.htmlFor = instance.altInput.id; });
+            },
+        });
+    });
+};
+
+const detruireSelecteursDate = () => {
+    document.querySelectorAll('[data-selecteur-date]').forEach((champ) => champ._flatpickr?.destroy());
+};
 
 const initialiserFormulairePresence = () => {
     document.querySelectorAll('[data-presence-form]').forEach((formulaire) => {
@@ -361,6 +405,7 @@ const initialiserAffichageNomFichier = () => {
 };
 
 const initialiserPage = () => {
+    initialiserSelecteursDate();
     initialiserFormulairePresence();
     initialiserSuppressionPresence();
     initialiserDesactivationCompte();
@@ -375,7 +420,9 @@ const initialiserPage = () => {
     initialiserAffichageNomFichier();
 };
 
+document.addEventListener('turbo:before-cache', detruireSelecteursDate);
 document.addEventListener('turbo:load', initialiserPage);
+document.addEventListener('turbo:render', initialiserPage);
 if ('loading' === document.readyState) {
     document.addEventListener('DOMContentLoaded', initialiserPage, {once: true});
 } else {
