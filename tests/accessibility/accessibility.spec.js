@@ -116,8 +116,9 @@ test('les repas sont generes apres un chargement direct du formulaire', async ({
   const lignes = page.locator('[data-repas-lignes] tr');
   await expect(lignes).toContainText('Choisissez une période valide');
 
-  await page.getByLabel('Du', { exact: true }).fill('2026-08-04');
-  await page.getByLabel('Au', { exact: true }).fill('2026-08-14');
+  await page.getByLabel('Du', { exact: true }).fill('04/08/2026');
+  await page.getByLabel('Du', { exact: true }).press('Tab');
+  await page.getByLabel('Au', { exact: true }).fill('14/08/2026');
   await page.getByLabel('Au', { exact: true }).press('Tab');
 
   await expect(lignes).toHaveCount(11);

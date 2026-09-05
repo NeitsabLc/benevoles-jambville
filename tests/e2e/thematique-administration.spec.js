@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { choisirPeriode, comptes, seConnecter } from './helpers.js';
+import { choisirPeriode, comptes, renseignerDate, seConnecter } from './helpers.js';
 
 test('création, transformation en événement exclusif et activation d’une thématique', async ({ page }) => {
   const nomInitial = 'Parcours E2E thématique permanente';
@@ -9,11 +9,11 @@ test('création, transformation en événement exclusif et activation d’une th
 
   await page.getByLabel('Nom').fill(nomInitial);
   await page.getByLabel('Ordre d’affichage').fill('1');
-  await page.getByLabel('Du', { exact: true }).fill('2094-05-10');
+  await renseignerDate(page.getByLabel('Du', { exact: true }), '2094-05-10');
   await page.getByRole('button', { name: 'Ajouter la thématique' }).click();
   await expect(page.locator('.alerte-erreur')).toContainText('Renseignez les deux dates');
 
-  await page.getByLabel('Au', { exact: true }).fill('2094-05-12');
+  await renseignerDate(page.getByLabel('Au', { exact: true }), '2094-05-12');
   await page.getByRole('button', { name: 'Ajouter la thématique' }).click();
   await expect(page).toHaveURL(/\/administration\/thematiques$/);
   await expect(page.locator('.alerte-succes')).toContainText('thématique a bien été ajoutée');
