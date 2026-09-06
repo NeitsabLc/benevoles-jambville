@@ -617,18 +617,15 @@ supposer qu'un rollback Liquibase destructif est sans perte.
 
 ## CI/CD
 
-La CI existante valide Composer et ImportMap, audite Composer et npm, exécute
-PHPStan, le style, PHPUnit, Axe et Playwright sur Chromium/Firefox/mobile, puis
-analyse les cinq images avec Trivy. Chaque commit de `main` publie des candidats
-GHCR immuables avec SBOM, provenance et signature Sigstore sans clé ; un tag
-signé attend la validation candidate du même SHA puis promeut les mêmes digests
-sans reconstruction. La qualité s'exécute sur les pull requests vers `dev` et
-le smoke de production sur celles vers `main`, sans doubler les contrôles.
+La CI valide Composer et ImportMap, audite Composer et npm, exécute PHPStan, le
+style, PHPUnit, Axe et Playwright sur Chromium/Firefox/mobile, puis analyse les
+cinq images avec Trivy. Les commits ordinaires de `main` ne publient rien.
+Release Please maintient une pull request de version ; sa fusion publie une
+GitHub Release qui construit, signe et teste les cinq images, puis promeut les
+mêmes digests sans reconstruction.
 
-Le déploiement reste volontairement manuel sur `web01` après sauvegarde et
-contrôle des migrations. Cette séparation évite d'exposer SSH ou le socket
-Docker du homelab à GitHub et empêche un push de déployer automatiquement une
-migration non revue. Si une automatisation est ajoutée plus tard, utiliser un
-environnement GitHub protégé avec approbation humaine, un compte de déploiement
-minimal et les mêmes étapes `release-verify`, sauvegarde, migration, healthcheck
-et rollback.
+Le dépôt `homelab-deploy` reçoit ensuite le SHA immuable et déploie
+automatiquement la recette sur `web02`. La production reste une promotion
+manuelle depuis ce dépôt : elle vérifie la release et l’égalité des digests,
+crée une sauvegarde chiffrée avant Liquibase, puis déploie sur `web01` avec le
+compte SSH minimal dédié.

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "d55aa5e8e91d9fdceaca9813d49b890a80deeef3",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "benevoles-jambville",
+      "include-v-in-tag": true,
+      "include-component-in-tag": false,
+      "pull-request-title-pattern": "chore: preparer la version ${version}",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Fonctionnalités"
+        },
+        {
+          "type": "fix",
+          "section": "Corrections"
+        },
+        {
+          "type": "perf",
+          "section": "Performances"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactorisation"
+        },
+        {
+          "type": "deps",
+          "section": "Dépendances"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "security",
+          "section": "Sécurité"
+        },
+        {
+          "type": "build",
+          "section": "Construction",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "Intégration continue",
+          "hidden": true
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Maintenance",
+          "hidden": true
+        }
+      ],
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "app/src/VersionApplication.php"
+        }
+      ]
+    }
+  }
+}
