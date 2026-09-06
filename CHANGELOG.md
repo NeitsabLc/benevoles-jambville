@@ -45,6 +45,15 @@ et le projet suit une numérotation de version sémantique.
 - détection Trivy des secrets dans les fichiers de la CI et assertions du smoke
   test sur le bind PostgreSQL exclusivement local.
 
+## [1.3.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.2.1...v1.3.0) (2026-09-06)
+
+
+### Fonctionnalités
+
+* afficher les calendriers à partir du lundi ([a2e441a](https://github.com/NeitsabLc/benevoles-jambville/commit/a2e441ab508fa9faa448e7daa23f7120847c38b0))
+* permettre de renvoyer une invitation ([db4009d](https://github.com/NeitsabLc/benevoles-jambville/commit/db4009d974a36ac213e40c9a0303b35f9a8c69f7))
+* permettre de renvoyer une invitation ([f32bcf4](https://github.com/NeitsabLc/benevoles-jambville/commit/f32bcf49babfd4bca961d228e249dfd21605df2a))
+
 ## 1.2.1 — 2026-08-12
 
 ### Corrigé
