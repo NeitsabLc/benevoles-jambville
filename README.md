@@ -160,28 +160,28 @@ la configuration Traefik active et le DAT/DIN/DEX local restent hors du dépôt.
 
 ## Modèle de branches
 
-- `main` contient uniquement les versions stables destinées à la production et
-  constitue la branche GitHub par défaut ;
-- `dev` est la branche d’intégration pour les travaux de développement ;
-- les changements sont préparés sur une branche courte créée depuis `dev`, puis
-  fusionnés dans `dev` après validation ;
-- une livraison fusionne `dev` dans `main`, met à jour la version et le
-  changelog, puis crée un tag annoté `vX.Y.Z` ;
-- un correctif urgent part de `main` et doit ensuite être reporté dans `dev`.
+- `main` est la branche stable et la source unique des releases ;
+- chaque évolution ou correction est préparée sur une branche courte issue de
+  `main`, puis fusionnée par pull request après validation de la CI ;
+- les titres suivent Conventional Commits afin que Release Please calcule la
+  prochaine version et actualise une unique pull request de release.
 
-## Livraison manuelle par images
+## Livraison par images
 
-Chaque commit de `main` publie dans GHCR cinq images candidates immuables
-(PHP, Nginx, PostgreSQL, Liquibase et sauvegarde), puis les teste ensemble avec
-la configuration de production. Un tag `vX.Y.Z` ne reconstruit rien : il
-attribue uniquement l’étiquette exacte `X.Y.Z` aux digests déjà validés. Les
-étiquettes flottantes `X.Y` et `X` ne sont pas publiées afin d’éviter toute mise
-à jour implicite.
+Les commits ordinaires de `main` ne publient aucune image. La fusion de la pull
+request Release Please publie la GitHub Release et déclenche la construction des
+cinq images candidates (PHP, Nginx, PostgreSQL, Liquibase et sauvegarde) sous une
+étiquette immuable `sha-<commit>`, avec SBOM, provenance et signature Sigstore.
+Les candidates sont testées par digest puis promues vers la version `X.Y.Z` sans
+reconstruction. Le dépôt `homelab-deploy` déploie ensuite automatiquement ces
+mêmes digests en recette sur `web02`, sans activer le service de sauvegarde.
 
-Sur le serveur, copier `.env.release.example` vers `.env.release` et renseigner
-le SHA Git ainsi que les cinq références `ghcr.io/...@sha256:...` affichées par
-GitHub. La livraison
-reste entièrement manuelle :
+La production reste une promotion manuelle depuis `homelab-deploy`, avec la
+version validée en recette et une confirmation explicite. Une sauvegarde
+PostgreSQL chiffrée est exigée avant Liquibase et le service planifié de
+sauvegarde reste actif en production.
+
+Les commandes suivantes restent disponibles pour le diagnostic manuel :
 
 ```bash
 make release-pull
@@ -193,7 +193,7 @@ make release-ps
 ```
 
 `release-pull` vérifie la signature Sigstore sans clé de chaque image, son
-workflow, sa branche et le SHA Git attendu avant son
+workflow, sa référence Git et le SHA attendu avant son
 téléchargement. La surcharge `compose.release.yaml` supprime
 toutes les constructions locales et `release-up` interdit explicitement toute
 reconstruction. Le volume PostgreSQL existant est conservé ; la sauvegarde
@@ -202,5 +202,5 @@ précède obligatoirement l'application des migrations Liquibase.
 Après un clonage destiné au développement local :
 
 ```bash
-git switch dev
+git switch main
 ```

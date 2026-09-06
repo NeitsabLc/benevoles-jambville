@@ -17,9 +17,9 @@ dans le même changement.
 - l’application est utilisée en production ;
 - la version `1.2.1`, commit
   `d55aa5e8e91d9fdceaca9813d49b890a80deeef3`, est livrée sur la VM Proxmox
-  `web01` depuis le 13 août 2026 ; la branche `dev` contient des améliorations
-  d’exploitation qui nécessitent une nouvelle release et de nouveaux digests
-  GHCR avant d’être déployées ;
+  `web01` depuis le 13 août 2026 ; `main` contient des améliorations
+  d’exploitation qui seront regroupées dans la prochaine release automatisée,
+  avec de nouveaux digests GHCR avant leur déploiement ;
 - les profils, rôles, inscriptions individuelles et compagnons, repas,
   couchages, présences, permanences, thématiques, synthèses et imports CSV sont
   opérationnels ;
@@ -45,7 +45,7 @@ dans le même changement.
 - la désactivation d'un compte révoque sa session à la prochaine requête ;
 - la CI GitHub Actions valide les configurations Docker Compose, Composer, les
   changelogs Liquibase, les mappings Doctrine, la compilation des assets et la
-  suite PHPUnit sur `dev` et `main` ; elle exécute également PHPStan au niveau
+  suite PHPUnit sur les pull requests visant `main` ; elle exécute également PHPStan au niveau
   6, `composer audit`, des scans Trivy des secrets et des cinq images de
   production, ainsi que les parcours d’accessibilité et métier Playwright/Axe
   sur Chromium, Firefox et mobile.
@@ -533,16 +533,15 @@ Pour une évolution d’interface :
 
 ## 13. Gestion des branches et des versions
 
-- `main` représente exclusivement l’état stable livrable en production et
-  constitue la branche GitHub par défaut.
-- `dev` est la branche d’intégration pour les travaux de développement.
-- Une branche de fonctionnalité ou de correction est créée depuis `dev` et
-  fusionnée dans `dev` après validation.
-- Une version est préparée en fusionnant `dev` dans `main`, en mettant à jour
-  `VersionApplication::VERSION` et `CHANGELOG.md`, puis en créant un tag annoté
-  `vX.Y.Z`.
-- Un correctif urgent est créé depuis `main`, livré sur `main`, puis reporté
-  dans `dev` afin d’éviter toute divergence.
+- `main` représente l’état stable livrable et constitue la branche GitHub par
+  défaut. Les évolutions sont préparées sur des branches courtes issues de
+  `main`, puis fusionnées par pull request.
+- Les titres de pull request suivent Conventional Commits. Release Please
+  agrège les changements, calcule la prochaine version et maintient une pull
+  request qui synchronise `version.txt`, `VersionApplication::VERSION` et
+  `CHANGELOG.md`.
+- La fusion de cette pull request crée automatiquement la GitHub Release et le
+  tag `vX.Y.Z` ; les versions ne sont plus préparées ni taguées manuellement.
 - Les procédures de livraison sans secret restent dans `docs/PRODUCTION.md` et
   les exemples d’infrastructure dans `deploy/`. Les paramètres réels de
   production restent exclusivement sur les hôtes concernés.
@@ -564,22 +563,21 @@ Pour une évolution d’interface :
   aucune valeur de secours utilisable.
 - La CI audite Composer, npm et les dépendances ImportMap, puis analyse les
   images PHP, Nginx, PostgreSQL, Liquibase et sauvegarde avec Trivy.
-- Chaque commit de `main` publie dans GHCR les cinq images candidates sous une
-  étiquette `sha-<commit>`, avec SBOM, provenance et signature Sigstore sans clé
-  liée au dépôt, au workflow, à la branche et au SHA Git.
-  Les images candidates sont ensuite
-  vérifiées et testées ensemble par le smoke test de production.
-- Un tag `vX.Y.Z` rattaché à `main` attend la validation candidate du même
-  commit puis
-  ajoute les étiquettes sémantiques aux digests candidats, sans reconstruction.
-  Aucun workflow ne déploie ni n'accède à une base de production.
-- La CI de qualité s’exécute uniquement sur les pull requests visant `dev` ; le
-  smoke de production s’exécute uniquement sur celles visant `main`. Ils
-  publient respectivement `Qualite et tests` et `Configuration de production`.
-- La livraison reste manuelle. Le fichier local `.env.release` contient le SHA
-  Git et les cinq références GHCR par digest. `compose.release.yaml` supprime les
-  constructions locales ; les commandes `make release-*` vérifient, téléchargent
-  et démarrent ces images, avec sauvegarde préalable et migrations Liquibase.
+- Les commits ordinaires de `main` ne publient aucune image. La publication
+  d’une GitHub Release construit une seule fois les cinq candidates sous
+  `sha-<commit>`, avec SBOM, provenance et signature Sigstore, puis les teste et
+  les promeut vers la version sans reconstruction.
+- Après promotion, `homelab-deploy` déploie automatiquement les mêmes digests en
+  recette sur `web02`, sans service de sauvegarde. La production est déclenchée
+  manuellement depuis `homelab-deploy`, avec confirmation explicite et
+  sauvegarde chiffrée obligatoire avant migration.
+- La CI de qualité et le smoke de production s’exécutent sur les pull requests
+  visant `main` et publient respectivement `Qualite et tests` et
+  `Configuration de production`.
+- Le fichier local `.env.release` contient le SHA Git et les cinq références
+  GHCR par digest. `compose.release.yaml` supprime les constructions locales ;
+  les commandes `make release-*` restent disponibles pour le diagnostic et les
+  opérations manuelles contrôlées.
 - En production, Liquibase utilise le rôle dédié
   `benevole_jambville_migrator`, sans privilège administrateur. Après
   l'amorçage initial, les objets applicatifs et les tables de suivi Liquibase
