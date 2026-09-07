@@ -17,6 +17,14 @@ et le projet suit une numérotation de version sémantique.
 - utilisation de `no-reply@neitsab.net` dans l’exemple d’environnement Symfony
   et dans les consignes de configuration des environnements distants.
 
+## [1.3.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.3.0...v1.3.1) (2026-09-07)
+
+
+### Documentation
+
+* actualiser la livraison et la messagerie ([de7155e](https://github.com/NeitsabLc/benevoles-jambville/commit/de7155e2e77b7c43de88625620a63b6561332c71))
+* actualiser la livraison et la messagerie ([8c3fc1e](https://github.com/NeitsabLc/benevoles-jambville/commit/8c3fc1e92da6a7043d27262e7026d8afe446eb7c))
+
 ## [1.3.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.2.1...v1.3.0) (2026-09-06)
 
 
