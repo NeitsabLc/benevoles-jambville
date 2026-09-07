@@ -122,7 +122,8 @@ pas copier la sortie dans un ticket, un log ou l'historique du shell.
 Renseigner aussi :
 
 - `BACKUP_AGE_RECIPIENT` avec la clé publique `age` ;
-- `MAILER_DSN` et `MAILER_FROM` avec le transport SMTP réel ;
+- `MAILER_DSN` avec le transport SMTP réel et secret ;
+- `MAILER_FROM=no-reply@neitsab.net` comme adresse d’expédition ;
 - `APP_HOSTNAME=benevoles-jambville.neitsab.net` pour le healthcheck Nginx ;
 - `TRUSTED_PROXIES=192.168.2.6` dans la configuration Compose et Symfony ;
 - `BACKUP_DIR=/srv/backups/benevole-jambville` ;
@@ -629,3 +630,8 @@ automatiquement la recette sur `web02`. La production reste une promotion
 manuelle depuis ce dépôt : elle vérifie la release et l’égalité des digests,
 crée une sauvegarde chiffrée avant Liquibase, puis déploie sur `web01` avec le
 compte SSH minimal dédié.
+
+La recette et la production conservent leur `MAILER_DSN` dans la configuration
+secrète de `homelab-deploy` et utilisent
+`MAILER_FROM=no-reply@neitsab.net`. L’envoi doit être validé en recette avant la
+promotion manuelle vers `web01`.

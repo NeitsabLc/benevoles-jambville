@@ -578,6 +578,9 @@ Pour une évolution d’interface :
   GHCR par digest. `compose.release.yaml` supprime les constructions locales ;
   les commandes `make release-*` restent disponibles pour le diagnostic et les
   opérations manuelles contrôlées.
+- La recette et la production injectent un `MAILER_DSN` secret et utilisent
+  `MAILER_FROM=no-reply@neitsab.net`. Le transport SMTP n’est jamais versionné
+  dans le dépôt applicatif.
 - En production, Liquibase utilise le rôle dédié
   `benevole_jambville_migrator`, sans privilège administrateur. Après
   l'amorçage initial, les objets applicatifs et les tables de suivi Liquibase
