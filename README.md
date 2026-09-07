@@ -143,6 +143,10 @@ La configuration d’exemple utilise `null://null` : aucun email réel n’est e
 Pour tester un serveur SMTP local, adapter uniquement `MAILER_DSN` et
 `MAILER_FROM` dans `app/.env.local`.
 
+La recette et la production fournissent un `MAILER_DSN` secret et utilisent
+`MAILER_FROM=no-reply@neitsab.net`. Ces valeurs restent dans la configuration de
+l’environnement et sont validées en recette avant la promotion en production.
+
 ## Structure du dépôt
 
 ```text

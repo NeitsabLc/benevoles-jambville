@@ -10,40 +10,12 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
-### Corrigé
+### Documentation et configuration
 
-- valeurs de repli épinglées pour les dépendances de construction Compose afin
-  que les commandes de livraison restent silencieuses avec un ancien fichier
-  `.env`, avec contrôle de non-régression dans la CI.
-- conservation de l'accès d'administration PostgreSQL uniquement sur
-  `127.0.0.1:5434`, sans exposition au réseau local.
-
-### Ajouté
-
-- guide complet de déploiement, migration, sauvegarde, restauration, diagnostic
-  et rollback sur `web01`, avec exemples d'environnement sans secrets et flux
-  dynamique Traefik pour `proxy01` ;
-- scripts versionnés reproduisant la chaîne `DOCKER-USER` et le service systemd
-  effectivement installés sur `web01`, ainsi que la route dynamique Traefik ;
-- healthchecks PHP-FPM et HTTP, attendus par la livraison avant de déclarer la
-  stack disponible.
-
-### Modifié
-
-- envoi des logs Symfony de production vers `stderr` afin qu'ils soient
-  collectés et soumis à la rotation Docker ;
-- maintenance manuelle de production exécutée avec l'image GHCR livrée.
-- alignement du README, du contexte projet, du guide de production et du
-  DAT/DIN/DEX local sur la production `web01` effectivement livrée, en
-  distinguant la release `v1.2.1` des changements encore présents seulement
-  sur `dev`.
-
-### Sécurité
-
-- exclusion des dumps et du répertoire persistant `var/` de Git et du contexte
-  Docker ;
-- détection Trivy des secrets dans les fichiers de la CI et assertions du smoke
-  test sur le bind PostgreSQL exclusivement local.
+- alignement du README, du contexte projet et du guide de production sur la CI,
+  la recette automatique et la promotion manuelle de production ;
+- utilisation de `no-reply@neitsab.net` dans l’exemple d’environnement Symfony
+  et dans les consignes de configuration des environnements distants.
 
 ## [1.3.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.2.1...v1.3.0) (2026-09-06)
 
@@ -53,6 +25,43 @@ et le projet suit une numérotation de version sémantique.
 * afficher les calendriers à partir du lundi ([a2e441a](https://github.com/NeitsabLc/benevoles-jambville/commit/a2e441ab508fa9faa448e7daa23f7120847c38b0))
 * permettre de renvoyer une invitation ([db4009d](https://github.com/NeitsabLc/benevoles-jambville/commit/db4009d974a36ac213e40c9a0303b35f9a8c69f7))
 * permettre de renvoyer une invitation ([f32bcf4](https://github.com/NeitsabLc/benevoles-jambville/commit/f32bcf49babfd4bca961d228e249dfd21605df2a))
+
+### Corrigé
+
+- valeurs de repli épinglées pour les dépendances de construction Compose afin
+  que les commandes de livraison restent silencieuses avec un ancien fichier
+  `.env`, avec contrôle de non-régression dans la CI ;
+- conservation de l’accès d’administration PostgreSQL uniquement sur
+  `127.0.0.1:5434`, sans exposition au réseau local.
+
+### Ajouté
+
+- guide complet de déploiement, migration, sauvegarde, restauration, diagnostic
+  et rollback sur `web01`, avec exemples d’environnement sans secrets et flux
+  dynamique Traefik pour `proxy01` ;
+- scripts versionnés reproduisant la chaîne `DOCKER-USER`, le service systemd et
+  la route dynamique Traefik effectivement installés ;
+- healthchecks PHP-FPM et HTTP, attendus avant de déclarer la stack disponible.
+
+### Modifié
+
+- envoi des logs Symfony de production vers `stderr` afin qu’ils soient
+  collectés et soumis à la rotation Docker ;
+- maintenance manuelle de production exécutée avec l’image GHCR livrée ;
+- exécution de la CI de qualité et du smoke de production sur les pull requests
+  visant `main`, avec ciblage identique pour Dependabot ;
+- automatisation des releases, du déploiement en recette et de la promotion
+  manuelle en production via `homelab-deploy` ;
+- adoption de la variante `alpine-slim` pour l’image Nginx.
+
+### Sécurité
+
+- exclusion des dumps et du répertoire persistant `var/` de Git et du contexte
+  Docker ;
+- détection Trivy des secrets dans les fichiers de la CI et assertions du smoke
+  test sur le bind PostgreSQL exclusivement local ;
+- exceptions Trivy temporaires, motivées et assorties d’une date d’expiration,
+  pour les CVE `util-linux` dont les binaires concernés sont absents des images.
 
 ## 1.2.1 — 2026-08-12
 
