@@ -10,6 +10,11 @@ et le projet suit une numérotation de version sémantique.
 
 ## Non publié
 
+### Exploitation
+
+- exécution de la maintenance métier en tâche ponctuelle, prête à être planifiée
+  par un timer persistant avec verrouillage et reprise sur échec.
+
 ### Documentation et configuration
 
 - alignement du README, du contexte projet et du guide de production sur la CI,

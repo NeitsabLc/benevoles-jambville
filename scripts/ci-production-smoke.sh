@@ -155,11 +155,12 @@ test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
 compose exec --no-TTY php php bin/console about --env=prod --no-debug
 compose exec --no-TTY php php bin/console cache:warmup --env=prod --no-debug
 test "$(compose exec --no-TTY php id -un)" = www-data
-compose --profile outils create maintenance backup liquibase
+compose --profile maintenance --profile outils create maintenance backup liquibase
 assert_container_hardened php www-data 536870912 1000000000 128 aucun
 assert_container_hardened nginx nginx 134217728 500000000 64 aucun
 assert_container_hardened database postgres 1073741824 2000000000 256
 assert_container_hardened maintenance www-data 268435456 500000000 64 aucun
+test "$(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$(compose ps --quiet --all maintenance)")" = "no"
 assert_container_hardened backup postgres 536870912 1000000000 128
 assert_container_hardened liquibase liquibase:liquibase 536870912 1000000000 128
 
@@ -201,7 +202,9 @@ if docker run --rm --network "${COMPOSE_PROJECT_NAME}_benevole_jambville" \
     exit 1
 fi
 
-compose run --rm --env MAINTENANCE_ONCE=1 maintenance
+maintenance_output=$(compose --profile maintenance run --rm maintenance)
+printf '%s\n' "$maintenance_output" | grep -q '"event":"maintenance_started"'
+printf '%s\n' "$maintenance_output" | grep -q '"event":"maintenance_succeeded"'
 compose run --rm --env BACKUP_ONCE=1 backup
 archive=$(find "$BACKUP_DIR" -maxdepth 1 -type f \
     -name 'benevole-jambville-*.dump.age' -size +0c -print -quit)
