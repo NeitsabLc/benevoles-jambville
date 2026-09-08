@@ -2,7 +2,7 @@
     "name": "sgdf/benevole-jambville",
     "description": "Application de gestion des bénévoles de Jambville",
     "type": "project",
-    "license": "proprietary",
+    "license": "Apache-2.0",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
