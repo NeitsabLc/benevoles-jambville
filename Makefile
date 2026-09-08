@@ -1,0 +1,197 @@
+.DEFAULT_GOAL := help
+
+DOCKER_COMPOSE := docker compose
+DOCKER_COMPOSE_PROD := $(DOCKER_COMPOSE) -f compose.yaml -f compose.prod.yaml
+RELEASE_ENV ?= .env.release
+DOCKER_COMPOSE_RELEASE := $(DOCKER_COMPOSE) --env-file .env --env-file $(RELEASE_ENV) -f compose.yaml -f compose.prod.yaml -f compose.release.yaml
+PHP := $(DOCKER_COMPOSE) exec php
+PHP_RUN := $(DOCKER_COMPOSE) run --rm php
+LIQUIBASE := $(DOCKER_COMPOSE) --profile outils run --rm liquibase
+
+.PHONY: help
+help: ## Afficher les commandes disponibles
+	@awk 'BEGIN {FS = ":.*##"; printf "\nCommandes disponibles :\n\n"} /^[a-zA-Z0-9_-]+:.*?##/ {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+.PHONY: install
+install: build up composer-install db-update ## Installer le projet
+
+.PHONY: build
+build: ## Construire les images Docker
+	$(DOCKER_COMPOSE) build
+
+.PHONY: up
+up: ## Démarrer l'environnement
+	$(DOCKER_COMPOSE) up -d
+
+.PHONY: down
+down: ## Arrêter l'environnement
+	$(DOCKER_COMPOSE) down
+
+.PHONY: ps
+ps: ## Afficher l'état des conteneurs
+	$(DOCKER_COMPOSE) ps
+
+.PHONY: prod-config
+prod-config: ## Valider silencieusement la configuration Compose de production
+	@$(DOCKER_COMPOSE_PROD) config --quiet
+
+.PHONY: prod-up
+prod-up: ## Démarrer les services avec la configuration de production
+	$(DOCKER_COMPOSE_PROD) up -d
+
+.PHONY: prod-ps
+prod-ps: ## Afficher l'état des services de production
+	$(DOCKER_COMPOSE_PROD) ps
+
+.PHONY: release-config
+release-config: ## Valider la configuration de livraison utilisant le registre GitLab
+	@$(DOCKER_COMPOSE_RELEASE) config --quiet
+
+.PHONY: release-verify
+release-verify: ## Vérifier les digests et signatures Sigstore
+	@set -a; . ./$(RELEASE_ENV); set +a; ./scripts/verify-release-images.sh
+
+.PHONY: release-pull
+release-pull: release-config release-verify ## Télécharger manuellement les cinq images vérifiées
+	$(DOCKER_COMPOSE_RELEASE) --profile outils --profile backup pull php nginx database liquibase backup
+
+.PHONY: release-backup-now
+release-backup-now: release-pull ## Sauvegarder ponctuellement la base avant une livraison par images
+	$(DOCKER_COMPOSE_RELEASE) --profile backup run --rm --no-deps backup
+
+.PHONY: release-db-status
+release-db-status: release-pull ## Contrôler les migrations avec l'image Liquibase livrée
+	$(DOCKER_COMPOSE_RELEASE) --profile outils run --rm liquibase status
+
+.PHONY: release-db-update
+release-db-update: release-pull ## Appliquer les migrations avec l'image Liquibase livrée
+	$(DOCKER_COMPOSE_RELEASE) --profile outils run --rm liquibase update
+
+.PHONY: release-up
+release-up: release-pull ## Démarrer manuellement les services persistants depuis les images du registre GitLab
+	$(DOCKER_COMPOSE_RELEASE) up -d --no-build --wait --wait-timeout 120 database php nginx
+
+.PHONY: release-ps
+release-ps: ## Afficher l'état des conteneurs issus des images du registre GitLab
+	$(DOCKER_COMPOSE_RELEASE) ps
+
+.PHONY: release-maintenance-now
+release-maintenance-now: release-pull ## Exécuter un cycle de maintenance avec l'image PHP livrée
+	$(DOCKER_COMPOSE_RELEASE) --profile maintenance run --rm maintenance
+
+.PHONY: logs
+logs: ## Afficher les journaux
+	$(DOCKER_COMPOSE) logs -f --tail=100
+
+.PHONY: logs-php
+logs-php: ## Afficher les journaux PHP
+	$(DOCKER_COMPOSE) logs -f --tail=100 php
+
+.PHONY: logs-nginx
+logs-nginx: ## Afficher les journaux Nginx
+	$(DOCKER_COMPOSE) logs -f --tail=100 nginx
+
+.PHONY: logs-database
+logs-database: ## Afficher les journaux PostgreSQL
+	$(DOCKER_COMPOSE) logs -f --tail=100 database
+
+.PHONY: composer-install
+composer-install: ## Installer les dépendances PHP
+	$(PHP_RUN) composer install
+
+.PHONY: console
+console: ## Exécuter une commande Symfony : make console ARGS="about"
+	$(PHP) php bin/console $(ARGS)
+
+.PHONY: db-validate
+db-validate: ## Valider les changelogs Liquibase
+	$(LIQUIBASE) validate
+
+.PHONY: db-status
+db-status: ## Afficher les changesets en attente
+	$(LIQUIBASE) status
+
+.PHONY: db-sql
+db-sql: ## Afficher le SQL Liquibase sans l'appliquer
+	$(LIQUIBASE) update-sql
+
+.PHONY: db-update
+db-update: ## Appliquer les changements de base de données
+	$(LIQUIBASE) update
+
+.PHONY: db-prepare-roles
+db-prepare-roles: ## Créer les rôles limités absents, sans modifier les rôles existants
+	$(DOCKER_COMPOSE) exec -T database /docker-entrypoint-initdb.d/10-init-roles.sh
+
+.PHONY: db-verify-role-switch
+db-verify-role-switch: ## Vérifier que PHP utilise bien le rôle applicatif limité
+	$(PHP) php -r '$$pdo = new PDO(sprintf("pgsql:host=%s;dbname=%s", getenv("DATABASE_HOST"), getenv("DATABASE_NAME")), getenv("DATABASE_USER"), getenv("DATABASE_PASSWORD")); $$role = $$pdo->query("SELECT current_user")->fetchColumn(); if ($$role !== "benevole_jambville_app") { fwrite(STDERR, "Rôle PostgreSQL inattendu: ".$$role.PHP_EOL); exit(1); } echo $$role.PHP_EOL;'
+
+.PHONY: db-sync-role-passwords
+db-sync-role-passwords: ## Synchroniser explicitement les mots de passe des rôles limités avec .env
+	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/sync-role-passwords
+
+.PHONY: db-finalize-role-hardening
+db-finalize-role-hardening: ## Transférer les objets au rôle migrateur et vérifier les rôles limités
+	$(DOCKER_COMPOSE) exec -T database /usr/local/bin/finalize-role-hardening
+
+.PHONY: db-dev-update
+db-dev-update: ## Appliquer les changements et les données de démonstration
+	$(LIQUIBASE) update --context-filter=dev
+
+.PHONY: db-shell
+db-shell: ## Ouvrir une console PostgreSQL
+	$(DOCKER_COMPOSE) exec database psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+
+.PHONY: test-db-reset
+test-db-reset: db-prepare-roles ## Reconstruire la base de test isolée après création des rôles dédiés manquants
+	$(DOCKER_COMPOSE) exec -T database sh -c 'base_test="$${POSTGRES_DB}_test"; dropdb --if-exists --force --username="$$POSTGRES_USER" "$$base_test" && createdb --username="$$POSTGRES_USER" --owner="$$POSTGRES_USER" "$$base_test"'
+	@base_test="$$($(DOCKER_COMPOSE) exec -T database printenv POSTGRES_DB)_test"; \
+		$(DOCKER_COMPOSE) --profile outils run --rm -e LIQUIBASE_COMMAND_URL="jdbc:postgresql://database:5432/$$base_test" liquibase update --context-filter=dev
+
+.PHONY: test
+test: test-db-reset ## Reconstruire la base de test puis exécuter les tests
+	$(PHP) php bin/phpunit
+
+.PHONY: analyse-statique
+analyse-statique: ## Analyser le code PHP avec PHPStan
+	$(PHP) php bin/console cache:warmup --env=dev
+	$(PHP) vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+.PHONY: style
+style: ## Vérifier le style du code PHP
+	$(PHP) composer lint:php
+
+.PHONY: style-fix
+style-fix: ## Corriger automatiquement le style du code PHP
+	$(PHP) composer fix:php
+
+.PHONY: assets-compile
+assets-compile: ## Reconstruire proprement les assets de production
+	$(PHP) php bin/console cache:clear --env=prod --no-debug
+	$(PHP) php bin/console importmap:install --env=prod --no-debug
+	$(PHP) php bin/console asset-map:compile --env=prod --no-debug
+
+.PHONY: test-accessibility
+test-accessibility: db-dev-update assets-compile ## Auditer l'accessibilité des pages sur les données de démonstration
+	npm run test:accessibility
+
+.PHONY: test-e2e
+test-e2e: db-dev-update assets-compile ## Exécuter les parcours métier Playwright sur Chromium, Firefox et mobile
+	npm run test:e2e
+
+.PHONY: test-browser
+test-browser: db-dev-update assets-compile ## Exécuter tous les contrôles navigateur
+	npm run test:browser
+
+.PHONY: backup-now
+backup-now: ## Créer immédiatement une sauvegarde ponctuelle
+	$(DOCKER_COMPOSE_PROD) --profile backup run --rm backup
+
+.PHONY: backup-restore-test
+backup-restore-test: ## Chiffrer puis restaurer une sauvegarde dans une base temporaire
+	./scripts/ci-backup-restore.sh
+
+.PHONY: maintenance-now
+maintenance-now: ## Exécuter immédiatement un cycle de maintenance de production
+	$(DOCKER_COMPOSE_PROD) --profile maintenance run --rm maintenance

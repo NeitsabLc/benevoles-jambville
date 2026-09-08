@@ -1,0 +1,383 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Controller;
+
+use App\Repository\UtilisateurRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
+
+final class BenevoleControllerTest extends WebTestCase
+{
+    use MailerAssertionsTrait;
+
+    public function testLePiloteVoitLaListeEtPeutOuvrirUnProfilSansMotDePasse(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        if (!$benevole->isActif()) {
+            $benevole->basculerActivation();
+            self::getContainer()->get(EntityManagerInterface::class)->flush();
+        }
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/administration/benevoles');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Bénévoles');
+        self::assertSelectorExists('a[href="/administration/benevoles/importer"]');
+        self::assertSelectorExists('a[href="/administration/benevoles/ajouter"]');
+        self::assertSelectorTextContains(sprintf('a[href="/administration/benevoles/%s/profil"] .email-benevole', $benevole->getId()), $benevole->getEmail());
+        self::assertSelectorTextContains('.corps-table-benevoles', 'Bénévole');
+
+        $client->click($crawler->filter(sprintf('a[href="/administration/benevoles/%s/profil"]', $benevole->getId()))->link());
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Camille Bénévole');
+        self::assertSelectorTextContains('a.retour-calendrier[href="/"]', 'Retour au calendrier');
+        self::assertSelectorNotExists('#mot-de-passe-titre');
+        self::assertSelectorExists('button:contains("Enregistrer le profil")');
+        self::assertSelectorExists(sprintf('form[action="/administration/benevoles/%s/invitation"] button:contains("Renvoyer le lien d’invitation par mail")', $benevole->getId()));
+    }
+
+    public function testLePilotePeutRenvoyerUneInvitationDepuisLeProfilDUnBenevole(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        self::assertFalse($benevole->isChangementMotDePasseRequis());
+        if (!$benevole->isActif()) {
+            $benevole->basculerActivation();
+            $entityManager->flush();
+        }
+        $client->loginUser($pilote);
+
+        try {
+            $crawler = $client->request('GET', sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
+            $formulaire = $crawler->filter(sprintf('form[action="/administration/benevoles/%s/invitation"]', $benevole->getId()))->form();
+            $client->submit($formulaire);
+
+            self::assertEmailCount(1);
+            $email = self::getMailerMessage();
+            self::assertNotNull($email);
+            self::assertEmailAddressContains($email, 'To', $benevole->getEmail());
+            self::assertEmailSubjectContains($email, 'nouveau lien d’invitation');
+            $client->followRedirect();
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextContains('.alerte-succes', 'Une nouvelle invitation a été envoyée');
+            $invitation = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            self::assertNotNull($invitation);
+            self::assertTrue($invitation->isChangementMotDePasseRequis());
+            self::assertTrue($invitation->activationEstValideA(new \DateTimeImmutable()));
+        } finally {
+            $utilisateurARestaurer = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+            self::assertNotNull($utilisateurARestaurer);
+            $utilisateurARestaurer->terminerActivation();
+            self::getContainer()->get(EntityManagerInterface::class)->flush();
+        }
+    }
+
+    public function testLePilotePeutCreerUnCompteUnique(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/administration/benevoles/ajouter');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Créer un compte');
+        self::assertSelectorExists('input[name="role"][value="BENEVOLE"]:checked');
+
+        $client->submit($crawler->selectButton('Créer et envoyer l’invitation')->form([
+            'code_adherent' => 'TEST-CREATION-UNIQUE',
+            'nom' => 'Unique',
+            'prenom' => 'Alice',
+            'email' => 'ALICE.UNIQUE@example.test',
+            'telephone' => '06 10 20 30 40',
+            'role' => 'SALARIE_ACCUEIL',
+        ]));
+        $client->followRedirect();
+
+        self::assertSelectorTextContains('.alerte-succes', 'a été créé');
+        $cree = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'TEST-CREATION-UNIQUE']);
+        self::assertNotNull($cree);
+        self::assertSame('alice.unique@example.test', $cree->getEmail());
+        self::assertSame('SALARIE_ACCUEIL', $cree->getRoleMetier());
+        self::assertTrue($cree->isChangementMotDePasseRequis());
+
+        self::getContainer()->get(Connection::class)->executeStatement('DELETE FROM benevole_jambville.utilisateur WHERE code_adherent = :code', ['code' => 'TEST-CREATION-UNIQUE']);
+    }
+
+    public function testLaCreationRefuseUneAdresseEmailDejaUtilisee(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+        $crawler = $client->request('GET', '/administration/benevoles/ajouter');
+
+        $client->submit($crawler->selectButton('Créer et envoyer l’invitation')->form([
+            'code_adherent' => 'TEST-DOUBLON-EMAIL',
+            'nom' => 'Doublon',
+            'prenom' => 'Email',
+            'email' => 'PILOTE@JAMBVILLE.TEST',
+        ]));
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertSelectorTextContains('.alerte-erreur', 'utilise déjà ce code adhérent ou cette adresse email');
+        self::assertNull(self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'TEST-DOUBLON-EMAIL']));
+    }
+
+    public function testUnSalarieNePeutPasOuvrirUnProfilAdministre(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $salarie = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-ACCUEIL']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($salarie);
+        self::assertNotNull($benevole);
+        $client->loginUser($salarie);
+
+        $client->request('GET', sprintf('/administration/benevoles/%s/profil', $benevole->getId()));
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testLePilotePeutDesactiverPuisReactiverUnBenevole(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        if (!$benevole->isActif()) {
+            $benevole->basculerActivation();
+            self::getContainer()->get(EntityManagerInterface::class)->flush();
+        }
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/administration/benevoles');
+        self::assertSelectorExists('dialog[data-dialog-desactivation]');
+        self::assertSelectorExists(sprintf('form[action="/administration/benevoles/%s/activation"][data-confirmation-desactivation]', $benevole->getId()));
+        self::assertSelectorNotExists('form[onsubmit*="confirm"]');
+        $formulaire = $crawler->filter(sprintf('form[action="/administration/benevoles/%s/activation"]', $benevole->getId()))->form();
+        $client->submit($formulaire);
+        $client->followRedirect();
+
+        self::assertSelectorTextContains('.alerte-succes', 'désactivé');
+        self::assertSelectorTextContains('.conteneur-ligne-benevole.inactive', 'Inactif');
+
+        $crawler = $client->getCrawler();
+        $client->submit($crawler->filter(sprintf('form[action="/administration/benevoles/%s/activation"]', $benevole->getId()))->form());
+        $client->followRedirect();
+
+        self::assertSelectorTextContains('.alerte-succes', 'réactivé');
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->clear();
+        $benevoleReactive = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($benevoleReactive);
+        self::assertTrue($benevoleReactive->isActif());
+    }
+
+    public function testLePilotePeutPrevisualiserUnImportCsv(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/administration/benevoles/importer');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Importer des bénévoles');
+        self::assertSelectorExists('input[type="file"][accept*=".csv"]');
+        self::assertSelectorExists('form[action="/administration/benevoles/importer#previsualisation-import"][data-turbo="false"]');
+
+        $chemin = tempnam(sys_get_temp_dir(), 'benevoles-csv-');
+        self::assertNotFalse($chemin);
+        file_put_contents($chemin, "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\nNOUVEAU-1;Martin;Lou;lou@example.test;06 12 34 56 78;BEN;NAT\n");
+        $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+        $formulaire['fichier_csv']->upload($chemin);
+        $client->submit($formulaire);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('#previsualisation-import');
+        self::assertSelectorTextContains('.carte-apercu-import', 'NOUVEAU-1');
+        self::assertSelectorTextContains('.statut-creation', 'Création');
+        self::assertSelectorTextContains('.regle-role-inconnue', 'rôle bénévole par défaut');
+    }
+
+    public function testLaPrevisualisationDetailleUnChangementDeRoleAvantApplication(): void
+    {
+        $client = self::createClient();
+        $connexion = self::getContainer()->get(Connection::class);
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        $client->loginUser($pilote);
+
+        $connexion->executeStatement(<<<'SQL'
+            INSERT INTO benevole_jambville.regle_attribution_role
+                (code_fonction, code_structure, role_attribue, version)
+            VALUES ('TEST-PILOTE', 'TEST-STRUCTURE', 'EQUIPE_PILOTE', 'test-1')
+            ON CONFLICT (code_fonction, code_structure) DO UPDATE
+                SET role_attribue = EXCLUDED.role_attribue, version = EXCLUDED.version, actif = TRUE
+            SQL);
+
+        try {
+            $crawler = $client->request('GET', '/administration/benevoles/importer');
+            $chemin = tempnam(sys_get_temp_dir(), 'benevoles-role-');
+            self::assertNotFalse($chemin);
+            file_put_contents($chemin, sprintf(
+                "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\n%s;%s;%s;%s;%s;TEST-PILOTE;TEST-STRUCTURE\n",
+                $benevole->getCodeAdherent(),
+                $benevole->getNom(),
+                $benevole->getPrenom(),
+                $benevole->getEmail(),
+                $benevole->getTelephone(),
+            ));
+            $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+            $formulaire['fichier_csv']->upload($chemin);
+            $crawler = $client->submit($formulaire);
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorExists('.details-comptes-mis-a-jour');
+            self::assertSelectorTextContains('.changement-role-import', 'Rôle : BENEVOLE → EQUIPE_PILOTE');
+            self::assertSelectorTextContains('.details-comptes-mis-a-jour', 'Code fonction : — → TEST-PILOTE');
+            self::assertSelectorNotExists('.regle-role-inconnue');
+
+            $client->submit($crawler->selectButton('Confirmer l’import')->form());
+            $client->followRedirect();
+            self::assertSame('EQUIPE_PILOTE', $connexion->fetchOne(
+                'SELECT role FROM benevole_jambville.utilisateur WHERE code_adherent = :code',
+                ['code' => 'DEV-BENEVOLE'],
+            ));
+        } finally {
+            $connexion->executeStatement(<<<'SQL'
+                UPDATE benevole_jambville.utilisateur
+                SET code_fonction = NULL, code_structure = NULL, role = 'BENEVOLE',
+                    source_role = 'MANUEL', role_calcule_le = NULL, version_regle_role = NULL
+                WHERE code_adherent = 'DEV-BENEVOLE'
+                SQL);
+            $connexion->executeStatement(
+                "DELETE FROM benevole_jambville.regle_attribution_role WHERE code_fonction = 'TEST-PILOTE' AND code_structure = 'TEST-STRUCTURE'",
+            );
+        }
+    }
+
+    public function testLImportConvertitUnCsvWindows1252EnUtf8(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+        $crawler = $client->request('GET', '/administration/benevoles/importer');
+
+        $csvUtf8 = "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\nNOUVEAU-2;Le Caër;Bastien;bastien@example.test;;;\n";
+        $csvWindows = mb_convert_encoding($csvUtf8, 'Windows-1252', 'UTF-8');
+        $chemin = tempnam(sys_get_temp_dir(), 'benevoles-ansi-');
+        self::assertNotFalse($chemin);
+        file_put_contents($chemin, $csvWindows);
+        $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+        $formulaire['fichier_csv']->upload($chemin);
+        $client->submit($formulaire);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.table-apercu-import', 'Le Caër');
+        self::assertSelectorNotExists('.table-apercu-import:contains("�")');
+    }
+
+    public function testLImportReconnaitLeETrémaMajusculeDUnCsvMacRoman(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+        $crawler = $client->request('GET', '/administration/benevoles/importer');
+
+        $csvUtf8 = "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\nNOUVEAU-3;LE CAËR;BASTIEN;bastien.mac@example.test;;;\n";
+        $csvMacRoman = iconv('UTF-8', 'MACINTOSH', $csvUtf8);
+        self::assertNotFalse($csvMacRoman);
+        $chemin = tempnam(sys_get_temp_dir(), 'benevoles-mac-');
+        self::assertNotFalse($chemin);
+        file_put_contents($chemin, $csvMacRoman);
+        $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+        $formulaire['fichier_csv']->upload($chemin);
+        $client->submit($formulaire);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.table-apercu-import', 'LE CAËR');
+        self::assertSelectorNotExists('.table-apercu-import:contains("CAèR")');
+    }
+
+    public function testLePilotePeutValiderLaPrevisualisationEtAppliquerLImport(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+        $crawler = $client->request('GET', '/administration/benevoles/importer');
+
+        $chemin = tempnam(sys_get_temp_dir(), 'benevoles-apply-');
+        self::assertNotFalse($chemin);
+        file_put_contents($chemin, "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\nTEST-IMPORT-APPLY;Importé;Zoé;zoe.import@example.test;0612345678;;\n");
+        $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+        $formulaire['fichier_csv']->upload($chemin);
+        $crawler = $client->submit($formulaire);
+        self::assertSelectorExists('button:contains("Valider et importer")');
+        self::assertSelectorTextContains('.dialog-confirmation-import', 'recevront un email contenant leur accès');
+
+        $client->submit($crawler->selectButton('Confirmer l’import')->form());
+        $client->followRedirect();
+
+        self::assertSelectorTextContains('.carte-resultat-import', 'Import appliqué');
+        self::assertSelectorExists('a[href="/administration/benevoles/importer/liens"][download]');
+        $client->request('GET', '/administration/benevoles/importer/liens');
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('content-type', 'text/csv; charset=UTF-8');
+        self::assertStringContainsString('zoe.import@example.test', (string) $client->getResponse()->getContent());
+        $importe = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'TEST-IMPORT-APPLY']);
+        self::assertNotNull($importe);
+        self::assertSame('BENEVOLE', $importe->getRoleMetier());
+
+        self::getContainer()->get(Connection::class)->executeStatement('DELETE FROM benevole_jambville.utilisateur WHERE code_adherent = :code', ['code' => 'TEST-IMPORT-APPLY']);
+    }
+
+    public function testLaPrevisualisationSignaleUnEmailUtiliseParUnAutreCompte(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $client->loginUser($pilote);
+        $crawler = $client->request('GET', '/administration/benevoles/importer');
+
+        $chemin = tempnam(sys_get_temp_dir(), 'benevoles-email-');
+        self::assertNotFalse($chemin);
+        file_put_contents($chemin, "code_adherent;nom;prenom;email;telephone;code_fonction;code_structure\nAUTRE-CODE;Dupont;Alice;pilote@jambville.test;;;\n");
+        $formulaire = $crawler->selectButton('Prévisualiser l’import')->form();
+        $formulaire['fichier_csv']->upload($chemin);
+        $client->submit($formulaire);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.statut-erreur', 'Adresse email déjà utilisée par le code adhérent DEV-PILOTE');
+        self::assertSelectorTextContains('.import-bloque', 'Corrigez les erreurs');
+        self::assertSelectorNotExists('[data-ouvrir-confirmation-import]');
+    }
+}

@@ -1,0 +1,430 @@
+import './stimulus_bootstrap.js';
+import flatpickr from 'flatpickr';
+import { French } from 'flatpickr/dist/l10n/fr.js';
+
+const initialiserSelecteursDate = () => {
+    document.querySelectorAll('input[type="date"]').forEach((champ) => {
+        const identifiantOriginal = champ.id;
+        const libelles = [...champ.labels];
+
+        champ.dataset.selecteurDate = 'true';
+        flatpickr(champ, {
+            allowInput: true,
+            altFormat: 'd/m/Y',
+            altInput: true,
+            ariaDateFormat: 'l j F Y',
+            dateFormat: 'Y-m-d',
+            disableMobile: true,
+            locale: {
+                ...French,
+                firstDayOfWeek: 1,
+                hourAriaLabel: 'Heure',
+                minuteAriaLabel: 'Minute',
+                monthAriaLabel: 'Mois',
+                yearAriaLabel: 'Année',
+            },
+            onDestroy: (_dates, _valeur, instance) => {
+                libelles.forEach((libelle) => { libelle.htmlFor = identifiantOriginal; });
+                delete instance.input.dataset.selecteurDate;
+            },
+            onReady: (_dates, _valeur, instance) => {
+                if (!instance.altInput) return;
+
+                instance.altInput.id = `${identifiantOriginal}-affichage`;
+                instance.altInput.lang = 'fr-FR';
+                instance.altInput.placeholder = 'jj/mm/aaaa';
+                instance.altInput.inputMode = 'numeric';
+                libelles.forEach((libelle) => { libelle.htmlFor = instance.altInput.id; });
+            },
+        });
+    });
+};
+
+const detruireSelecteursDate = () => {
+    document.querySelectorAll('[data-selecteur-date]').forEach((champ) => champ._flatpickr?.destroy());
+};
+
+const initialiserFormulairePresence = () => {
+    document.querySelectorAll('[data-presence-form]').forEach((formulaire) => {
+        if (formulaire.dataset.initialise === 'true') {
+            return;
+        }
+        formulaire.dataset.initialise = 'true';
+
+        const selectionRepas = formulaire.querySelector('[data-selection-repas]');
+        const selectThematique = formulaire.querySelector('select[name="thematique"]');
+        const dateDebutThematique = formulaire.querySelector('#date_debut');
+        const dateFinThematique = formulaire.querySelector('#date_fin');
+        if (selectThematique && dateDebutThematique && dateFinThematique) {
+            const invitation = selectThematique.options[0];
+            const options = [...selectThematique.options].slice(1);
+            const erreurExclusive = formulaire.querySelector('[data-erreur-periode-exclusive]');
+            const actualiserThematiques = () => {
+                const debut = dateDebutThematique.value;
+                const fin = dateFinThematique.value;
+                const periodeValide = debut && fin && fin >= debut;
+                const exclusivesChevauchantes = options.filter((option) => option.dataset.exclusive === 'true' && periodeValide && debut <= option.dataset.fin && fin >= option.dataset.debut);
+                const compatibles = options.filter((option) => option.dataset.evenement !== 'true' || (periodeValide && debut >= option.dataset.debut && fin <= option.dataset.fin));
+                const visibles = exclusivesChevauchantes.length > 0
+                    ? exclusivesChevauchantes.filter((option) => debut >= option.dataset.debut && fin <= option.dataset.fin)
+                    : compatibles;
+                const valeur = selectThematique.value;
+                const ordonnees = [...visibles].sort((a, b) => (b.dataset.evenement === 'true') - (a.dataset.evenement === 'true'));
+                selectThematique.replaceChildren(invitation, ...ordonnees);
+                selectThematique.value = ordonnees.some((option) => option.value === valeur) ? valeur : '';
+                if (erreurExclusive) {
+                    const exclusivePartielle = exclusivesChevauchantes.find((option) => debut < option.dataset.debut || fin > option.dataset.fin);
+                    erreurExclusive.hidden = !exclusivePartielle;
+                    if (exclusivePartielle) {
+                        const formaterDate = (dateIso) => new Intl.DateTimeFormat('fr-FR').format(new Date(`${dateIso}T12:00:00`));
+                        erreurExclusive.textContent = `Inscription impossible : les dates chevauchent la période exclusive de l’événement « ${exclusivePartielle.textContent} ». Choisissez uniquement des dates comprises dans sa période (du ${formaterDate(exclusivePartielle.dataset.debut)} au ${formaterDate(exclusivePartielle.dataset.fin)}).`;
+                    } else {
+                        erreurExclusive.textContent = '';
+                    }
+                }
+            };
+            dateDebutThematique.addEventListener('change', actualiserThematiques);
+            dateFinThematique.addEventListener('change', actualiserThematiques);
+            actualiserThematiques();
+        }
+        if (selectionRepas) {
+            const lignes = selectionRepas.querySelector('[data-repas-lignes]');
+            const dateDebut = formulaire.querySelector('#date_debut');
+            const dateFin = formulaire.querySelector('#date_fin');
+            const selectionInitiale = new Set(JSON.parse(selectionRepas.dataset.selectionnes || '[]'));
+            const repasConfigures = selectionRepas.dataset.configures === 'true';
+            const libelles = [
+                ['PETIT_DEJEUNER', 'Petit-déjeuner'],
+                ['DEJEUNER', 'Déjeuner'],
+                ['DINER', 'Dîner'],
+            ];
+            const marqueur = document.createElement('input');
+            marqueur.type = 'hidden';
+            marqueur.name = 'repas_configures';
+            marqueur.value = '1';
+            formulaire.querySelector('form').appendChild(marqueur);
+
+            const genererLignesRepas = () => {
+                const etatCourant = new Map([...lignes.querySelectorAll('input[type="checkbox"]')].map((caseRepas) => [caseRepas.dataset.cle, caseRepas.checked]));
+                lignes.replaceChildren();
+                if (!dateDebut.value || !dateFin.value || dateFin.value < dateDebut.value) {
+                    const ligne = document.createElement('tr');
+                    const cellule = document.createElement('td');
+                    cellule.colSpan = 4;
+                    cellule.className = 'repas-vide';
+                    cellule.textContent = 'Choisissez une période valide pour afficher les repas.';
+                    ligne.appendChild(cellule);
+                    lignes.appendChild(ligne);
+                    return;
+                }
+
+                let date = new Date(`${dateDebut.value}T12:00:00`);
+                const fin = new Date(`${dateFin.value}T12:00:00`);
+                while (date <= fin) {
+                    const dateIso = date.toISOString().slice(0, 10);
+                    const ligne = document.createElement('tr');
+                    const jour = document.createElement('th');
+                    jour.scope = 'row';
+                    jour.textContent = new Intl.DateTimeFormat('fr-FR', {weekday: 'short', day: 'numeric', month: 'short'}).format(date);
+                    ligne.appendChild(jour);
+                    libelles.forEach(([type, libelle]) => {
+                        const cellule = document.createElement('td');
+                        const caseRepas = document.createElement('input');
+                        const cle = `${dateIso}|${type}`;
+                        caseRepas.type = 'checkbox';
+                        caseRepas.name = `repas[${dateIso}][]`;
+                        caseRepas.value = type;
+                        caseRepas.dataset.cle = cle;
+                        caseRepas.checked = etatCourant.has(cle) ? etatCourant.get(cle) : (repasConfigures ? selectionInitiale.has(cle) : true);
+                        caseRepas.setAttribute('aria-label', `${libelle} du ${jour.textContent}`);
+                        cellule.appendChild(caseRepas);
+                        ligne.appendChild(cellule);
+                    });
+                    lignes.appendChild(ligne);
+                    date.setDate(date.getDate() + 1);
+                }
+            };
+
+            dateDebut.addEventListener('change', genererLignesRepas);
+            dateFin.addEventListener('change', genererLignesRepas);
+            selectionRepas.querySelector('[data-repas-tous]').addEventListener('click', () => lignes.querySelectorAll('input[type="checkbox"]').forEach((caseRepas) => { caseRepas.checked = true; }));
+            selectionRepas.querySelector('[data-repas-aucun]').addEventListener('click', () => lignes.querySelectorAll('input[type="checkbox"]').forEach((caseRepas) => { caseRepas.checked = false; }));
+            genererLignesRepas();
+        }
+
+        formulaire.querySelectorAll('[data-mode-button]').forEach((bouton) => {
+            bouton.addEventListener('click', () => {
+                const mode = bouton.dataset.modeButton;
+                formulaire.dataset.mode = mode;
+                formulaire.querySelector('[data-mode-input]').value = mode;
+                formulaire.querySelectorAll('[data-mode-button]').forEach((element) => element.classList.toggle('actif', element === bouton));
+                formulaire.querySelectorAll('[data-mode-panel]').forEach((panneau) => {
+                    const visible = panneau.dataset.modePanel === mode;
+                    panneau.hidden = !visible;
+                    panneau.querySelectorAll('input, select, textarea').forEach((champ) => { champ.disabled = !visible; });
+                });
+                formulaire.querySelectorAll('[data-mode-detail]').forEach((detail) => {
+                    const visible = detail.dataset.modeDetail === mode;
+                    detail.hidden = !visible;
+                    if (detail.matches('input, select, textarea')) detail.disabled = !visible;
+                    detail.querySelectorAll?.('input, select, textarea').forEach((champ) => { champ.disabled = !visible; });
+                });
+            });
+        });
+    });
+};
+
+const initialiserSuppressionPresence = () => {
+    const dialog = document.querySelector('[data-dialog-suppression-presence]');
+    if (!dialog || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    const formulaire = dialog.querySelector('[data-form-suppression-presence]');
+    const nom = dialog.querySelector('[data-nom-suppression-presence]');
+    const periode = dialog.querySelector('[data-periode-suppression-presence]');
+    const token = dialog.querySelector('[data-token-suppression-presence]');
+
+    document.querySelectorAll('[data-suppression-presence]').forEach((bouton) => bouton.addEventListener('click', () => {
+        nom.textContent = bouton.dataset.presenceNom;
+        periode.textContent = bouton.dataset.presencePeriode;
+        formulaire.action = bouton.dataset.suppressionUrl;
+        token.value = bouton.dataset.suppressionToken;
+        dialog.showModal();
+    }));
+    dialog.querySelector('[data-fermer-suppression-presence]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+};
+
+const initialiserDesactivationCompte = () => {
+    const dialog = document.querySelector('[data-dialog-desactivation]');
+    if (!dialog || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    const formulaireConfirmation = dialog.querySelector('[data-form-desactivation]');
+    const nom = dialog.querySelector('[data-nom-desactivation]');
+    const token = dialog.querySelector('[data-token-desactivation]');
+
+    document.querySelectorAll('[data-confirmation-desactivation]').forEach((formulaire) => {
+        formulaire.addEventListener('submit', (event) => {
+            event.preventDefault();
+            nom.textContent = formulaire.dataset.benevoleNom;
+            formulaireConfirmation.action = formulaire.action;
+            token.value = formulaire.querySelector('input[name="_csrf_token"]').value;
+            dialog.showModal();
+        });
+    });
+    dialog.querySelector('[data-fermer-desactivation]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+};
+
+const initialiserMenuMobile = () => {
+    const bouton = document.querySelector('[data-menu-mobile]');
+    const navigation = document.querySelector('[data-navigation-mobile]');
+    if (!bouton || !navigation || bouton.dataset.initialise === 'true') return;
+    bouton.dataset.initialise = 'true';
+    const definirOuverture = (ouvert) => {
+        document.body.classList.toggle('menu-mobile-ouvert', ouvert);
+        bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+    };
+    bouton.addEventListener('click', () => definirOuverture(bouton.getAttribute('aria-expanded') !== 'true'));
+    document.querySelectorAll('[data-fermer-menu-mobile]').forEach((element) => element.addEventListener('click', () => definirOuverture(false)));
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') definirOuverture(false); });
+};
+
+const initialiserLignesPresence = () => {
+    document.querySelectorAll('[data-modification-url]').forEach((ligne) => {
+        if (ligne.dataset.initialise === 'true') return;
+        ligne.dataset.initialise = 'true';
+        const ouvrir = () => { if (ligne.hasAttribute('data-carte-thematique') || window.matchMedia('(max-width: 760px)').matches) window.location.href = ligne.dataset.modificationUrl; };
+        ligne.addEventListener('click', (event) => {
+            if (ligne.dataset.glissement === 'true') {
+                ligne.dataset.glissement = 'false';
+                event.preventDefault();
+                return;
+            }
+            if (!event.target.closest('a, button')) ouvrir();
+        });
+        ligne.addEventListener('keydown', (event) => { if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a, button')) { event.preventDefault(); ouvrir(); } });
+    });
+};
+
+const initialiserGlissieresThematiques = () => {
+    document.querySelectorAll('[data-glissiere-thematique]').forEach((glissiere) => {
+        if (glissiere.dataset.initialise === 'true') return;
+        glissiere.dataset.initialise = 'true';
+        const ligne = glissiere.querySelector('[data-carte-thematique]');
+        if (!ligne) return;
+        let departX = 0;
+        let departY = 0;
+        let glissementHorizontal = false;
+
+        ligne.addEventListener('pointerdown', (event) => {
+            if (!window.matchMedia('(max-width: 760px)').matches || event.target.closest('a, button')) return;
+            departX = event.clientX;
+            departY = event.clientY;
+            glissementHorizontal = false;
+        });
+        ligne.addEventListener('pointermove', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            const deltaY = event.clientY - departY;
+            if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) glissementHorizontal = true;
+        });
+        ligne.addEventListener('pointerup', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            if (glissementHorizontal && deltaX < -45) {
+                document.querySelectorAll('[data-glissiere-thematique].ouverte').forEach((autre) => { if (autre !== glissiere) autre.classList.remove('ouverte'); });
+                glissiere.classList.add('ouverte');
+                ligne.dataset.glissement = 'true';
+            } else if (glissementHorizontal && deltaX > 35) {
+                glissiere.classList.remove('ouverte');
+                ligne.dataset.glissement = 'true';
+            }
+            departX = 0;
+            departY = 0;
+        });
+        ligne.addEventListener('pointercancel', () => {
+            departX = 0;
+            departY = 0;
+            glissementHorizontal = false;
+        });
+    });
+};
+
+const initialiserGlissieresBenevoles = () => {
+    document.querySelectorAll('[data-glissiere-benevole]').forEach((glissiere) => {
+        if (glissiere.dataset.initialise === 'true') return;
+        glissiere.dataset.initialise = 'true';
+        const ligne = glissiere.querySelector('.ligne-benevole');
+        if (!ligne || !glissiere.querySelector('.action-glissee-benevole')) return;
+        let departX = 0;
+        let departY = 0;
+        let glissementHorizontal = false;
+
+        ligne.addEventListener('pointerdown', (event) => {
+            if (!window.matchMedia('(max-width: 760px)').matches) return;
+            departX = event.clientX;
+            departY = event.clientY;
+            glissementHorizontal = false;
+        });
+        ligne.addEventListener('pointermove', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            const deltaY = event.clientY - departY;
+            if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) glissementHorizontal = true;
+        });
+        ligne.addEventListener('pointerup', (event) => {
+            if (!departX) return;
+            const deltaX = event.clientX - departX;
+            if (glissementHorizontal && deltaX < -45) {
+                document.querySelectorAll('[data-glissiere-benevole].ouverte').forEach((autre) => { if (autre !== glissiere) autre.classList.remove('ouverte'); });
+                glissiere.classList.add('ouverte');
+                ligne.dataset.glissement = 'true';
+            } else if (glissementHorizontal && deltaX > 35) {
+                glissiere.classList.remove('ouverte');
+                ligne.dataset.glissement = 'true';
+            }
+            departX = 0;
+            departY = 0;
+        });
+        ligne.addEventListener('pointercancel', () => { departX = 0; departY = 0; glissementHorizontal = false; });
+        ligne.addEventListener('click', (event) => {
+            if (ligne.dataset.glissement === 'true') {
+                event.preventDefault();
+                delete ligne.dataset.glissement;
+            }
+        });
+    });
+};
+
+const initialiserValidationTelephone = () => {
+    document.querySelectorAll('[data-telephone-francais]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        const erreur = document.querySelector('[data-erreur-telephone]');
+        const formatTelephoneFrancais = /^(?:(?:\+33|0033)[ .-]?[1-9]|0[1-9])(?:[ .-]?\d{2}){4}$/;
+
+        const valider = () => {
+            const invalide = champ.value.trim() !== '' && !formatTelephoneFrancais.test(champ.value.trim());
+            champ.setCustomValidity(invalide ? 'Indiquez un numéro français valide.' : '');
+            champ.setAttribute('aria-invalid', invalide ? 'true' : 'false');
+            if (erreur) erreur.hidden = !invalide;
+        };
+
+        champ.addEventListener('blur', valider);
+        champ.addEventListener('input', () => {
+            if (champ.getAttribute('aria-invalid') === 'true') valider();
+        });
+    });
+};
+
+const initialiserConfirmationImport = () => {
+    const dialog = document.querySelector('[data-dialog-confirmation-import]');
+    const ouvrir = document.querySelector('[data-ouvrir-confirmation-import]');
+    if (!dialog || !ouvrir || dialog.dataset.initialise === 'true') return;
+    dialog.dataset.initialise = 'true';
+    ouvrir.addEventListener('click', () => dialog.showModal());
+    dialog.querySelector('[data-fermer-confirmation-import]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+};
+
+const initialiserConfirmationCalendrier = () => {
+    document.querySelectorAll('[data-confirmation-remplacement]').forEach((formulaire) => {
+        if (formulaire.dataset.initialise === 'true') return;
+        formulaire.dataset.initialise = 'true';
+        formulaire.addEventListener('submit', (event) => {
+            if (formulaire.querySelector('input[name="mode"]:checked')?.value === 'remplacer'
+                && !window.confirm('Les informations déjà renseignées sur cette période seront remplacées. Continuer ?')) {
+                event.preventDefault();
+            }
+        });
+    });
+};
+
+const initialiserSoumissionAutomatique = () => {
+    document.querySelectorAll('[data-soumission-automatique]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        champ.addEventListener('change', () => champ.form?.requestSubmit());
+    });
+};
+
+const initialiserAffichageNomFichier = () => {
+    document.querySelectorAll('[data-affichage-nom-fichier]').forEach((champ) => {
+        if (champ.dataset.initialise === 'true') return;
+        champ.dataset.initialise = 'true';
+        const libelle = champ.closest('label')?.querySelector('[data-nom-fichier-selectionne]');
+        if (!libelle) return;
+        champ.addEventListener('change', () => {
+            libelle.textContent = champ.files?.[0]?.name || 'Choisir un fichier CSV';
+        });
+    });
+};
+
+const initialiserPage = () => {
+    initialiserSelecteursDate();
+    initialiserFormulairePresence();
+    initialiserSuppressionPresence();
+    initialiserDesactivationCompte();
+    initialiserMenuMobile();
+    initialiserLignesPresence();
+    initialiserGlissieresThematiques();
+    initialiserValidationTelephone();
+    initialiserConfirmationImport();
+    initialiserConfirmationCalendrier();
+    initialiserGlissieresBenevoles();
+    initialiserSoumissionAutomatique();
+    initialiserAffichageNomFichier();
+};
+
+document.addEventListener('turbo:before-cache', detruireSelecteursDate);
+document.addEventListener('turbo:load', initialiserPage);
+document.addEventListener('turbo:render', initialiserPage);
+if ('loading' === document.readyState) {
+    document.addEventListener('DOMContentLoaded', initialiserPage, {once: true});
+} else {
+    initialiserPage();
+}

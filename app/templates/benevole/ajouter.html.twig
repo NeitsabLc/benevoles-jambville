@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-ajout-benevole">
+        <a class="retour-calendrier" href="{{ path('app_admin_benevoles') }}">← Retour aux bénévoles</a>
+        <header class="entete-ajout-benevole">
+            <p class="surtitre">Administration</p>
+            <h1>Créer un compte</h1>
+            <p>Ajoutez un bénévole et envoyez-lui son invitation de première connexion.</p>
+        </header>
+
+        {% if erreurs %}<div class="alerte alerte-erreur"><ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul></div>{% endif %}
+
+        <form method="post" class="formulaire-ajout-benevole">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('ajouter-benevole') }}">
+            <section class="carte-ajout-benevole">
+                <h2>Informations du bénévole</h2>
+                <p class="explication-ajout-benevole">Le code adhérent et l’adresse email doivent être uniques.</p>
+                <div class="grille-ajout-benevole">
+                    <label class="champ"><span>Code adhérent</span><input name="code_adherent" maxlength="50" value="{{ valeurs.code_adherent }}" required autocomplete="off"></label>
+                    <label class="champ"><span>Adresse email</span><input name="email" type="email" maxlength="180" value="{{ valeurs.email }}" required autocomplete="email"></label>
+                    <label class="champ"><span>Prénom</span><input name="prenom" maxlength="100" value="{{ valeurs.prenom }}" required autocomplete="given-name"></label>
+                    <label class="champ"><span>Nom</span><input name="nom" maxlength="100" value="{{ valeurs.nom }}" required autocomplete="family-name"></label>
+                    <label class="champ champ-large"><span>Téléphone <small>(facultatif)</small></span><input name="telephone" type="tel" maxlength="30" value="{{ valeurs.telephone }}" autocomplete="tel"></label>
+                </div>
+            </section>
+            <section class="carte-ajout-benevole">
+                <h2>Rôle</h2>
+                <p class="explication-ajout-benevole">Le rôle détermine les espaces et les fonctionnalités accessibles à cette personne.</p>
+                <fieldset class="choix-role-benevole">
+                    <legend>Rôle du compte</legend>
+                    <label><input type="radio" name="role" value="BENEVOLE" {{ valeurs.role == 'BENEVOLE' ? 'checked' }} required><span><strong>Bénévole</strong><small>Gère son profil et ses propres présences.</small></span></label>
+                    <label><input type="radio" name="role" value="SALARIE_ACCUEIL" {{ valeurs.role == 'SALARIE_ACCUEIL' ? 'checked' }}><span><strong>Salarié</strong><small>Accède aux outils d’accueil et au calendrier.</small></span></label>
+                    <label><input type="radio" name="role" value="EQUIPE_PILOTE" {{ valeurs.role == 'EQUIPE_PILOTE' ? 'checked' }}><span><strong>Équipe pilote</strong><small>Dispose des droits d’administration.</small></span></label>
+                </fieldset>
+            </section>
+            <div class="actions-formulaire"><a class="bouton-secondaire" href="{{ path('app_admin_benevoles') }}">Annuler</a><button class="bouton-principal" type="submit">Créer et envoyer l’invitation</button></div>
+        </form>
+    </main>
+</div>
+{% endblock %}

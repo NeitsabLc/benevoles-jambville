@@ -1,0 +1,39 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
+
+    firewalls:
+        dev:
+            pattern: ^/(_profiler|_wdt|assets)/
+            security: false
+        main:
+            lazy: true
+            provider: utilisateurs
+            user_checker: App\Security\UtilisateurChecker
+            form_login:
+                login_path: app_connexion
+                check_path: app_connexion
+                enable_csrf: true
+                username_parameter: email
+                password_parameter: mot_de_passe
+                default_target_path: app_accueil
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
+            logout:
+                path: app_deconnexion
+                target: app_connexion
+                enable_csrf: true
+
+    providers:
+        utilisateurs:
+            entity:
+                class: App\Entity\Utilisateur
+
+    access_control:
+        - { path: ^/connexion$, roles: PUBLIC_ACCESS }
+        - { path: ^/premiere-connexion/, roles: PUBLIC_ACCESS }
+        - { path: ^/conditions-utilisation$, roles: PUBLIC_ACCESS }
+        - { path: ^/politique-confidentialite$, roles: PUBLIC_ACCESS }
+        - { route: app_page_introuvable, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

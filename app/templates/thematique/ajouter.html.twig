@@ -1,0 +1,5 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ajouter une thématique · Bénévoles Jambville{% endblock %}
+{% block body %}<div class="application">{% include 'commun/_barre_application.html.twig' %}
+<main class="page-thematiques page-formulaire-thematique"><nav class="fil-ariane-thematique" aria-label="Fil d’Ariane"><a href="{{ path('app_admin_thematiques') }}">Thématiques</a><span>/</span><span>Ajouter</span></nav><header class="entete-thematiques"><h1>Ajouter une thématique</h1><p>Créez une thématique permanente ou liée à un événement.</p></header>
+<form method="post" class="formulaire-thematique"><section class="carte-thematique"><h2>Informations générales</h2><input type="hidden" name="_csrf_token" value="{{ csrf_token('creer-thematique') }}">{% include 'thematique/_formulaire.html.twig' with {thematique: null} %}</section><div class="actions-formulaire actions-thematique-formulaire"><a class="bouton-secondaire" href="{{ path('app_admin_thematiques') }}">Annuler</a><button class="bouton-principal" type="submit">Ajouter la thématique</button></div></form></main></div>{% endblock %}

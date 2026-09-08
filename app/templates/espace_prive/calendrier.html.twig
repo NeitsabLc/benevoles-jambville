@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Configuration du calendrier · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-configuration-calendrier">
+        <header class="entete-configuration-calendrier">
+            <p class="surtitre">Administration</p>
+            <h1>Configuration du calendrier</h1>
+            <p>Renseignez en une fois les informations communes à plusieurs journées.</p>
+        </header>
+
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur">{{ message }}</div>{% endfor %}
+
+        <div class="grille-configuration-calendrier">
+            <section class="carte-configuration-calendrier">
+                <header class="titre-carte-calendrier">
+                    <span class="numero-configuration">1</span>
+                    <div><h2>Personne de permanence</h2><p>Attribuez une personne à une semaine ou à toute autre période.</p></div>
+                </header>
+
+                {% if personnes is not empty %}
+                <form method="post" class="formulaire-configuration-calendrier" data-confirmation-remplacement>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('configurer-calendrier') }}">
+                    <input type="hidden" name="action" value="permanence">
+                    <div class="champ">
+                        <label for="personne">Personne</label>
+                        <select id="personne" name="personne" required>
+                            <option value="">Choisir une personne</option>
+                            {% for personne in personnes %}<option value="{{ personne.id }}">{{ personne.nom }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    {% include 'espace_prive/_periode_calendrier.html.twig' with {prefixe: 'permanence'} %}
+                    <button class="bouton-principal" type="submit">Appliquer la permanence</button>
+                </form>
+                {% else %}
+                    <p class="liste-permanence-vide">Ajoutez d’abord une personne pour pouvoir planifier les permanences.</p>
+                {% endif %}
+
+                <details class="ajout-personne-permanence" {{ personnes is empty ? 'open' }}>
+                    <summary>Ajouter une personne à la liste</summary>
+                    <form method="post">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('configurer-calendrier') }}">
+                        <input type="hidden" name="action" value="ajouter_personne">
+                        <div class="champ"><label for="nom_personne">Nom complet</label><input id="nom_personne" name="nom_personne" maxlength="150" required autocomplete="off" placeholder="Ex. Camille Martin"></div>
+                        <button class="bouton-secondaire" type="submit">Ajouter à la liste</button>
+                    </form>
+                </details>
+            </section>
+
+            <section class="carte-configuration-calendrier carte-commentaire-calendrier">
+                <header class="titre-carte-calendrier">
+                    <span class="numero-configuration">2</span>
+                    <div><h2>Commentaire affiché</h2><p>Ajoutez une information visible sur le calendrier pendant une période donnée.</p></div>
+                </header>
+                <form method="post" class="formulaire-configuration-calendrier" data-confirmation-remplacement>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('configurer-calendrier') }}">
+                    <input type="hidden" name="action" value="commentaire">
+                    <div class="champ">
+                        <label for="commentaire">Commentaire <span class="indication-optionnelle">optionnel</span></label>
+                        <textarea id="commentaire" name="commentaire" maxlength="1000" rows="4" placeholder="Ex. Travaux dans l’aile nord, accueil déplacé au château."></textarea>
+                        <small>Laissez vide en mode « Remplacer » pour retirer les commentaires de la période.</small>
+                    </div>
+                    {% include 'espace_prive/_periode_calendrier.html.twig' with {prefixe: 'commentaire'} %}
+                    <button class="bouton-principal" type="submit">Appliquer le commentaire</button>
+                </form>
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}

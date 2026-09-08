@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conditions d’utilisation · Bénévoles Jambville{% endblock %}
+{% block body_class %}page-legale{% endblock %}
+
+{% block body %}
+<main class="conteneur-page-legale">
+    <header class="entete-page-legale">
+        <a class="marque-page-legale" href="{{ app.user ? path('app_accueil') : path('app_connexion') }}" aria-label="Retour à Bénévoles Jambville"><span aria-hidden="true">BJ</span><strong>Bénévoles Jambville</strong></a>
+        <p>Informations légales</p>
+        <h1>Conditions d’utilisation</h1>
+        <p class="mise-a-jour-page-legale">Dernière mise à jour : 9 août 2026</p>
+    </header>
+
+    <article class="contenu-page-legale">
+        <p>Bénévoles Jambville est un outil destiné à organiser la présence et l’accueil des bénévoles et des équipes compagnons à Jambville. Son utilisation implique le respect des présentes conditions et des règles internes des Scouts et Guides de France.</p>
+
+        <h2>1. Accès au service</h2>
+        <p>L’accès est réservé aux personnes autorisées. Chaque compte est personnel et ses identifiants ne doivent pas être partagés. Toute perte d’accès, suspicion d’utilisation frauduleuse ou erreur d’habilitation doit être signalée rapidement à l’équipe pilote.</p>
+
+        <h2>2. Utilisation autorisée</h2>
+        <p>L’utilisateur s’engage à utiliser le service uniquement pour préparer et gérer l’accueil à Jambville. Il doit notamment :</p>
+        <ul><li>ne consulter que les informations nécessaires à sa mission ;</li><li>saisir des informations exactes, pertinentes et à jour ;</li><li>ne pas communiquer les données à une personne non autorisée ;</li><li>ne pas contourner les droits d’accès ou les protections du service ;</li><li>signaler toute information attribuée à la mauvaise personne.</li></ul>
+
+        <h2>3. Données sensibles</h2>
+        <p>Le service contient des informations alimentaires, notamment des allergies, ainsi que des besoins d’hébergement et des commentaires d’accueil. Ces informations sont confidentielles et ne doivent être consultées ou transmises que lorsqu’elles sont nécessaires à l’accueil des personnes.</p>
+        <p>Les exports et copies éventuelles doivent être protégés et supprimés dès qu’ils ne sont plus nécessaires.</p>
+
+        <h2>4. Responsabilité des utilisateurs</h2>
+        <p>Chaque utilisateur reste responsable des informations qu’il saisit, modifie ou transmet. L’équipe pilote détermine les personnes autorisées et veille à la mise à jour des accès.</p>
+
+        <h2>5. Disponibilité et évolution</h2>
+        <p>Des interruptions peuvent survenir pour maintenance, correction ou raisons de sécurité. Les fonctionnalités et les présentes conditions peuvent évoluer ; la date de mise à jour identifie la version applicable.</p>
+
+        <h2>6. Désactivation et suppression d’un compte</h2>
+        <p>Un compte peut être désactivé lorsqu’il n’est plus nécessaire, en cas de risque de sécurité ou de non-respect des présentes conditions. Les allergies et le champ alimentaire libre sont effacés dès la désactivation. Le compte et ses données associées sont définitivement supprimés après 30 jours s’il n’est pas réactivé.</p>
+
+        <h2>7. Données personnelles</h2>
+        <p>Les traitements réalisés au moyen du service sont décrits dans la <a href="{{ path('app_politique_confidentialite') }}">politique de confidentialité</a>.</p>
+
+        <h2>8. Contact</h2>
+        <p>Pour toute question ou pour signaler un incident, écrivez à <a href="mailto:contact@neitsab.net">contact@neitsab.net</a>.</p>
+    </article>
+</main>
+{% endblock %}

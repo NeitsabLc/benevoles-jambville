@@ -1,0 +1,19 @@
+# Configuration restrictive pour le réseau Compose de production.
+# Adapter conjointement ce sous-réseau et BENEVOLE_NETWORK_SUBNET si nécessaire.
+
+local   all                         all                                             scram-sha-256
+host    all                         all                         127.0.0.1/32        scram-sha-256
+host    all                         all                         ::1/128             scram-sha-256
+
+local   replication                 all                                             scram-sha-256
+host    replication                 all                         127.0.0.1/32        scram-sha-256
+host    replication                 all                         ::1/128             scram-sha-256
+
+host    benevole_jambville          benevole_jambville_app      172.29.0.0/24       scram-sha-256
+host    benevole_jambville          benevole_jambville_migrator 172.29.0.0/24       scram-sha-256
+host    benevole_jambville          benevole_jambville_backup   172.29.0.0/24       scram-sha-256
+host    benevole_jambville          benevole_jambville          172.29.0.0/24       scram-sha-256
+host    all                         benevole_jambville_admin    172.29.0.0/24       scram-sha-256
+
+host    all                         all                         0.0.0.0/0           reject
+host    all                         all                         ::/0                reject

@@ -1,0 +1,13 @@
+[Unit]
+Description=Filtrage Docker du port 8081 de Benevoles Jambville
+Requires=docker.service
+After=docker.service ufw.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/benevole-docker-firewall
+ExecReload=/usr/local/sbin/benevole-docker-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
