@@ -46,8 +46,10 @@ services:
       start_period: 10s
 
   maintenance:
+    profiles:
+      - maintenance
     logging: *production-logging
-    restart: unless-stopped
+    restart: "no"
     image: "benevole-jambville-php-production:${APP_IMAGE_TAG:-local}"
     pull_policy: build
     build:

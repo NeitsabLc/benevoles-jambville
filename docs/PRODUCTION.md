@@ -56,7 +56,8 @@ Services Compose :
   de migration ;
 - `backup` crée immédiatement une sauvegarde chiffrée au démarrage, puis une
   sauvegarde toutes les 24 heures, avec une rétention locale de sept jours ;
-- `maintenance` exécute quotidiennement les désactivations et purges métier.
+- `maintenance` est une tâche ponctuelle, lancée chaque jour par un timer systemd
+  persistant de l’hôte pour les désactivations et purges métier.
 
 Il n'existe ni Redis, ni file de messages, ni worker asynchrone, ni stockage
 d'uploads durable. Les CSV importés sont traités temporairement. Les caches,
@@ -488,7 +489,10 @@ make release-ps
 
 # Journaux bornés
 docker compose -f compose.yaml -f compose.prod.yaml logs \
-  --since=30m --tail=200 nginx php database maintenance backup
+  --since=30m --tail=200 nginx php database backup
+
+# Dernier résultat de la maintenance ponctuelle
+systemctl status neitsab-app-maintenance@benevoles-jambville-production.service
 
 # Sauvegarde immédiate avant toute modification
 make release-backup-now
