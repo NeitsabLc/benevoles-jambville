@@ -75,9 +75,9 @@ trap nettoyer EXIT INT TERM
 
 compose config --quiet
 if [ "${USE_RELEASE_IMAGES:-0}" = "1" ]; then
-    compose --profile outils pull php nginx database liquibase backup
+    compose --profile outils --profile backup pull php nginx database liquibase backup
 else
-    compose --profile outils build --quiet database liquibase php nginx backup
+    compose --profile outils --profile backup build --quiet database liquibase php nginx backup
 fi
 
 fichier_identite="$repertoire_temporaire/identity.txt"
@@ -155,13 +155,14 @@ test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
 compose exec --no-TTY php php bin/console about --env=prod --no-debug
 compose exec --no-TTY php php bin/console cache:warmup --env=prod --no-debug
 test "$(compose exec --no-TTY php id -un)" = www-data
-compose --profile maintenance --profile outils create maintenance backup liquibase
+compose --profile backup --profile maintenance --profile outils create maintenance backup liquibase
 assert_container_hardened php www-data 536870912 1000000000 128 aucun
 assert_container_hardened nginx nginx 134217728 500000000 64 aucun
 assert_container_hardened database postgres 1073741824 2000000000 256
 assert_container_hardened maintenance www-data 268435456 500000000 64 aucun
 test "$(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$(compose ps --quiet --all maintenance)")" = "no"
 assert_container_hardened backup postgres 536870912 1000000000 128
+test "$(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$(compose --profile backup ps --quiet --all backup)")" = "no"
 assert_container_hardened liquibase liquibase:liquibase 536870912 1000000000 128
 
 compose exec --no-TTY database sh -ec '
@@ -205,7 +206,9 @@ fi
 maintenance_output=$(compose --profile maintenance run --rm maintenance)
 printf '%s\n' "$maintenance_output" | grep -q '"event":"maintenance_started"'
 printf '%s\n' "$maintenance_output" | grep -q '"event":"maintenance_succeeded"'
-compose run --rm --env BACKUP_ONCE=1 backup
+backup_output=$(compose --profile backup run --rm backup)
+printf '%s\n' "$backup_output" | grep -q '"event":"backup_started"'
+printf '%s\n' "$backup_output" | grep -q '"event":"backup_succeeded"'
 archive=$(find "$BACKUP_DIR" -maxdepth 1 -type f \
     -name 'benevole-jambville-*.dump.age' -size +0c -print -quit)
 test -n "$archive"

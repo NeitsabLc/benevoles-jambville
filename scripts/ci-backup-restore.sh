@@ -22,7 +22,7 @@ destinataire=$(docker run --rm --user root \
 
 env BACKUP_DIR="$repertoire_sauvegardes" BACKUP_AGE_RECIPIENT="$destinataire" \
     docker compose -f compose.yaml -f compose.prod.yaml run --rm \
-    --env BACKUP_ONCE=1 backup
+    backup
 
 archive=$(find "$repertoire_sauvegardes" -maxdepth 1 -type f \
     -name 'benevole-jambville-*.dump.age' -print -quit)
