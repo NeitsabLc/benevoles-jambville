@@ -171,8 +171,10 @@ services:
       - "${POSTGRES_HBA_FILE:-./docker/postgres/pg_hba.prod.conf.example}:/etc/postgresql/pg_hba.conf:ro"
 
   backup:
+    profiles:
+      - backup
     logging: *production-logging
-    restart: unless-stopped
+    restart: "no"
     image: "benevole-jambville-backup:${BACKUP_IMAGE_TAG:-local}"
     build:
       context: .
