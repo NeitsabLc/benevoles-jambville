@@ -6,5 +6,5 @@ namespace App;
 
 final class VersionApplication
 {
-    public const string VERSION = '1.3.2'; // x-release-version
+    public const string VERSION = '1.3.3'; // x-release-version
 }
