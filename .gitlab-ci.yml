@@ -37,6 +37,8 @@ variables:
   COMPOSER_MAX_PARALLEL_HTTP: "4"
 
 default:
+  tags:
+    - local-build
   image:
     name: "$NODE_IMAGE"
   interruptible: true
