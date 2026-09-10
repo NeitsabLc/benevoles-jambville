@@ -63,6 +63,20 @@ export BACKUP_AGE_RECIPIENT=age1configuration-temporaire-remplacee-avant-sauvega
 export NGINX_HOST_PORT POSTGRES_HOST_PORT POSTGRES_DB POSTGRES_USER
 export POSTGRES_HEALTHCHECK_USER POSTGRES_HEALTHCHECK_PASSWORD
 export TRUSTED_HOST_PATTERN TRUSTED_PROXIES
+
+http_test_host=${SMOKE_HTTP_HOST:-127.0.0.1}
+if [ -z "${SMOKE_HTTP_HOST:-}" ]; then
+    case "${DOCKER_HOST:-}" in
+        tcp://*)
+            docker_service_host=${DOCKER_HOST#tcp://}
+            http_test_host=${docker_service_host%%:*}
+            NGINX_BIND_ADDRESS=0.0.0.0
+            export NGINX_BIND_ADDRESS
+            ;;
+    esac
+fi
+nginx_bind_address=${NGINX_BIND_ADDRESS:-127.0.0.1}
+
 mkdir -m 0777 "$BACKUP_DIR"
 
 nettoyer() {
@@ -141,21 +155,21 @@ test "$(docker inspect --format '{{.State.Health.Status}}' "$nginx_container")" 
 docker inspect --format '{{json .HostConfig.PortBindings}}' "$database_container" \
     | grep -q '"5432/tcp".*"HostIp":"127.0.0.1"'
 docker inspect --format '{{json .HostConfig.PortBindings}}' "$nginx_container" \
-    | grep -q '"HostIp":"127.0.0.1"'
+    | grep -Fq "\"HostIp\":\"$nginx_bind_address\""
 
 curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors \
-    --output /dev/null "http://127.0.0.1:${NGINX_HOST_PORT}/connexion"
+    --output /dev/null "http://$http_test_host:${NGINX_HOST_PORT}/connexion"
 entetes_connexion=$(curl --silent --show-error --dump-header - --output /dev/null \
-    "http://127.0.0.1:${NGINX_HOST_PORT}/connexion" | tr -d '\r')
+    "http://$http_test_host:${NGINX_HOST_PORT}/connexion" | tr -d '\r')
 printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin$'
 printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin$'
 printf '%s\n' "$entetes_connexion" | grep -Eiq '^X-Permitted-Cross-Domain-Policies:[[:space:]]*none$'
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
-    --header 'Host: attaquant.example' "http://127.0.0.1:${NGINX_HOST_PORT}/connexion")" = 400
+    --header 'Host: attaquant.example' "http://$http_test_host:${NGINX_HOST_PORT}/connexion")" = 400
 test "$(curl --silent --output /dev/null --write-out '%{http_code}' \
     --header 'Host: attaquant.example' \
     --header 'X-Forwarded-Host: localhost' \
-    "http://127.0.0.1:${NGINX_HOST_PORT}/connexion")" = 400
+    "http://$http_test_host:${NGINX_HOST_PORT}/connexion")" = 400
 
 compose exec --no-TTY php php bin/console about --env=prod --no-debug
 compose exec --no-TTY php php bin/console cache:warmup --env=prod --no-debug
@@ -244,4 +258,4 @@ compose exec --no-TTY database sh -ec '
 '
 
 curl --fail --silent --show-error --output /dev/null \
-    "http://127.0.0.1:${NGINX_HOST_PORT}/connexion"
+    "http://$http_test_host:${NGINX_HOST_PORT}/connexion"
