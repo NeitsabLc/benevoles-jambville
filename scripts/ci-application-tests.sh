@@ -48,7 +48,9 @@ for tentative in 1 2 3; do
 done
 
 docker compose up --detach database php nginx
-APP_BASE_URL="http://$(docker compose port nginx 8080)"
+published_port="$(docker compose port nginx 8080)"
+app_port="${published_port##*:}"
+APP_BASE_URL="http://127.0.0.1:$app_port"
 export APP_BASE_URL
 
 docker compose exec --no-TTY php composer validate --strict --no-check-publish
@@ -81,6 +83,12 @@ docker compose --profile outils run --rm \
 docker compose exec --no-TTY php php bin/phpunit
 docker compose --profile outils run --rm liquibase update --context-filter=dev
 
-curl --fail --retry 30 --retry-delay 2 --retry-all-errors "$APP_BASE_URL/connexion"
+docker run --rm --network host "$PLAYWRIGHT_IMAGE" \
+    curl --fail --retry 30 --retry-delay 2 --retry-all-errors "$APP_BASE_URL/connexion"
 ./scripts/run-playwright-ci.sh test:accessibility
+docker compose exec --no-TTY database sh -c \
+    'exec psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --set=ON_ERROR_STOP=1' \
+    < tests/e2e/reset.sql
+E2E_SKIP_RESET=1
+export E2E_SKIP_RESET
 ./scripts/run-playwright-ci.sh test:e2e
