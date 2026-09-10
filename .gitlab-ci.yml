@@ -122,7 +122,10 @@ betterleaks:
       base_sha="${CI_MERGE_REQUEST_DIFF_BASE_SHA:-$CI_MERGE_REQUEST_TARGET_BRANCH_SHA}"
       docker run --rm --volume "$CI_PROJECT_DIR:/src" "$BETTERLEAKS_IMAGE" \
         git /src --log-opts="$base_sha..$CI_COMMIT_SHA" --report-path /src/betterleaks.sarif --report-format sarif
-      docker run --rm --volume "$CI_PROJECT_DIR:/src:ro" "$BETTERLEAKS_IMAGE" dir /src
+      rm -rf .betterleaks-worktree
+      mkdir .betterleaks-worktree
+      git archive HEAD | tar -x -C .betterleaks-worktree
+      docker run --rm --volume "$CI_PROJECT_DIR/.betterleaks-worktree:/src:ro" "$BETTERLEAKS_IMAGE" dir /src
   artifacts:
     when: always
     expire_in: 7 days
