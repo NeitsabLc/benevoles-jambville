@@ -158,8 +158,10 @@ docker inspect --format '{{json .HostConfig.PortBindings}}' "$nginx_container" \
     | grep -Fq "\"HostIp\":\"$nginx_bind_address\""
 
 curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors \
+    --header 'Host: localhost' \
     --output /dev/null "http://$http_test_host:${NGINX_HOST_PORT}/connexion"
 entetes_connexion=$(curl --silent --show-error --dump-header - --output /dev/null \
+    --header 'Host: localhost' \
     "http://$http_test_host:${NGINX_HOST_PORT}/connexion" | tr -d '\r')
 printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Opener-Policy:[[:space:]]*same-origin$'
 printf '%s\n' "$entetes_connexion" | grep -Eiq '^Cross-Origin-Resource-Policy:[[:space:]]*same-origin$'
@@ -258,4 +260,5 @@ compose exec --no-TTY database sh -ec '
 '
 
 curl --fail --silent --show-error --output /dev/null \
+    --header 'Host: localhost' \
     "http://$http_test_host:${NGINX_HOST_PORT}/connexion"
