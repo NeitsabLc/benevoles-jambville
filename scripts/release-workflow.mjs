@@ -283,15 +283,18 @@ function changelogSection(version, changelog) {
 
 async function publishRelease() {
   const commitSha = required("CI_COMMIT_SHA");
-  const commitTitle = required("CI_COMMIT_TITLE");
+  const commitMessage = required("CI_COMMIT_MESSAGE");
   const version = (await readFile("version.txt", "utf8")).trim();
   if (!semver.valid(version)) {
     fail("version.txt ne contient pas une version sémantique valide.");
   }
 
   const expectedTitle = `chore(release): v${version}`;
-  if (commitTitle !== expectedTitle && !commitTitle.startsWith(`${expectedTitle} `)) {
-    fail(`Le commit de fusion doit être « ${expectedTitle} ».`);
+  const containsExpectedTitle = commitMessage
+    .split(/\r?\n/)
+    .some((line) => line === expectedTitle || line.startsWith(`${expectedTitle} `));
+  if (!containsExpectedTitle) {
+    fail(`Le message du commit de fusion doit contenir « ${expectedTitle} ».`);
   }
 
   const tag = `v${version}`;
