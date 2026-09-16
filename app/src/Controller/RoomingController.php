@@ -82,6 +82,7 @@ final class RoomingController extends AbstractController
 
         $inscriptionsPeriode = $inscriptions->findPourRooming($debut, $fin);
         $affectations = $rooming->trouverAffectations($debut, $fin);
+        $disponibilites = $rooming->trouverDisponibilites($debut, $fin);
         $jours = [];
         $presencesParJour = [];
         $sansChambreParJour = [];
@@ -101,9 +102,12 @@ final class RoomingController extends AbstractController
         foreach ($rooming->getChambres() as $code => $chambre) {
             $occupation = [];
             foreach ($jours as $jour) {
-                $occupation[$jour['date']->format('Y-m-d')] = [
+                $cleJour = $jour['date']->format('Y-m-d');
+                $disponible = $disponibilites[$code][$cleJour] ?? false;
+                $occupation[$cleJour] = [
+                    'disponible' => $disponible,
                     'occupees' => 0,
-                    'disponibles' => $chambre['capacite'],
+                    'disponibles' => $disponible ? $chambre['capacite'] : 0,
                     'occupants' => [],
                 ];
             }
@@ -128,7 +132,9 @@ final class RoomingController extends AbstractController
 
                 if (null !== $affectation && isset($chambres[$affectation['chambre']])) {
                     $chambres[$affectation['chambre']]['occupation'][$cleJour]['occupees'] += $affectation['nombre_places'];
-                    $chambres[$affectation['chambre']]['occupation'][$cleJour]['disponibles'] -= $affectation['nombre_places'];
+                    if ($chambres[$affectation['chambre']]['occupation'][$cleJour]['disponible']) {
+                        $chambres[$affectation['chambre']]['occupation'][$cleJour]['disponibles'] -= $affectation['nombre_places'];
+                    }
                     $chambres[$affectation['chambre']]['occupation'][$cleJour]['occupants'][] = [
                         'inscription' => $inscription,
                         'libelle' => $libelle,

@@ -421,8 +421,10 @@ const initialiserPage = () => {
 };
 
 document.addEventListener('turbo:before-cache', detruireSelecteursDate);
+document.addEventListener('application:avant-mise-a-jour', detruireSelecteursDate);
 document.addEventListener('turbo:load', initialiserPage);
 document.addEventListener('turbo:render', initialiserPage);
+document.addEventListener('application:contenu-mis-a-jour', initialiserPage);
 if ('loading' === document.readyState) {
     document.addEventListener('DOMContentLoaded', initialiserPage, {once: true});
 } else {

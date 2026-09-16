@@ -16,7 +16,7 @@ body {
 }
 
 .pied-page-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; padding: 1rem 1.5rem; color: var(--texte-secondaire); font-size: .78rem; }
-.pied-page-legal--avec-navigation { position: fixed; z-index: 20; right: 0; bottom: 0; left: 14.5rem; margin-left: 0; background: var(--fond); }
+.pied-page-legal--avec-navigation { margin-left: 14.5rem; background: var(--fond); }
 .pied-page-legal a, .note-legale-connexion a { color: inherit; }
 .note-legale-connexion { max-width: 30rem; margin: 1.25rem auto 0; color: var(--texte-secondaire); font-size: .75rem; line-height: 1.55; text-align: center; }
 .page-legale { min-height: 100vh; background: var(--fond); }
@@ -91,6 +91,7 @@ body {
 .message-accueil > p:last-child { max-width: 28rem; margin: .6rem 0 0; font-size: clamp(1.55rem, 3vw, 2.5rem); font-weight: 700; line-height: 1.25; }
 .surtitre-clair { color: #c6f4e3; }
 .alerte { margin-bottom: 1.25rem; padding: .85rem 1rem; border-radius: .5rem; font-size: .88rem; line-height: 1.45; }
+.alerte-en-disparition { opacity: 0; transform: translateY(-.35rem); transition: opacity .22s ease, transform .22s ease; }
 .alerte-erreur { color: #7d2424; background: #fff0ef; border: 1px solid #f2c1bd; }
 .alerte-succes { color: #17614e; background: #eaf8f2; border: 1px solid #b7e3d4; }
 .etapes { height: .25rem; margin-bottom: 2rem; overflow: hidden; border-radius: 1rem; background: #dce7eb; }
@@ -568,6 +569,8 @@ body {
 .tableau-planning-rooming td { position: relative; color: #6a7e87; background: #fff; }
 .tableau-planning-rooming td.chambre-occupee { color: #17614e; background: #eaf8f2; }
 .tableau-planning-rooming td.chambre-complete { color: #8a4b08; background: #fff0d5; }
+.tableau-planning-rooming td.chambre-indisponible { color: #73838a; background: repeating-linear-gradient(135deg, #f1f4f5, #f1f4f5 8px, #e8edef 8px, #e8edef 16px); }
+.tableau-planning-rooming td.chambre-indisponible .resume-occupation-rooming strong { color: #73838a; }
 .resume-occupation-rooming { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
 .resume-occupation-rooming strong { color: var(--bleu-sgdf); font-size: .92rem; }
 .resume-occupation-rooming span { font-size: .64rem; font-weight: 700; }
@@ -610,10 +613,50 @@ body {
 .ligne-rooming .bouton-principal { min-height: 2.8rem; }
 .rooming-vide { margin: 0; padding: 2rem 1.3rem; color: var(--texte-secondaire); text-align: center; }
 
+/* Administration des chambres */
+.page-administration-chambres { width: min(100%, 88rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.notifications-chambres { position: fixed; z-index: 30; top: 1rem; right: 1rem; display: grid; width: min(28rem, calc(100vw - 2rem)); gap: .55rem; pointer-events: none; }
+.notifications-chambres .alerte { margin: 0; box-shadow: 0 8px 28px rgb(0 34 54 / 18%); pointer-events: auto; }
+.entete-administration-chambres { margin-bottom: 1.25rem; }
+.entete-administration-chambres h1 { margin: .35rem 0 .4rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+.entete-administration-chambres > p:last-child { max-width: 48rem; margin: 0; color: var(--texte-secondaire); line-height: 1.5; }
+.information-disponibilite-chambres { margin-bottom: 1.25rem; padding: .9rem 1rem; border-left: 4px solid var(--menthe-sgdf); border-radius: .35rem; color: #284f68; background: #eaf8f2; font-size: .85rem; line-height: 1.45; }
+.carte-creation-chambre { margin-bottom: 1.25rem; padding: 1.2rem 1.3rem; border-top: .3rem solid var(--menthe-sgdf); border-radius: .7rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.carte-creation-chambre > header { margin-bottom: 1rem; }
+.carte-creation-chambre h2 { margin: 0; font-size: 1.2rem; }
+.carte-creation-chambre header p { margin: .25rem 0 0; color: var(--texte-secondaire); font-size: .78rem; line-height: 1.4; }
+.formulaire-creation-chambre { display: grid; grid-template-columns: minmax(12rem, 1.3fr) minmax(12rem, 1fr) minmax(7rem, .5fr) auto; align-items: end; gap: .8rem; }
+.formulaire-creation-chambre .champ { min-width: 0; }
+.formulaire-creation-chambre .champ input, .formulaire-creation-chambre .champ select { min-height: 3.2rem; }
+.formulaire-creation-chambre .bouton-principal { min-height: 3.2rem; white-space: nowrap; }
+.grille-administration-chambres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.carte-administration-chambre { overflow: hidden; border-radius: .7rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.carte-administration-chambre > header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid #d8e2e6; }
+.carte-administration-chambre > header h2 { margin: 0; font-size: 1.3rem; }
+.carte-administration-chambre > header p { margin: .2rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.statut-disponibilite-chambre { flex: 0 0 auto; padding: .28rem .55rem; border-radius: 2rem; font-size: .68rem; font-weight: 800; }
+.statut-disponibilite-chambre.permanente { color: #17614e; background: #dff4eb; }
+.statut-disponibilite-chambre.periodes { color: #7a4b08; background: #fff0d5; }
+.mode-disponibilite-chambre, .periodes-disponibilite-chambre { padding: 1.1rem 1.3rem; }
+.mode-disponibilite-chambre { border-bottom: 1px solid #e1e8eb; }
+.mode-disponibilite-chambre h3, .periodes-disponibilite-chambre h3 { margin: 0; font-size: .92rem; }
+.mode-disponibilite-chambre > p { margin: .4rem 0 .85rem; color: var(--texte-secondaire); font-size: .75rem; line-height: 1.45; }
+.mode-disponibilite-chambre .bouton-secondaire { min-height: 2.4rem; padding: .45rem .7rem; font-size: .72rem; }
+.periodes-disponibilite-chambre > ul { display: grid; gap: .45rem; margin: .8rem 0 1rem; padding: 0; list-style: none; }
+.periodes-disponibilite-chambre > ul li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .6rem .7rem; border-radius: .4rem; color: #284f68; background: #f2f7f8; font-size: .74rem; }
+.bouton-suppression-periode { padding: .3rem .45rem; border: 0; color: #a32119; background: transparent; font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
+.bouton-suppression-periode:hover { text-decoration: underline; }
+.aucune-periode-chambre { margin: .65rem 0 1rem; color: var(--texte-secondaire); font-size: .75rem; font-style: italic; }
+.formulaire-periode-chambre { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: .65rem; padding-top: .85rem; border-top: 1px solid #e1e8eb; }
+.formulaire-periode-chambre .champ { min-width: 0; }
+.formulaire-periode-chambre .bouton-principal { grid-column: 1 / -1; min-height: 2.55rem; }
+
 @media (max-width: 1400px) and (min-width: 761px) {
     .jour-synthese { grid-template-columns: 10.5rem minmax(0, 1fr); }
     .details-synthese { grid-column: 1 / -1; border-top: 1px solid #e0e7ea; }
     .repas-synthese { border-right: 0; }
+    .formulaire-creation-chambre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .formulaire-creation-chambre .bouton-principal { grid-column: 1 / -1; }
 }
 
 @media (max-width: 760px) {
@@ -712,6 +755,14 @@ body {
     .affectations-rooming { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
     .affectations-rooming > header { align-items: start; }
     .ligne-rooming { grid-template-columns: 1fr; }
+    .page-administration-chambres { padding: 1.2rem .7rem 2rem; }
+    .notifications-chambres { top: 4.2rem; right: .7rem; width: calc(100vw - 1.4rem); }
+    .carte-creation-chambre { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .formulaire-creation-chambre { grid-template-columns: 1fr; }
+    .grille-administration-chambres { grid-template-columns: 1fr; }
+    .carte-administration-chambre > header { flex-direction: column; }
+    .formulaire-periode-chambre { grid-template-columns: 1fr; }
+    .formulaire-periode-chambre .bouton-principal { grid-column: auto; }
     .entete-calendrier, .outils-calendrier { align-items: stretch; flex-direction: column; }
     .filtre-et-legende-calendrier { align-items: stretch; gap: .55rem; }
     .outils-calendrier form, .outils-calendrier select { width: 100%; }

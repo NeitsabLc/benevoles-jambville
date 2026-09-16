@@ -77,14 +77,19 @@
                         </tr>
                         {% for code, chambre in chambres %}
                             <tr>
-                                <th scope="row"><strong>{{ chambre.nom }}</strong><small>{{ chambre.capacite }} lit{{ chambre.capacite > 1 ? 's' }}</small></th>
+                                <th scope="row"><strong>{{ chambre.nom }}</strong><small>{{ chambre.batiment }}</small><small>{{ chambre.capacite }} lit{{ chambre.capacite > 1 ? 's' }}</small></th>
                                 {% for jour in jours %}
                                     {% set cle_jour = jour.date|date('Y-m-d') %}
                                     {% set occupation = chambre.occupation[cle_jour] %}
-                                    <td class="{{ occupation.occupees == chambre.capacite ? 'chambre-complete' : (occupation.occupees > 0 ? 'chambre-occupee') }}">
+                                    <td class="{{ not occupation.disponible ? 'chambre-indisponible' : (occupation.occupees == chambre.capacite ? 'chambre-complete' : (occupation.occupees > 0 ? 'chambre-occupee')) }}">
                                         <div class="resume-occupation-rooming">
-                                            <strong>{{ occupation.occupees }}/{{ chambre.capacite }}</strong>
-                                            <span>{{ occupation.disponibles }} libre{{ occupation.disponibles > 1 ? 's' }}</span>
+                                            {% if occupation.disponible %}
+                                                <strong>{{ occupation.occupees }}/{{ chambre.capacite }}</strong>
+                                                <span>{{ occupation.disponibles }} libre{{ occupation.disponibles > 1 ? 's' }}</span>
+                                            {% else %}
+                                                <strong aria-label="Chambre indisponible">—</strong>
+                                                <span>Indisponible</span>
+                                            {% endif %}
                                         </div>
                                         {% if occupation.occupants %}
                                             <ul class="occupants-rooming">
@@ -113,7 +118,7 @@
                                                 {% endfor %}
                                             </ul>
                                         {% endif %}
-                                        {% if occupation.disponibles > 0 and presences_par_jour[cle_jour]|length > occupation.occupants|length %}
+                                        {% if occupation.disponible and occupation.disponibles > 0 and presences_par_jour[cle_jour]|length > occupation.occupants|length %}
                                             {% set id_ajout = 'ajout-' ~ code|lower ~ '-' ~ cle_jour %}
                                             <div class="ajout-rooming" data-controller="floating-popover">
                                                 <button class="declencheur-popup-rooming" type="button" popovertarget="{{ id_ajout }}" aria-label="Ajouter une personne dans {{ chambre.nom }} le {{ jour.jour }} {{ jour.mois }}" data-floating-popover-target="trigger">+</button>
