@@ -8,7 +8,10 @@ FROM composer:2@${COMPOSER_IMAGE_DIGEST} AS composer-bin
 
 FROM php:${PHP_VERSION}-fpm@${PHP_IMAGE_DIGEST} AS php-base
 
-RUN apt-get update \
+ARG OS_PACKAGE_REFRESH=manual
+
+RUN test -n "$OS_PACKAGE_REFRESH" \
+    && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends libicu-dev libpq-dev libzip-dev \
     && docker-php-ext-install intl opcache pdo_pgsql zip \
