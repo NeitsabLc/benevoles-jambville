@@ -26,7 +26,7 @@ test('modification des disponibilités sans rechargement de page', async ({ page
   expect(await page.evaluate(() => window.__pageChambresInitiale)).toBe(true);
   await expect(carte.getByLabel('Du')).toHaveAttribute('type', 'text');
 
-  const alerte = page.locator('[data-chambres-alerte]');
+  const alerte = page.locator('[data-notifications-flottantes] .alerte');
   await expect(alerte).toContainText('uniquement pendant les périodes');
   await page.clock.fastForward(5500);
   await expect(alerte).toHaveCount(0);

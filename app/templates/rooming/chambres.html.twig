@@ -16,10 +16,8 @@
             <p>Créez les chambres du centre, puis choisissez celles qui restent ouvertes toute l’année et indiquez les périodes des autres.</p>
         </header>
 
-        <div class="notifications-chambres">
-            {% for message in app.flashes('succes') %}<div class="alerte alerte-succes" role="status" data-chambres-alerte>{{ message }}</div>{% endfor %}
-            {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur" role="alert" data-chambres-alerte>{{ message }}</div>{% endfor %}
-        </div>
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes" role="status">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur" role="alert">{{ message }}</div>{% endfor %}
 
         <div class="information-disponibilite-chambres">
             Une personne ne pourra être affectée que si chaque nuit demandée est couverte par la disponibilité de la chambre.

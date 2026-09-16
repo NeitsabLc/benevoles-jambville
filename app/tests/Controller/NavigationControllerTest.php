@@ -42,6 +42,7 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('a[href="/administration/chambres"]');
         self::assertSelectorExists('a[href="/administration/thematiques"]');
         self::assertSelectorExists('a[href="/administration/benevoles"]');
+        self::assertSelectorExists('[data-notifications-flottantes]');
         self::assertSelectorExists('.liens-legaux-navigation + .compte-navigation');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/conditions-utilisation"]');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/politique-confidentialite"]');

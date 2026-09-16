@@ -94,6 +94,8 @@ body {
 .alerte-en-disparition { opacity: 0; transform: translateY(-.35rem); transition: opacity .22s ease, transform .22s ease; }
 .alerte-erreur { color: #7d2424; background: #fff0ef; border: 1px solid #f2c1bd; }
 .alerte-succes { color: #17614e; background: #eaf8f2; border: 1px solid #b7e3d4; }
+.notifications-flottantes { position: fixed; z-index: 30; top: 1rem; right: 1rem; display: grid; width: min(28rem, calc(100vw - 2rem)); gap: .55rem; pointer-events: none; }
+.notifications-flottantes .alerte { max-height: min(70vh, 30rem); margin: 0; overflow: auto; box-shadow: 0 8px 28px rgb(0 34 54 / 18%); pointer-events: auto; }
 .etapes { height: .25rem; margin-bottom: 2rem; overflow: hidden; border-radius: 1rem; background: #dce7eb; }
 .etapes span { display: block; width: 100%; height: 100%; background: var(--menthe-sgdf); }
 .page-centree { display: grid; background: var(--fond); place-items: center; }
@@ -615,8 +617,6 @@ body {
 
 /* Administration des chambres */
 .page-administration-chambres { width: min(100%, 88rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
-.notifications-chambres { position: fixed; z-index: 30; top: 1rem; right: 1rem; display: grid; width: min(28rem, calc(100vw - 2rem)); gap: .55rem; pointer-events: none; }
-.notifications-chambres .alerte { margin: 0; box-shadow: 0 8px 28px rgb(0 34 54 / 18%); pointer-events: auto; }
 .entete-administration-chambres { margin-bottom: 1.25rem; }
 .entete-administration-chambres h1 { margin: .35rem 0 .4rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
 .entete-administration-chambres > p:last-child { max-width: 48rem; margin: 0; color: var(--texte-secondaire); line-height: 1.5; }
@@ -756,7 +756,8 @@ body {
     .affectations-rooming > header { align-items: start; }
     .ligne-rooming { grid-template-columns: 1fr; }
     .page-administration-chambres { padding: 1.2rem .7rem 2rem; }
-    .notifications-chambres { top: 4.2rem; right: .7rem; width: calc(100vw - 1.4rem); }
+    .notifications-flottantes { top: .7rem; right: .7rem; width: calc(100vw - 1.4rem); }
+    body:has(.navigation-laterale) .notifications-flottantes { top: 4.2rem; }
     .carte-creation-chambre { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
     .formulaire-creation-chambre { grid-template-columns: 1fr; }
     .grille-administration-chambres { grid-template-columns: 1fr; }

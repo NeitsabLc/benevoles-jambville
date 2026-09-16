@@ -2,6 +2,27 @@ import './stimulus_bootstrap.js';
 import flatpickr from 'flatpickr';
 import { French } from 'flatpickr/dist/l10n/fr.js';
 
+const DELAI_DISPARITION_ALERTE = 5000;
+const DUREE_TRANSITION_ALERTE = 220;
+
+const initialiserNotificationsFlottantes = () => {
+    const conteneur = document.querySelector('[data-notifications-flottantes]');
+    if (!conteneur) return;
+
+    document.querySelectorAll('.alerte:not([data-notification-initialisee])').forEach((alerte) => {
+        alerte.dataset.notificationInitialisee = 'true';
+        if (!alerte.hasAttribute('role')) {
+            alerte.setAttribute('role', alerte.classList.contains('alerte-erreur') ? 'alert' : 'status');
+        }
+        conteneur.appendChild(alerte);
+
+        window.setTimeout(() => {
+            alerte.classList.add('alerte-en-disparition');
+            window.setTimeout(() => alerte.remove(), DUREE_TRANSITION_ALERTE);
+        }, DELAI_DISPARITION_ALERTE);
+    });
+};
+
 const initialiserSelecteursDate = () => {
     document.querySelectorAll('input[type="date"]').forEach((champ) => {
         const identifiantOriginal = champ.id;
@@ -405,6 +426,7 @@ const initialiserAffichageNomFichier = () => {
 };
 
 const initialiserPage = () => {
+    initialiserNotificationsFlottantes();
     initialiserSelecteursDate();
     initialiserFormulairePresence();
     initialiserSuppressionPresence();
@@ -425,6 +447,7 @@ document.addEventListener('application:avant-mise-a-jour', detruireSelecteursDat
 document.addEventListener('turbo:load', initialiserPage);
 document.addEventListener('turbo:render', initialiserPage);
 document.addEventListener('application:contenu-mis-a-jour', initialiserPage);
+document.addEventListener('application:notifications-mises-a-jour', initialiserNotificationsFlottantes);
 if ('loading' === document.readyState) {
     document.addEventListener('DOMContentLoaded', initialiserPage, {once: true});
 } else {

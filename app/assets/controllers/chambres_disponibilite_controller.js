@@ -1,17 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
-const DELAI_DISPARITION_ALERTE = 5000;
-const DUREE_TRANSITION_ALERTE = 220;
-
 export default class extends Controller {
     connect() {
         this.envoiEnCours = false;
-        this.minuteriesAlertes = new Set();
-        this.programmerDisparitionAlertes();
-    }
-
-    disconnect() {
-        this.annulerMinuteriesAlertes();
     }
 
     async envoyer(event) {
@@ -46,12 +37,10 @@ export default class extends Controller {
             const contenuRecu = documentRecu.querySelector('.page-administration-chambres');
             if (!contenuRecu) throw new Error('Contenu de la page introuvable');
 
-            this.annulerMinuteriesAlertes();
             document.dispatchEvent(new CustomEvent('application:avant-mise-a-jour'));
             this.element.innerHTML = contenuRecu.innerHTML;
             contenuActualise = true;
             document.dispatchEvent(new CustomEvent('application:contenu-mis-a-jour'));
-            this.programmerDisparitionAlertes();
         } catch (erreur) {
             console.error('La disponibilité de la chambre n’a pas pu être actualisée.', erreur);
             if (!contenuActualise) this.afficherErreurTechnique();
@@ -61,24 +50,6 @@ export default class extends Controller {
             this.element.removeAttribute('aria-busy');
             if (bouton?.isConnected) bouton.disabled = false;
         }
-    }
-
-    programmerDisparitionAlertes() {
-        this.element.querySelectorAll('[data-chambres-alerte]').forEach((alerte) => {
-            if (alerte.dataset.disparitionProgrammee === 'true') return;
-            alerte.dataset.disparitionProgrammee = 'true';
-            const minuterie = window.setTimeout(() => {
-                alerte.classList.add('alerte-en-disparition');
-                const minuterieSuppression = window.setTimeout(() => alerte.remove(), DUREE_TRANSITION_ALERTE);
-                this.minuteriesAlertes.add(minuterieSuppression);
-            }, DELAI_DISPARITION_ALERTE);
-            this.minuteriesAlertes.add(minuterie);
-        });
-    }
-
-    annulerMinuteriesAlertes() {
-        this.minuteriesAlertes?.forEach((minuterie) => window.clearTimeout(minuterie));
-        this.minuteriesAlertes?.clear();
     }
 
     restaurerPosition(positionVerticale) {
@@ -92,15 +63,14 @@ export default class extends Controller {
     }
 
     afficherErreurTechnique() {
-        const conteneur = this.element.querySelector('.notifications-chambres');
+        const conteneur = document.querySelector('[data-notifications-flottantes]');
         if (!conteneur) return;
 
         const alerte = document.createElement('div');
         alerte.className = 'alerte alerte-erreur';
-        alerte.dataset.chambresAlerte = '';
         alerte.setAttribute('role', 'alert');
         alerte.textContent = 'La modification n’a pas pu être enregistrée. Vérifiez votre connexion puis réessayez.';
         conteneur.appendChild(alerte);
-        this.programmerDisparitionAlertes();
+        document.dispatchEvent(new CustomEvent('application:notifications-mises-a-jour'));
     }
 }
