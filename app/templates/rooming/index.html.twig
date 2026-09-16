@@ -1,0 +1,163 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rooming · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main class="page-rooming">
+        <header class="entete-rooming">
+            <p class="surtitre">Accueil et hôtellerie</p>
+            <h1>Rooming</h1>
+            <p>Visualisez l’occupation et affectez les personnes directement dans chaque chambre.</p>
+        </header>
+
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur">{{ message }}</div>{% endfor %}
+
+        <nav class="navigation-date-rooming" aria-label="Choisir la période affichée">
+            <form method="get" action="{{ path('app_rooming') }}">
+                <div class="champ">
+                    <label for="debut-rooming">Du</label>
+                    <input id="debut-rooming" type="date" name="debut" value="{{ debut|date('Y-m-d') }}" required>
+                </div>
+                <div class="champ">
+                    <label for="fin-rooming">Au</label>
+                    <input id="fin-rooming" type="date" name="fin" value="{{ fin|date('Y-m-d') }}" required>
+                </div>
+                <button class="bouton-principal" type="submit">Afficher</button>
+            </form>
+        </nav>
+
+        <section class="planning-rooming" aria-labelledby="titre-planning-rooming">
+            <header>
+                <div>
+                    <h2 id="titre-planning-rooming">Occupation des chambres</h2>
+                    <p>Du {{ debut|date('d/m/Y') }} au {{ fin|date('d/m/Y') }} · faites défiler horizontalement pour voir toute la période.</p>
+                </div>
+            </header>
+            <div
+                class="tableau-planning-rooming"
+                tabindex="0"
+                aria-label="Planning mensuel des chambres"
+                data-controller="rooming-scroll"
+                data-rooming-scroll-storage-key-value="rooming-position-{{ debut|date('Y-m-d') }}-{{ fin|date('Y-m-d') }}"
+                data-action="submit->rooming-scroll#memoriser"
+            >
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Chambre</th>
+                            {% for jour in jours %}
+                                <th scope="col" class="{{ jour.date|date('N') >= 6 ? 'week-end' }}">
+                                    <time datetime="{{ jour.date|date('Y-m-d') }}">
+                                        {{ jour.jour_semaine }} {{ jour.jour }} {{ jour.mois }}
+                                    </time>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="ligne-sans-chambre">
+                            <th scope="row"><strong>Personnes à affecter</strong><small>Sans chambre</small></th>
+                            {% for jour in jours %}
+                                {% set cle_jour = jour.date|date('Y-m-d') %}
+                                <td>
+                                    {% if sans_chambre_par_jour[cle_jour] %}
+                                        <ul>
+                                            {% for presence in sans_chambre_par_jour[cle_jour] %}
+                                                <li>{{ presence.libelle }} <b>{{ presence.effectif }}</b></li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <span class="tout-affecte-rooming">Tout le monde est affecté</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% for code, chambre in chambres %}
+                            <tr>
+                                <th scope="row"><strong>{{ chambre.nom }}</strong><small>{{ chambre.capacite }} lit{{ chambre.capacite > 1 ? 's' }}</small></th>
+                                {% for jour in jours %}
+                                    {% set cle_jour = jour.date|date('Y-m-d') %}
+                                    {% set occupation = chambre.occupation[cle_jour] %}
+                                    <td class="{{ occupation.occupees == chambre.capacite ? 'chambre-complete' : (occupation.occupees > 0 ? 'chambre-occupee') }}">
+                                        <div class="resume-occupation-rooming">
+                                            <strong>{{ occupation.occupees }}/{{ chambre.capacite }}</strong>
+                                            <span>{{ occupation.disponibles }} libre{{ occupation.disponibles > 1 ? 's' }}</span>
+                                        </div>
+                                        {% if occupation.occupants %}
+                                            <ul class="occupants-rooming">
+                                                {% for occupant in occupation.occupants %}
+                                                    {% set id_retrait = 'retrait-' ~ code|lower ~ '-' ~ cle_jour ~ '-' ~ occupant.inscription.id %}
+                                                    <li>
+                                                        <span>{{ occupant.libelle }} <b>{{ occupant.nombre }}</b></span>
+                                                        <div class="retrait-rooming" data-controller="floating-popover">
+                                                            <button class="declencheur-popup-rooming" type="button" popovertarget="{{ id_retrait }}" aria-label="Retirer {{ occupant.libelle }} de {{ chambre.nom }}" data-floating-popover-target="trigger">×</button>
+                                                            <div id="{{ id_retrait }}" class="popup-rooming" popover="auto" role="dialog" aria-label="Retirer {{ occupant.libelle }} de {{ chambre.nom }}" data-floating-popover-target="panel">
+                                                                <button class="fermer-popup-rooming" type="button" popovertarget="{{ id_retrait }}" popovertargetaction="hide" aria-label="Fermer">×</button>
+                                                                <p>Retirer <strong>{{ occupant.libelle }}</strong> de {{ chambre.nom }} :</p>
+                                                                <form method="post" action="{{ path('app_rooming') }}">
+                                                                    <input type="hidden" name="periode_debut" value="{{ debut|date('Y-m-d') }}">
+                                                                    <input type="hidden" name="periode_fin" value="{{ fin|date('Y-m-d') }}">
+                                                                    <input type="hidden" name="date_nuit" value="{{ cle_jour }}">
+                                                                    <input type="hidden" name="inscription" value="{{ occupant.inscription.id }}">
+                                                                    <input type="hidden" name="action" value="retirer">
+                                                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('rooming-' ~ occupant.inscription.id ~ '-' ~ cle_jour) }}">
+                                                                    <button class="bouton-secondaire" type="submit" name="portee" value="nuit">Cette nuit</button>
+                                                                    <button class="bouton-danger" type="submit" name="portee" value="periode">Toute la période</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                        {% if occupation.disponibles > 0 and presences_par_jour[cle_jour]|length > occupation.occupants|length %}
+                                            {% set id_ajout = 'ajout-' ~ code|lower ~ '-' ~ cle_jour %}
+                                            <div class="ajout-rooming" data-controller="floating-popover">
+                                                <button class="declencheur-popup-rooming" type="button" popovertarget="{{ id_ajout }}" aria-label="Ajouter une personne dans {{ chambre.nom }} le {{ jour.jour }} {{ jour.mois }}" data-floating-popover-target="trigger">+</button>
+                                                <div id="{{ id_ajout }}" class="popup-rooming" popover="auto" role="dialog" aria-label="Ajouter une personne dans {{ chambre.nom }} le {{ jour.jour }} {{ jour.mois }}" data-floating-popover-target="panel">
+                                                    <button class="fermer-popup-rooming" type="button" popovertarget="{{ id_ajout }}" popovertargetaction="hide" aria-label="Fermer">×</button>
+                                                    <p>Ajouter une personne dans <strong>{{ chambre.nom }}</strong> le {{ jour.jour }} {{ jour.mois }} :</p>
+                                                    <form method="post" action="{{ path('app_rooming') }}">
+                                                        <input type="hidden" name="periode_debut" value="{{ debut|date('Y-m-d') }}">
+                                                        <input type="hidden" name="periode_fin" value="{{ fin|date('Y-m-d') }}">
+                                                        <input type="hidden" name="date_nuit" value="{{ cle_jour }}">
+                                                        <input type="hidden" name="chambre" value="{{ code }}">
+                                                        <input type="hidden" name="action" value="affecter">
+                                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('rooming-date-' ~ cle_jour) }}">
+                                                        <label>
+                                                            Personne
+                                                            <select name="inscription" required>
+                                                                <option value="">Choisir…</option>
+                                                                {% for presence in presences_par_jour[cle_jour] %}
+                                                                    {% if presence.chambre != code %}
+                                                                        <option value="{{ presence.inscription.id }}">{{ presence.libelle }} · {{ presence.effectif }} lit{{ presence.effectif > 1 ? 's' }}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </label>
+                                                        <label>
+                                                            Durée
+                                                            <select name="portee">
+                                                                <option value="periode" selected>Toute la période de présence</option>
+                                                                <option value="nuit">Cette nuit seulement</option>
+                                                            </select>
+                                                        </label>
+                                                        <button class="bouton-principal" type="submit">Ajouter</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

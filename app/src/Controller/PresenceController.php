@@ -9,6 +9,7 @@ use App\Entity\Utilisateur;
 use App\Repository\InscriptionRepository;
 use App\Repository\ThematiqueRepository;
 use App\Repository\UtilisateurRepository;
+use App\Service\RoomingService;
 use App\Service\ValidationPresenceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -145,6 +146,7 @@ final class PresenceController extends AbstractController
         UtilisateurRepository $utilisateurs,
         EntityManagerInterface $entityManager,
         ValidationPresenceService $validationPresence,
+        RoomingService $rooming,
     ): Response {
         $utilisateur = $this->utilisateurCourant();
         $inscription = $inscriptions->find($id);
@@ -154,6 +156,10 @@ final class PresenceController extends AbstractController
         $this->verifierDroitGestion($inscription, $utilisateur);
 
         $mode = 'COMPAGNON' === $inscription->getType() ? 'compa' : 'benevole';
+        $ancienEffectif = 'COMPAGNON' === $inscription->getType() ? (int) $inscription->getNombrePersonnes() : 1 + $inscription->getNombreEnfants();
+        $ancienUtilisateurId = $inscription->getUtilisateur()?->getId();
+        $ancienneDateDebut = $inscription->getDateDebut();
+        $ancienneDateFin = $inscription->getDateFin();
         $erreurs = [];
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('modifier-presence-'.$inscription->getId(), $request->request->getString('_csrf_token'))) {
@@ -225,6 +231,13 @@ final class PresenceController extends AbstractController
                 if ($request->request->has('repas_configures')) {
                     $inscription->definirRepasSelectionnes($this->lireRepasSelectionnes($request));
                 }
+                $rooming->synchroniserApresModification(
+                    $inscription,
+                    $ancienEffectif,
+                    $ancienUtilisateurId,
+                    $ancienneDateDebut,
+                    $ancienneDateFin,
+                );
                 $entityManager->flush();
                 $this->addFlash('succes', 'La présence a bien été modifiée.');
 
@@ -247,7 +260,7 @@ final class PresenceController extends AbstractController
     }
 
     #[Route('/presences/{id}/supprimer', name: 'app_presence_supprimer', methods: ['POST'])]
-    public function supprimer(string $id, Request $request, InscriptionRepository $inscriptions, EntityManagerInterface $entityManager): Response
+    public function supprimer(string $id, Request $request, InscriptionRepository $inscriptions, EntityManagerInterface $entityManager, RoomingService $rooming): Response
     {
         $utilisateur = $this->utilisateurCourant();
         $inscription = $inscriptions->find($id);
@@ -260,6 +273,7 @@ final class PresenceController extends AbstractController
         }
 
         $mois = $inscription->getDateDebut()->format('Y-m');
+        $rooming->supprimerPour($inscription);
         $inscription->supprimer($utilisateur);
         $entityManager->flush();
         $this->addFlash('succes', 'La présence a bien été supprimée.');

@@ -36,6 +36,10 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
                 <span>Synthèse</span>
             </a>
+            <a class="lien-navigation {{ app.current_route == 'app_rooming' ? 'actif' }}" href="{{ path('app_rooming') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18v-7h18v7M5 11V7h6v4m2 0V7h6v4M3 18v3m18-3v3"/></svg>
+                <span>Rooming</span>
+            </a>
         </div>
 
         <div class="groupe-navigation administration-navigation">
