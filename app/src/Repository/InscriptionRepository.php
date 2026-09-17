@@ -63,6 +63,28 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return list<Inscription> */
+    public function findPourRooming(\DateTimeImmutable $debut, \DateTimeImmutable $fin): array
+    {
+        return $this->createQueryBuilder('i')
+            ->addSelect('u')
+            ->leftJoin('i.utilisateur', 'u')
+            ->andWhere('i.actif = true')
+            ->andWhere('i.type = :type')
+            ->andWhere('i.typeCouchage = :couchage')
+            ->andWhere('i.dateDebut <= :fin AND i.dateFin >= :debut')
+            ->setParameter('type', 'INDIVIDUELLE')
+            ->setParameter('couchage', 'DUR')
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->orderBy('u.prenom', 'ASC')
+            ->addOrderBy('u.nom', 'ASC')
+            ->addOrderBy('i.nomEquipeCompa', 'ASC')
+            ->addOrderBy('i.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function chevauchePour(Utilisateur $utilisateur, \DateTimeImmutable $debut, \DateTimeImmutable $fin, ?Inscription $inscriptionIgnoree = null): bool
     {
         $requete = $this->createQueryBuilder('i')
