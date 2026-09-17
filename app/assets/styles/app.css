@@ -16,7 +16,7 @@ body {
 }
 
 .pied-page-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; padding: 1rem 1.5rem; color: var(--texte-secondaire); font-size: .78rem; }
-.pied-page-legal--avec-navigation { position: fixed; z-index: 20; right: 0; bottom: 0; left: 14.5rem; margin-left: 0; background: var(--fond); }
+.pied-page-legal--avec-navigation { margin-left: 14.5rem; background: var(--fond); }
 .pied-page-legal a, .note-legale-connexion a { color: inherit; }
 .note-legale-connexion { max-width: 30rem; margin: 1.25rem auto 0; color: var(--texte-secondaire); font-size: .75rem; line-height: 1.55; text-align: center; }
 .page-legale { min-height: 100vh; background: var(--fond); }
@@ -91,8 +91,11 @@ body {
 .message-accueil > p:last-child { max-width: 28rem; margin: .6rem 0 0; font-size: clamp(1.55rem, 3vw, 2.5rem); font-weight: 700; line-height: 1.25; }
 .surtitre-clair { color: #c6f4e3; }
 .alerte { margin-bottom: 1.25rem; padding: .85rem 1rem; border-radius: .5rem; font-size: .88rem; line-height: 1.45; }
+.alerte-en-disparition { opacity: 0; transform: translateY(-.35rem); transition: opacity .22s ease, transform .22s ease; }
 .alerte-erreur { color: #7d2424; background: #fff0ef; border: 1px solid #f2c1bd; }
 .alerte-succes { color: #17614e; background: #eaf8f2; border: 1px solid #b7e3d4; }
+.notifications-flottantes { position: fixed; z-index: 30; top: 1rem; right: 1rem; display: grid; width: min(28rem, calc(100vw - 2rem)); gap: .55rem; pointer-events: none; }
+.notifications-flottantes .alerte { max-height: min(70vh, 30rem); margin: 0; overflow: auto; box-shadow: 0 8px 28px rgb(0 34 54 / 18%); pointer-events: auto; }
 .etapes { height: .25rem; margin-bottom: 2rem; overflow: hidden; border-radius: 1rem; background: #dce7eb; }
 .etapes span { display: block; width: 100%; height: 100%; background: var(--menthe-sgdf); }
 .page-centree { display: grid; background: var(--fond); place-items: center; }
@@ -539,10 +542,121 @@ body {
 .commentaires-regimes h3 { margin: 0 0 .3rem; color: var(--texte-secondaire); font-size: .68rem; }
 .commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
 
+/* Rooming */
+.page-rooming { width: min(100%, 96rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-rooming { margin-bottom: 1.5rem; }
+.entete-rooming h1 { margin: .35rem 0 .4rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+.entete-rooming > p:last-child { margin: 0; color: var(--texte-secondaire); }
+.navigation-date-rooming { margin-bottom: 1.25rem; }
+.navigation-date-rooming > form { display: flex; align-items: end; gap: .65rem; }
+.navigation-date-rooming .champ { min-width: 12rem; }
+.navigation-date-rooming .bouton-principal { min-height: 3.2rem; }
+.planning-rooming { margin-bottom: 1.25rem; overflow: hidden; border-radius: .65rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.planning-rooming > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.3rem; border-bottom: 1px solid #d8e2e6; }
+.planning-rooming > header h2 { margin: 0; font-size: 1.2rem; }
+.planning-rooming > header p { margin: .25rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.tableau-planning-rooming { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: #94adb9 #edf2f4; }
+.tableau-planning-rooming:focus-visible { outline: 3px solid rgb(72 185 148 / 35%); outline-offset: -3px; }
+.tableau-planning-rooming table { width: max-content; min-width: 100%; border-spacing: 0; border-collapse: separate; font-size: .75rem; }
+.tableau-planning-rooming th, .tableau-planning-rooming td { min-width: 10rem; padding: .65rem; border-right: 1px solid #e1e8eb; border-bottom: 1px solid #e1e8eb; text-align: left; vertical-align: top; }
+.tableau-planning-rooming thead th { height: 3.2rem; color: var(--texte-secondaire); background: #f4f8f9; }
+.tableau-planning-rooming thead th time { color: var(--bleu-sgdf); font-size: .9rem; font-weight: 800; white-space: nowrap; }
+.tableau-planning-rooming thead th.week-end { background: #edf3f5; }
+.tableau-planning-rooming th:first-child { position: sticky; z-index: 2; left: 0; width: 10.5rem; min-width: 10.5rem; padding-inline: 1rem; text-align: left; }
+.tableau-planning-rooming thead th:first-child { z-index: 3; color: var(--bleu-sgdf); background: #f4f8f9; }
+.tableau-planning-rooming tbody th { background: #fff; box-shadow: 3px 0 8px rgb(0 58 93 / 5%); }
+.tableau-planning-rooming tbody th strong, .tableau-planning-rooming tbody th small { display: block; }
+.tableau-planning-rooming tbody th strong { font-size: .88rem; }
+.tableau-planning-rooming tbody th small { margin-top: .2rem; color: var(--texte-secondaire); font-size: .68rem; }
+.tableau-planning-rooming td { position: relative; color: #6a7e87; background: #fff; }
+.tableau-planning-rooming td.chambre-occupee { color: #17614e; background: #eaf8f2; }
+.tableau-planning-rooming td.chambre-complete { color: #8a4b08; background: #fff0d5; }
+.tableau-planning-rooming td.chambre-indisponible { color: #73838a; background: repeating-linear-gradient(135deg, #f1f4f5, #f1f4f5 8px, #e8edef 8px, #e8edef 16px); }
+.tableau-planning-rooming td.chambre-indisponible .resume-occupation-rooming strong { color: #73838a; }
+.resume-occupation-rooming { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
+.resume-occupation-rooming strong { color: var(--bleu-sgdf); font-size: .92rem; }
+.resume-occupation-rooming span { font-size: .64rem; font-weight: 700; }
+.occupants-rooming, .ligne-sans-chambre ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.occupants-rooming > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: .35rem; color: var(--bleu-sgdf); font-size: .7rem; line-height: 1.3; }
+.occupants-rooming > li > span { overflow-wrap: anywhere; }
+.occupants-rooming > li > span b, .ligne-sans-chambre li b { display: inline-block; margin-left: .2rem; padding: .05rem .3rem; border-radius: 1rem; color: #17614e; background: #d6f0e6; font-size: .6rem; }
+.retrait-rooming, .ajout-rooming { position: relative; }
+.declencheur-popup-rooming { display: grid; padding: 0; border: 0; border-radius: 50%; color: #fff; font-weight: 800; cursor: pointer; place-items: center; }
+.retrait-rooming > .declencheur-popup-rooming { width: 1.25rem; height: 1.25rem; background: #b42318; font-size: .9rem; line-height: 1; }
+.ajout-rooming { margin-top: .6rem; }
+.ajout-rooming > .declencheur-popup-rooming { width: 1.7rem; height: 1.7rem; margin-left: auto; background: var(--bleu-sgdf); font-size: 1.15rem; }
+.popup-rooming[popover] { position: fixed; inset: auto; width: min(16rem, calc(100vw - 1rem)); max-height: calc(100vh - 1rem); margin: 0; padding: .9rem; overflow: auto; border: 1px solid #cbd8dd; border-radius: .55rem; color: var(--bleu-sgdf); background: #fff; box-shadow: 0 8px 22px rgb(0 34 54 / 16%); }
+.popup-rooming::backdrop { background: transparent; }
+.popup-rooming > p { margin: 0 1.5rem .7rem 0; font-size: .75rem; line-height: 1.4; }
+.fermer-popup-rooming { position: absolute; top: .45rem; right: .45rem; display: grid; width: 1.35rem; height: 1.35rem; padding: 0; border: 0; border-radius: 50%; color: var(--bleu-sgdf); background: #edf3f5; font: inherit; font-size: .8rem; font-weight: 800; cursor: pointer; place-items: center; }
+.retrait-rooming form { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.popup-rooming form button { min-height: 2.35rem; padding: .45rem .6rem; font-size: .7rem; }
+.bouton-danger { border: 0; border-radius: .35rem; color: #fff; background: #b42318; font: inherit; font-weight: 800; cursor: pointer; }
+.ajout-rooming form { display: grid; gap: .65rem; }
+.ajout-rooming label { display: grid; gap: .25rem; font-size: .68rem; font-weight: 800; }
+.ajout-rooming select { width: 100%; min-height: 2.35rem; padding: .35rem .45rem; border: 1px solid #c7d2d8; border-radius: .35rem; color: var(--bleu-sgdf); background: #fff; font: inherit; font-size: .72rem; }
+.ligne-sans-chambre th, .ligne-sans-chambre td { background: #fff8e8; }
+.ligne-sans-chambre td { color: #7a4b08; }
+.ligne-sans-chambre li { font-size: .7rem; line-height: 1.35; }
+.tout-affecte-rooming { color: var(--texte-secondaire); font-size: .66rem; font-style: italic; }
+.affectations-rooming { overflow: hidden; border-radius: .65rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.affectations-rooming > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.3rem; border-bottom: 1px solid #d8e2e6; }
+.affectations-rooming > header h2 { margin: 0; font-size: 1.2rem; }
+.affectations-rooming > header p { margin: .25rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.affectations-rooming > header > span { flex: 0 0 auto; color: var(--texte-secondaire); font-size: .8rem; font-weight: 700; }
+.ligne-rooming { display: grid; grid-template-columns: minmax(12rem, 1.3fr) minmax(24rem, 2fr) auto; align-items: end; gap: 1rem; padding: 1.1rem 1.3rem; }
+.ligne-rooming + .ligne-rooming { border-top: 1px solid #e2e9ec; }
+.identite-rooming strong, .identite-rooming span, .identite-rooming em { display: block; }
+.identite-rooming span { margin-top: .2rem; color: var(--texte-secondaire); font-size: .76rem; }
+.identite-rooming em { width: fit-content; margin-top: .35rem; padding: .15rem .5rem; border-radius: 1rem; color: #8a4b08; background: #fff3d6; font-size: .68rem; font-weight: 800; font-style: normal; }
+.identite-rooming em.complet { color: #17614e; background: #eaf8f2; }
+.choix-chambre-rooming select { width: 100%; min-height: 2.8rem; padding: .5rem .7rem; border: 1px solid #c7d2d8; border-radius: .4rem; color: var(--bleu-sgdf); background: #fff; font: inherit; }
+.choix-chambre-rooming select:focus { border-color: var(--menthe-sgdf); outline: 0; box-shadow: 0 0 0 3px rgb(72 185 148 / 18%); }
+.ligne-rooming .bouton-principal { min-height: 2.8rem; }
+.rooming-vide { margin: 0; padding: 2rem 1.3rem; color: var(--texte-secondaire); text-align: center; }
+
+/* Administration des chambres */
+.page-administration-chambres { width: min(100%, 88rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.entete-administration-chambres { margin-bottom: 1.25rem; }
+.entete-administration-chambres h1 { margin: .35rem 0 .4rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+.entete-administration-chambres > p:last-child { max-width: 48rem; margin: 0; color: var(--texte-secondaire); line-height: 1.5; }
+.information-disponibilite-chambres { margin-bottom: 1.25rem; padding: .9rem 1rem; border-left: 4px solid var(--menthe-sgdf); border-radius: .35rem; color: #284f68; background: #eaf8f2; font-size: .85rem; line-height: 1.45; }
+.carte-creation-chambre { margin-bottom: 1.25rem; padding: 1.2rem 1.3rem; border-top: .3rem solid var(--menthe-sgdf); border-radius: .7rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.carte-creation-chambre > header { margin-bottom: 1rem; }
+.carte-creation-chambre h2 { margin: 0; font-size: 1.2rem; }
+.carte-creation-chambre header p { margin: .25rem 0 0; color: var(--texte-secondaire); font-size: .78rem; line-height: 1.4; }
+.formulaire-creation-chambre { display: grid; grid-template-columns: minmax(12rem, 1.3fr) minmax(12rem, 1fr) minmax(7rem, .5fr) auto; align-items: end; gap: .8rem; }
+.formulaire-creation-chambre .champ { min-width: 0; }
+.formulaire-creation-chambre .champ input, .formulaire-creation-chambre .champ select { min-height: 3.2rem; }
+.formulaire-creation-chambre .bouton-principal { min-height: 3.2rem; white-space: nowrap; }
+.grille-administration-chambres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.carte-administration-chambre { overflow: hidden; border-radius: .7rem; background: #fff; box-shadow: 0 7px 22px rgb(0 58 93 / 7%); }
+.carte-administration-chambre > header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid #d8e2e6; }
+.carte-administration-chambre > header h2 { margin: 0; font-size: 1.3rem; }
+.carte-administration-chambre > header p { margin: .2rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.statut-disponibilite-chambre { flex: 0 0 auto; padding: .28rem .55rem; border-radius: 2rem; font-size: .68rem; font-weight: 800; }
+.statut-disponibilite-chambre.permanente { color: #17614e; background: #dff4eb; }
+.statut-disponibilite-chambre.periodes { color: #7a4b08; background: #fff0d5; }
+.mode-disponibilite-chambre, .periodes-disponibilite-chambre { padding: 1.1rem 1.3rem; }
+.mode-disponibilite-chambre { border-bottom: 1px solid #e1e8eb; }
+.mode-disponibilite-chambre h3, .periodes-disponibilite-chambre h3 { margin: 0; font-size: .92rem; }
+.mode-disponibilite-chambre > p { margin: .4rem 0 .85rem; color: var(--texte-secondaire); font-size: .75rem; line-height: 1.45; }
+.mode-disponibilite-chambre .bouton-secondaire { min-height: 2.4rem; padding: .45rem .7rem; font-size: .72rem; }
+.periodes-disponibilite-chambre > ul { display: grid; gap: .45rem; margin: .8rem 0 1rem; padding: 0; list-style: none; }
+.periodes-disponibilite-chambre > ul li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .6rem .7rem; border-radius: .4rem; color: #284f68; background: #f2f7f8; font-size: .74rem; }
+.bouton-suppression-periode { padding: .3rem .45rem; border: 0; color: #a32119; background: transparent; font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
+.bouton-suppression-periode:hover { text-decoration: underline; }
+.aucune-periode-chambre { margin: .65rem 0 1rem; color: var(--texte-secondaire); font-size: .75rem; font-style: italic; }
+.formulaire-periode-chambre { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: .65rem; padding-top: .85rem; border-top: 1px solid #e1e8eb; }
+.formulaire-periode-chambre .champ { min-width: 0; }
+.formulaire-periode-chambre .bouton-principal { grid-column: 1 / -1; min-height: 2.55rem; }
+
 @media (max-width: 1400px) and (min-width: 761px) {
     .jour-synthese { grid-template-columns: 10.5rem minmax(0, 1fr); }
     .details-synthese { grid-column: 1 / -1; border-top: 1px solid #e0e7ea; }
     .repas-synthese { border-right: 0; }
+    .formulaire-creation-chambre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .formulaire-creation-chambre .bouton-principal { grid-column: 1 / -1; }
 }
 
 @media (max-width: 760px) {
@@ -569,6 +683,7 @@ body {
     .page-formulaire-presence { padding: 1.2rem .7rem 2rem; }
     .page-profil { padding: 1.2rem .7rem 2rem; }
     .page-synthese { padding: 1.2rem .7rem 2rem; }
+    .page-rooming { padding: 1.2rem .7rem 2rem; }
     .page-thematiques { padding: 1.2rem .7rem 5.5rem; }
     .page-benevoles { padding: 1.2rem .7rem 5.5rem; }
     .page-import-benevoles { padding: 1.2rem .7rem 2rem; }
@@ -631,6 +746,24 @@ body {
     .date-synthese span { margin: 0; }
     .repas-synthese { border-right: 0; border-bottom: 1px solid #e0e7ea; }
     .details-synthese { grid-template-columns: 1fr 1fr; }
+    .navigation-date-rooming { align-items: stretch; }
+    .navigation-date-rooming > form { min-width: 0; flex: 1; align-items: stretch; flex-direction: column; }
+    .navigation-date-rooming .champ { min-width: 0; }
+    .planning-rooming { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .planning-rooming > header { align-items: start; }
+    .tableau-planning-rooming th, .tableau-planning-rooming td { min-width: 9rem; }
+    .affectations-rooming { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .affectations-rooming > header { align-items: start; }
+    .ligne-rooming { grid-template-columns: 1fr; }
+    .page-administration-chambres { padding: 1.2rem .7rem 2rem; }
+    .notifications-flottantes { top: .7rem; right: .7rem; width: calc(100vw - 1.4rem); }
+    body:has(.navigation-laterale) .notifications-flottantes { top: 4.2rem; }
+    .carte-creation-chambre { margin-inline: -.7rem; border-radius: 0; box-shadow: none; }
+    .formulaire-creation-chambre { grid-template-columns: 1fr; }
+    .grille-administration-chambres { grid-template-columns: 1fr; }
+    .carte-administration-chambre > header { flex-direction: column; }
+    .formulaire-periode-chambre { grid-template-columns: 1fr; }
+    .formulaire-periode-chambre .bouton-principal { grid-column: auto; }
     .entete-calendrier, .outils-calendrier { align-items: stretch; flex-direction: column; }
     .filtre-et-legende-calendrier { align-items: stretch; gap: .55rem; }
     .outils-calendrier form, .outils-calendrier select { width: 100%; }

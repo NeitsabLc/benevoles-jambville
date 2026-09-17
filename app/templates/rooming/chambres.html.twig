@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Disponibilité des chambres · Bénévoles Jambville{% endblock %}
+
+{% block body %}
+<div class="application">
+    {% include 'commun/_barre_application.html.twig' %}
+    <main
+        class="page-administration-chambres"
+        data-controller="chambres-disponibilite"
+        data-action="submit->chambres-disponibilite#envoyer"
+    >
+        <header class="entete-administration-chambres">
+            <p class="surtitre">Administration</p>
+            <h1>Disponibilité des chambres</h1>
+            <p>Créez les chambres du centre, puis choisissez celles qui restent ouvertes toute l’année et indiquez les périodes des autres.</p>
+        </header>
+
+        {% for message in app.flashes('succes') %}<div class="alerte alerte-succes" role="status">{{ message }}</div>{% endfor %}
+        {% for message in app.flashes('erreur') %}<div class="alerte alerte-erreur" role="alert">{{ message }}</div>{% endfor %}
+
+        <div class="information-disponibilite-chambres">
+            Une personne ne pourra être affectée que si chaque nuit demandée est couverte par la disponibilité de la chambre.
+        </div>
+
+        <section class="carte-creation-chambre" aria-labelledby="titre-creation-chambre" data-chambres-repere="creation">
+            <header>
+                <div>
+                    <h2 id="titre-creation-chambre">Ajouter une chambre</h2>
+                    <p>Indiquez son bâtiment et sa capacité fixe. La chambre sera disponible en permanence après sa création.</p>
+                </div>
+            </header>
+            <form method="post" class="formulaire-creation-chambre" data-chambres-repere="creation-formulaire">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('administrer-chambres') }}">
+                <input type="hidden" name="action" value="creer_chambre">
+                <div class="champ">
+                    <label for="nom-chambre">Nom de la chambre</label>
+                    <input id="nom-chambre" name="nom" maxlength="100" required autocomplete="off" placeholder="Ex. Tilleul">
+                </div>
+                <div class="champ">
+                    <label for="batiment-chambre">Bâtiment</label>
+                    <select id="batiment-chambre" name="batiment" required>
+                        <option value="">Choisir un bâtiment</option>
+                        {% for batiment in batiments %}<option value="{{ batiment }}">{{ batiment }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="champ">
+                    <label for="capacite-chambre">Capacité</label>
+                    <input id="capacite-chambre" type="number" name="capacite" min="1" max="100" required inputmode="numeric" placeholder="Ex. 4">
+                </div>
+                <button class="bouton-principal" type="submit">Créer la chambre</button>
+            </form>
+        </section>
+
+        <div class="grille-administration-chambres">
+            {% for code, chambre in chambres %}
+                <article class="carte-administration-chambre" data-chambres-repere="chambre-{{ code|lower }}">
+                    <header>
+                        <div>
+                            <h2>{{ chambre.nom }}</h2>
+                            <p>{{ chambre.batiment }} · {{ chambre.capacite }} lit{{ chambre.capacite > 1 ? 's' }}</p>
+                        </div>
+                        <span class="statut-disponibilite-chambre {{ chambre.disponible_permanence ? 'permanente' : 'periodes' }}">
+                            {{ chambre.disponible_permanence ? 'Disponible en permanence' : 'Disponible par périodes' }}
+                        </span>
+                    </header>
+
+                    <section class="mode-disponibilite-chambre" aria-labelledby="mode-{{ code|lower }}">
+                        <h3 id="mode-{{ code|lower }}">Mode de disponibilité</h3>
+                        <p>
+                            {% if chambre.disponible_permanence %}
+                                Toutes les nuits peuvent être planifiées. Les périodes ci-dessous sont conservées en préparation d’un passage au mode par périodes.
+                            {% else %}
+                                Seules les nuits comprises dans au moins une période peuvent être planifiées.
+                            {% endif %}
+                        </p>
+                        <form method="post" data-chambres-repere="mode-{{ code|lower }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('administrer-chambres') }}">
+                            <input type="hidden" name="chambre" value="{{ code }}">
+                            {% if chambre.disponible_permanence %}
+                                <input type="hidden" name="action" value="rendre_par_periodes">
+                                <button class="bouton-secondaire" type="submit">Limiter aux périodes indiquées</button>
+                            {% else %}
+                                <input type="hidden" name="action" value="rendre_permanente">
+                                <button class="bouton-secondaire" type="submit">Rendre disponible en permanence</button>
+                            {% endif %}
+                        </form>
+                    </section>
+
+                    <section class="periodes-disponibilite-chambre" aria-labelledby="periodes-{{ code|lower }}">
+                        <h3 id="periodes-{{ code|lower }}">Périodes de mise à disposition</h3>
+                        {% if chambre.periodes %}
+                            <ul>
+                                {% for periode in chambre.periodes %}
+                                    <li>
+                                        <span>Du <strong>{{ periode.date_debut|date('d/m/Y') }}</strong> au <strong>{{ periode.date_fin|date('d/m/Y') }}</strong></span>
+                                        <form method="post">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('administrer-chambres') }}">
+                                            <input type="hidden" name="action" value="supprimer_periode">
+                                            <input type="hidden" name="periode" value="{{ periode.id }}">
+                                            <button class="bouton-suppression-periode" type="submit" aria-label="Supprimer la période du {{ periode.date_debut|date('d/m/Y') }} au {{ periode.date_fin|date('d/m/Y') }} pour {{ chambre.nom }}">Supprimer</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="aucune-periode-chambre">Aucune période enregistrée.</p>
+                        {% endif %}
+
+                        <form method="post" class="formulaire-periode-chambre" data-chambres-repere="periode-{{ code|lower }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('administrer-chambres') }}">
+                            <input type="hidden" name="action" value="ajouter_periode">
+                            <input type="hidden" name="chambre" value="{{ code }}">
+                            <div class="champ">
+                                <label for="debut-{{ code|lower }}">Du</label>
+                                <input id="debut-{{ code|lower }}" type="date" name="date_debut" value="{{ date_debut|date('Y-m-d') }}" required>
+                            </div>
+                            <div class="champ">
+                                <label for="fin-{{ code|lower }}">Au</label>
+                                <input id="fin-{{ code|lower }}" type="date" name="date_fin" value="{{ date_fin|date('Y-m-d') }}" required>
+                            </div>
+                            <button class="bouton-principal" type="submit">Ajouter la période</button>
+                        </form>
+                    </section>
+                </article>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

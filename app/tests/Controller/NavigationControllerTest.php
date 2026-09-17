@@ -37,9 +37,12 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('.navigation-laterale');
         self::assertSelectorExists('button[data-menu-mobile][aria-controls="navigation-principale"]');
         self::assertSelectorExists('a[href="/synthese"]');
+        self::assertSelectorExists('a[href="/rooming"]');
         self::assertSelectorExists('a[href="/administration/calendrier"]');
+        self::assertSelectorExists('a[href="/administration/chambres"]');
         self::assertSelectorExists('a[href="/administration/thematiques"]');
         self::assertSelectorExists('a[href="/administration/benevoles"]');
+        self::assertSelectorExists('[data-notifications-flottantes]');
         self::assertSelectorExists('.liens-legaux-navigation + .compte-navigation');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/conditions-utilisation"]');
         self::assertSelectorExists('.liens-legaux-navigation a[href="/politique-confidentialite"]');
@@ -64,9 +67,17 @@ final class NavigationControllerTest extends WebTestCase
         self::assertSelectorExists('.navigation-laterale');
         self::assertSelectorExists('button[data-menu-mobile][aria-controls="navigation-principale"]');
         self::assertSelectorExists('a[href="/synthese"]');
+        self::assertSelectorExists('a[href="/rooming"]');
         self::assertSelectorExists('a[href="/administration/calendrier"]');
+        self::assertSelectorExists('a[href="/administration/chambres"]');
         self::assertSelectorNotExists('a[href="/administration/thematiques"]');
         self::assertSelectorNotExists('a[href="/administration/benevoles"]');
+
+        $client->request('GET', '/rooming');
+        self::assertResponseIsSuccessful();
+
+        $client->request('GET', '/administration/chambres');
+        self::assertResponseIsSuccessful();
 
         $client->request('GET', '/administration/thematiques');
         self::assertResponseStatusCodeSame(403);
@@ -85,7 +96,13 @@ final class NavigationControllerTest extends WebTestCase
         $client->request('GET', '/synthese');
         self::assertResponseStatusCodeSame(403);
 
+        $client->request('GET', '/rooming');
+        self::assertResponseStatusCodeSame(403);
+
         $client->request('GET', '/administration/calendrier');
+        self::assertResponseStatusCodeSame(403);
+
+        $client->request('GET', '/administration/chambres');
         self::assertResponseStatusCodeSame(403);
     }
 }

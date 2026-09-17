@@ -20,6 +20,7 @@ L’application repose sur Symfony, PostgreSQL, Liquibase, Nginx et Docker Compo
 - inscriptions individuelles et inscriptions d’équipes compagnons ;
 - calendrier des présences et gestion des permanences ;
 - synthèse anonymisée des repas, couchages et régimes alimentaires ;
+- rooming quotidien des bénévoles en couchage dur, avec contrôle des capacités et prise en compte des enfants ;
 - gestion des thématiques et des bénévoles ;
 - import CSV avec prévisualisation des modifications ;
 - purge et anonymisation des données arrivées à échéance.
