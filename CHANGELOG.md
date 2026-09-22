@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.4.0](https://gitlab.com/neitsablc/benevoles-jambville/compare/v1.3.3...v1.4.0) (2026-09-22)
+
+### Fonctionnalités
+
+* administrer le rooming et les disponibilités des chambres ([3708dbc](https://gitlab.com/neitsablc/benevoles-jambville/commit/3708dbcf3db58c5d0649713f2a3bc082d82a1f14))
+* afficher le prochain séjour sur le compte bénévole ([880ed3d](https://gitlab.com/neitsablc/benevoles-jambville/commit/880ed3dc515aa6de0c554edf08a18a96de815cbd))
+
 ## [1.3.3](https://gitlab.com/neitsablc/benevoles-jambville/compare/v1.3.2...v1.3.3) (2026-09-10)
 
 ### Corrections
