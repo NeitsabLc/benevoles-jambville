@@ -85,6 +85,25 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findProchainePourUtilisateur(Utilisateur $utilisateur, \DateTimeImmutable $dateReference): ?Inscription
+    {
+        return $this->createQueryBuilder('i')
+            ->addSelect('t')
+            ->leftJoin('i.thematique', 't')
+            ->andWhere('i.actif = true')
+            ->andWhere('i.type = :type')
+            ->andWhere('i.utilisateur = :utilisateur')
+            ->andWhere('i.dateFin >= :dateReference')
+            ->setParameter('type', 'INDIVIDUELLE')
+            ->setParameter('utilisateur', $utilisateur)
+            ->setParameter('dateReference', $dateReference)
+            ->orderBy('i.dateDebut', 'ASC')
+            ->addOrderBy('i.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function chevauchePour(Utilisateur $utilisateur, \DateTimeImmutable $debut, \DateTimeImmutable $fin, ?Inscription $inscriptionIgnoree = null): bool
     {
         $requete = $this->createQueryBuilder('i')

@@ -17,6 +17,61 @@
             {% endif %}
         </section>
 
+        {% if prochain_sejour %}
+            <section class="carte-prochain-sejour" aria-labelledby="titre-prochain-sejour">
+                <header class="entete-prochain-sejour">
+                    <div>
+                        <p class="sur-titre-prochain-sejour">Votre prochain séjour</p>
+                        <h2 id="titre-prochain-sejour">{{ prochain_sejour.periode }}</h2>
+                        {% if prochain_sejour.thematique %}
+                            <p class="thematique-prochain-sejour">{{ prochain_sejour.thematique }}</p>
+                        {% endif %}
+                    </div>
+                    <span class="statut-prochain-sejour">{{ prochain_sejour.statut }}</span>
+                </header>
+
+                <div class="corps-prochain-sejour {{ prochain_sejour.rooming ? 'corps-prochain-sejour--avec-rooming' }}">
+                    <ol class="frise-prochain-sejour">
+                        {% for jour in prochain_sejour.jours %}
+                            <li class="jour-prochain-sejour">
+                                <span class="repere-prochain-sejour" aria-hidden="true"><i></i></span>
+                                <div class="detail-jour-prochain-sejour">
+                                    <time datetime="{{ jour.date|date('Y-m-d') }}">
+                                        <strong>{{ jour.jour }}</strong>
+                                        <span>{{ jour.date_courte }}</span>
+                                    </time>
+                                    <div class="pastilles-prochain-sejour">
+                                        {% if jour.arrivee %}<span class="pastille-sejour pastille-arrivee">Arrivée</span>{% endif %}
+                                        {% for repas in jour.repas %}<span class="pastille-sejour pastille-repas">{{ repas }}</span>{% endfor %}
+                                        {% if jour.repas is empty %}<span class="aucun-repas-sejour">Aucun repas</span>{% endif %}
+                                        {% if jour.depart %}<span class="pastille-sejour pastille-depart">Départ</span>{% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ol>
+
+                    {% if prochain_sejour.rooming %}
+                        <aside class="rooming-prochain-sejour" aria-label="Hébergement prévu">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24"><path d="M3 19V8m0 8h18v3M7 16v-5h5c2 0 3 1 3 3v2m0-4h3a3 3 0 0 1 3 3v1M5.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+                            <p class="libelle-rooming-prochain-sejour">Votre chambre</p>
+                            {% for affectation in prochain_sejour.rooming %}
+                                <div class="affectation-prochain-sejour">
+                                    <strong>{{ affectation.nom }}</strong>
+                                    <span>{{ affectation.batiment }}</span>
+                                    <small>{{ affectation.periode }}</small>
+                                </div>
+                            {% endfor %}
+                        </aside>
+                    {% endif %}
+                </div>
+
+                <footer class="actions-prochain-sejour">
+                    <a href="{{ path('app_presence_modifier', {id: prochain_sejour.id}) }}">Modifier mon séjour <span aria-hidden="true">→</span></a>
+                </footer>
+            </section>
+        {% endif %}
+
         <section class="outils-calendrier" aria-label="Navigation du calendrier">
             <div class="filtre-et-legende-calendrier">
                 <form method="get" action="{{ path('app_accueil') }}">
