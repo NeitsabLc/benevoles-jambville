@@ -370,6 +370,34 @@ final class RoomingService
         return $affectations;
     }
 
+    /** @return list<array{date: \DateTimeImmutable, chambre: string, nom: string, batiment: string}> */
+    public function trouverAffectationsPour(Inscription $inscription): array
+    {
+        return array_map(
+            static fn (array $ligne): array => [
+                'date' => new \DateTimeImmutable((string) $ligne['date_nuit']),
+                'chambre' => (string) $ligne['chambre'],
+                'nom' => (string) $ligne['nom'],
+                'batiment' => (string) $ligne['batiment'],
+            ],
+            $this->connexion->fetchAllAssociative(
+                <<<'SQL'
+                    SELECT a.date_nuit, a.chambre, c.nom, c.batiment
+                    FROM benevole_jambville.affectation_rooming a
+                    INNER JOIN benevole_jambville.chambre_rooming c ON c.code = a.chambre
+                    WHERE a.inscription_id = :inscription
+                      AND a.date_nuit BETWEEN :debut AND :fin
+                    ORDER BY a.date_nuit, c.nom
+                    SQL,
+                [
+                    'inscription' => $inscription->getId(),
+                    'debut' => $inscription->getDateDebut()->format('Y-m-d'),
+                    'fin' => $inscription->getDateFin()->format('Y-m-d'),
+                ],
+            ),
+        );
+    }
+
     public function affecter(Inscription $inscription, ?string $codeChambre, Utilisateur $auteur): void
     {
         $this->affecterPeriode($inscription, $codeChambre, $auteur);

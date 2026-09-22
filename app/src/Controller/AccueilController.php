@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Inscription;
+use App\Entity\Utilisateur;
 use App\Repository\InscriptionRepository;
 use App\Repository\JourneeRepository;
 use App\Repository\ThematiqueRepository;
+use App\Service\RoomingService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +23,7 @@ final class AccueilController extends AbstractController
         InscriptionRepository $inscriptions,
         JourneeRepository $journees,
         ThematiqueRepository $thematiques,
+        RoomingService $rooming,
     ): Response {
         $mois = $this->lireMois($request->query->getString('mois'));
         $debutMois = $mois->modify('first day of this month');
@@ -65,6 +69,15 @@ final class AccueilController extends AbstractController
         }
 
         $nomsMois = [1 => 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+        $prochainSejour = null;
+        $utilisateur = $this->getUser();
+        if ($utilisateur instanceof Utilisateur) {
+            $dateReference = new \DateTimeImmutable('today');
+            $inscription = $inscriptions->findProchainePourUtilisateur($utilisateur, $dateReference);
+            if (null !== $inscription) {
+                $prochainSejour = $this->construireProchainSejour($inscription, $rooming, $dateReference);
+            }
+        }
 
         return $this->render('accueil/index.html.twig', [
             'jours' => $jours,
@@ -76,7 +89,137 @@ final class AccueilController extends AbstractController
             'filtre' => $filtre,
             'nombre_presences' => $nombrePresences,
             'classes_thematiques' => $this->classesThematiques(),
+            'prochain_sejour' => $prochainSejour,
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function construireProchainSejour(
+        Inscription $inscription,
+        RoomingService $roomingService,
+        \DateTimeImmutable $dateReference,
+    ): array {
+        $repasSelectionnes = array_fill_keys($inscription->getRepasSelectionnes(), true);
+        $libellesRepas = [
+            'PETIT_DEJEUNER' => 'Petit-déjeuner',
+            'DEJEUNER' => 'Déjeuner',
+            'DINER' => 'Dîner',
+        ];
+        $jours = [];
+        for ($date = $inscription->getDateDebut(); $date <= $inscription->getDateFin(); $date = $date->modify('+1 day')) {
+            $repas = [];
+            foreach ($libellesRepas as $type => $libelle) {
+                if (isset($repasSelectionnes[$date->format('Y-m-d').'|'.$type])) {
+                    $repas[] = $libelle;
+                }
+            }
+            $jours[] = [
+                'date' => $date,
+                'jour' => ucfirst($this->nomJour($date)),
+                'date_courte' => $date->format('j').' '.$this->nomMoisCourt($date),
+                'repas' => $repas,
+                'arrivee' => $date == $inscription->getDateDebut(),
+                'depart' => $date == $inscription->getDateFin(),
+            ];
+        }
+
+        $affectationsParChambre = [];
+        foreach ($roomingService->trouverAffectationsPour($inscription) as $affectation) {
+            $code = $affectation['chambre'];
+            $affectationsParChambre[$code] ??= [
+                'nom' => $affectation['nom'],
+                'batiment' => $affectation['batiment'],
+                'dates' => [],
+            ];
+            $affectationsParChambre[$code]['dates'][] = $affectation['date'];
+        }
+
+        $nombreJours = $inscription->getDateDebut()->diff($inscription->getDateFin())->days + 1;
+        $rooming = [];
+        foreach ($affectationsParChambre as $affectation) {
+            $dates = $affectation['dates'];
+            $rooming[] = [
+                'nom' => $affectation['nom'],
+                'batiment' => $affectation['batiment'],
+                'periode' => count($dates) === $nombreJours
+                    ? 'Attribuée pour tout le séjour'
+                    : $this->libellePeriodeRooming($dates),
+            ];
+        }
+
+        $ecart = (int) $dateReference->diff($inscription->getDateDebut())->format('%r%a');
+        $statut = match (true) {
+            $inscription->getDateDebut() <= $dateReference && $inscription->getDateFin() >= $dateReference => 'En cours',
+            1 === $ecart => 'Demain',
+            default => sprintf('Dans %d jours', max(0, $ecart)),
+        };
+
+        return [
+            'id' => $inscription->getId(),
+            'periode' => $this->libellePeriode($inscription->getDateDebut(), $inscription->getDateFin()),
+            'statut' => $statut,
+            'thematique' => $inscription->getThematique()?->getNom(),
+            'jours' => $jours,
+            'rooming' => $rooming,
+        ];
+    }
+
+    private function libellePeriode(\DateTimeImmutable $debut, \DateTimeImmutable $fin): string
+    {
+        if ($debut == $fin) {
+            return sprintf('Le %s %d %s', $this->nomJour($debut), (int) $debut->format('j'), $this->nomMois($debut));
+        }
+        if ($debut->format('Y-m') === $fin->format('Y-m')) {
+            return sprintf(
+                'Du %s %d au %s %d %s',
+                $this->nomJour($debut),
+                (int) $debut->format('j'),
+                $this->nomJour($fin),
+                (int) $fin->format('j'),
+                $this->nomMois($fin),
+            );
+        }
+
+        return sprintf(
+            'Du %s %d %s au %s %d %s',
+            $this->nomJour($debut),
+            (int) $debut->format('j'),
+            $this->nomMois($debut),
+            $this->nomJour($fin),
+            (int) $fin->format('j'),
+            $this->nomMois($fin),
+        );
+    }
+
+    /** @param list<\DateTimeImmutable> $dates */
+    private function libellePeriodeRooming(array $dates): string
+    {
+        if (1 === count($dates)) {
+            return 'Le '.$dates[0]->format('j').' '.$this->nomMois($dates[0]);
+        }
+
+        return sprintf(
+            'Du %d %s au %d %s',
+            (int) $dates[0]->format('j'),
+            $this->nomMois($dates[0]),
+            (int) $dates[array_key_last($dates)]->format('j'),
+            $this->nomMois($dates[array_key_last($dates)]),
+        );
+    }
+
+    private function nomJour(\DateTimeImmutable $date): string
+    {
+        return [1 => 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'][(int) $date->format('N')];
+    }
+
+    private function nomMois(\DateTimeImmutable $date): string
+    {
+        return [1 => 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][(int) $date->format('n')];
+    }
+
+    private function nomMoisCourt(\DateTimeImmutable $date): string
+    {
+        return [1 => 'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][(int) $date->format('n')];
     }
 
     private function lireMois(string $valeur): \DateTimeImmutable
