@@ -37,4 +37,11 @@ for variable in \
     ajouter_variable "$variable" "$(openssl rand -hex 24)"
 done
 
+# GitHub Actions n’importe pas automatiquement les variables écrites dans un
+# fichier dotenv. Les publier via GITHUB_ENV les rend disponibles aux étapes
+# suivantes sans les afficher dans les journaux.
+if [ -n "${GITHUB_ENV:-}" ]; then
+    cat "$ci_env_file" >>"$GITHUB_ENV"
+fi
+
 printf 'Configuration CI generee dans %s (valeurs masquees).\n' "$ci_env_file"
