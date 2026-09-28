@@ -62,6 +62,9 @@ final class PresenceController extends AbstractController
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
             $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
+            if ([] === $erreurs && (!$dateDebut instanceof \DateTimeImmutable || !$dateFin instanceof \DateTimeImmutable)) {
+                throw new \LogicException('La période validée doit être disponible.');
+            }
             $inscription = null;
             if ('benevole' === $mode) {
                 $benevole = $utilisateur;
@@ -180,6 +183,9 @@ final class PresenceController extends AbstractController
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
             $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
+            if ([] === $erreurs && (!$dateDebut instanceof \DateTimeImmutable || !$dateFin instanceof \DateTimeImmutable)) {
+                throw new \LogicException('La période validée doit être disponible.');
+            }
 
             if ('benevole' === $mode) {
                 $benevole = $inscription->getUtilisateur();

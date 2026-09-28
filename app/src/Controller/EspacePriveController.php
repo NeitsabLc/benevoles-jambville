@@ -70,6 +70,7 @@ final class EspacePriveController extends AbstractController
 
             for ($date = $premierJour; $date <= $dernierJour; $date = $date->modify('+1 day')) {
                 $cle = $date->format('Y-m-d');
+                assert(isset($jours[$cle]));
                 $besoinCouchage = 'INDIVIDUELLE' === $inscription->getType()
                     ? trim((string) $inscription->getUtilisateur()?->getBesoinCouchage())
                     : '';
@@ -105,6 +106,7 @@ final class EspacePriveController extends AbstractController
             foreach ($inscription->getRepas() as $repas) {
                 $cle = $repas->getDateRepas()->format('Y-m-d');
                 if ($repas->isSelectionne() && isset($jours[$cle])) {
+                    assert(isset($jours[$cle]['repas'][$repas->getTypeRepas()]));
                     $jours[$cle]['repas'][$repas->getTypeRepas()] += $effectif;
                 }
             }

@@ -47,7 +47,7 @@ final readonly class AnalyseImportBenevoleCsv
 
             return [[], ['Le fichier est vide.']];
         }
-        $entete = array_map(static fn (string $valeur): string => trim($valeur, " \t\n\r\0\x0B\xEF\xBB\xBF"), $entete);
+        $entete = array_map(static fn (?string $valeur): string => trim((string) $valeur, " \t\n\r\0\x0B\xEF\xBB\xBF"), $entete);
         if (self::COLONNES !== $entete) {
             fclose($poignee);
 
@@ -71,7 +71,7 @@ final readonly class AnalyseImportBenevoleCsv
             }
 
             /** @var array<string, string> $donnees */
-            $donnees = array_combine(self::COLONNES, array_map('trim', $valeurs));
+            $donnees = array_combine(self::COLONNES, array_map(static fn (?string $valeur): string => trim((string) $valeur), $valeurs));
             $erreur = $this->validerLigne($donnees, $codesVus, $emailsVus);
             $codesVus[$donnees['code_adherent']] = true;
             $emailsVus[mb_strtolower($donnees['email'])] = true;
