@@ -50,11 +50,11 @@ final class Inscription
     #[ORM\Column(name: 'nombre_vegetariens')]
     private int $nombreVegetariens = 0;
 
-    #[ORM\Column(name: 'nombre_allergie_oeuf')]
-    private int $nombreAllergieOeuf = 0;
+    #[ORM\Column(name: 'nombre_sans_lactose')]
+    private int $nombreSansLactose = 0;
 
-    #[ORM\Column(name: 'nombre_allergie_arachide')]
-    private int $nombreAllergieArachide = 0;
+    #[ORM\Column(name: 'nombre_sans_gluten')]
+    private int $nombreSansGluten = 0;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
@@ -98,15 +98,15 @@ final class Inscription
         return $inscription;
     }
 
-    public static function compagnon(Utilisateur $auteur, string $nomEquipe, int $nombrePersonnes, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreVegetariens, int $nombreAllergieOeuf, int $nombreAllergieArachide, ?string $commentaire): self
+    public static function compagnon(Utilisateur $auteur, string $nomEquipe, int $nombrePersonnes, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreVegetariens, int $nombreSansLactose, int $nombreSansGluten, ?string $commentaire): self
     {
         $inscription = new self($auteur, $dateDebut, $dateFin, $typeCouchage, $commentaire);
         $inscription->type = 'COMPAGNON';
         $inscription->nomEquipeCompa = trim($nomEquipe);
         $inscription->nombrePersonnes = $nombrePersonnes;
         $inscription->nombreVegetariens = $nombreVegetariens;
-        $inscription->nombreAllergieOeuf = $nombreAllergieOeuf;
-        $inscription->nombreAllergieArachide = $nombreAllergieArachide;
+        $inscription->nombreSansLactose = $nombreSansLactose;
+        $inscription->nombreSansGluten = $nombreSansGluten;
         $inscription->genererRepas();
 
         return $inscription;
@@ -133,7 +133,7 @@ final class Inscription
         $this->modifierPeriodeEtAccueil($dateDebut, $dateFin, $typeCouchage, $commentaire, $auteur);
     }
 
-    public function modifierCompagnon(string $nomEquipe, int $nombrePersonnes, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreVegetariens, int $nombreAllergieOeuf, int $nombreAllergieArachide, ?string $commentaire, Utilisateur $auteur): void
+    public function modifierCompagnon(string $nomEquipe, int $nombrePersonnes, \DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage, int $nombreVegetariens, int $nombreSansLactose, int $nombreSansGluten, ?string $commentaire, Utilisateur $auteur): void
     {
         if ('COMPAGNON' !== $this->type) {
             throw new \LogicException('Une inscription individuelle ne peut pas devenir compa.');
@@ -142,8 +142,8 @@ final class Inscription
         $this->nomEquipeCompa = trim($nomEquipe);
         $this->nombrePersonnes = $nombrePersonnes;
         $this->nombreVegetariens = $nombreVegetariens;
-        $this->nombreAllergieOeuf = $nombreAllergieOeuf;
-        $this->nombreAllergieArachide = $nombreAllergieArachide;
+        $this->nombreSansLactose = $nombreSansLactose;
+        $this->nombreSansGluten = $nombreSansGluten;
         $this->modifierPeriodeEtAccueil($dateDebut, $dateFin, $typeCouchage, $commentaire, $auteur);
     }
 
@@ -266,14 +266,14 @@ final class Inscription
         return $this->nombreVegetariens;
     }
 
-    public function getNombreAllergieOeuf(): int
+    public function getNombreSansLactose(): int
     {
-        return $this->nombreAllergieOeuf;
+        return $this->nombreSansLactose;
     }
 
-    public function getNombreAllergieArachide(): int
+    public function getNombreSansGluten(): int
     {
-        return $this->nombreAllergieArachide;
+        return $this->nombreSansGluten;
     }
 
     public function getCommentaire(): ?string

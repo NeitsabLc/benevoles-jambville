@@ -36,11 +36,11 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\Column]
     private bool $vegetarien = false;
 
-    #[ORM\Column(name: 'allergie_oeuf')]
-    private bool $allergieOeuf = false;
+    #[ORM\Column(name: 'sans_lactose')]
+    private bool $sansLactose = false;
 
-    #[ORM\Column(name: 'allergie_arachide')]
-    private bool $allergieArachide = false;
+    #[ORM\Column(name: 'sans_gluten')]
+    private bool $sansGluten = false;
 
     #[ORM\Column(name: 'regime_autre', type: 'text', nullable: true)]
     private ?string $regimeAutre = null;
@@ -171,14 +171,14 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         return $this->vegetarien;
     }
 
-    public function hasAllergieOeuf(): bool
+    public function isSansLactose(): bool
     {
-        return $this->allergieOeuf;
+        return $this->sansLactose;
     }
 
-    public function hasAllergieArachide(): bool
+    public function isSansGluten(): bool
     {
-        return $this->allergieArachide;
+        return $this->sansGluten;
     }
 
     public function getRegimeAutre(): ?string
@@ -204,8 +204,8 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
     public function modifierProfil(
         ?string $telephone,
         bool $vegetarien,
-        bool $allergieOeuf,
-        bool $allergieArachide,
+        bool $sansLactose,
+        bool $sansGluten,
         ?string $regimeAutre,
         ?string $besoinCouchage,
     ): void {
@@ -214,8 +214,8 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
         }
         $this->telephone = $telephone;
         $this->vegetarien = $vegetarien;
-        $this->allergieOeuf = $allergieOeuf;
-        $this->allergieArachide = $allergieArachide;
+        $this->sansLactose = $sansLactose;
+        $this->sansGluten = $sansGluten;
         $this->regimeAutre = $regimeAutre;
         $this->besoinCouchage = $besoinCouchage;
     }
@@ -295,8 +295,8 @@ final class Utilisateur implements UserInterface, PasswordAuthenticatedUserInter
 
         if (!$this->actif) {
             $this->desactiveLe = $maintenant ?? new \DateTimeImmutable();
-            $this->allergieOeuf = false;
-            $this->allergieArachide = false;
+            $this->sansLactose = false;
+            $this->sansGluten = false;
             $this->regimeAutre = null;
         } else {
             $this->desactiveLe = null;

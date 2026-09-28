@@ -318,8 +318,8 @@ final class PresenceControllerTest extends WebTestCase
             'date_fin' => '2040-04-11',
             'type_couchage' => 'TENTE',
             'nombre_vegetariens' => 2,
-            'nombre_allergie_oeuf' => 1,
-            'nombre_allergie_arachide' => 1,
+            'nombre_sans_lactose' => 1,
+            'nombre_sans_gluten' => 1,
         ]);
         $client->submit($formulaire);
 
@@ -333,8 +333,8 @@ final class PresenceControllerTest extends WebTestCase
         self::assertNotNull($inscription);
         self::assertSame(6, $inscription->getNombreRepas());
         self::assertSame(2, $inscription->getNombreVegetariens());
-        self::assertSame(1, $inscription->getNombreAllergieOeuf());
-        self::assertSame(1, $inscription->getNombreAllergieArachide());
+        self::assertSame(1, $inscription->getNombreSansLactose());
+        self::assertSame(1, $inscription->getNombreSansGluten());
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $inscriptionGeree = self::getContainer()->get(InscriptionRepository::class)->find($inscription->getId());

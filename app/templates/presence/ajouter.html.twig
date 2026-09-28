@@ -90,11 +90,11 @@
             </section>
 
             <section class="alimentation-compa" data-mode-detail="compa" {{ mode != 'compa' ? 'hidden' }}>
-                <header><h2>Régimes et allergènes</h2><p>Indiquez le nombre de personnes concernées dans l’équipe.</p></header>
+                <header><h2>Régimes et contraintes alimentaires</h2><p>Indiquez le nombre de personnes concernées dans l’équipe.</p></header>
                 <div class="champs-alimentation-compa">
                     <div class="champ"><label for="nombre_vegetariens">Végétariens</label><input id="nombre_vegetariens" name="nombre_vegetariens" type="number" min="0" value="{{ app.request.request.get('nombre_vegetariens', inscription ? inscription.nombreVegetariens : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
-                    <div class="champ"><label for="nombre_allergie_oeuf">Allergie aux œufs</label><input id="nombre_allergie_oeuf" name="nombre_allergie_oeuf" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_oeuf', inscription ? inscription.nombreAllergieOeuf : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
-                    <div class="champ"><label for="nombre_allergie_arachide">Allergie aux arachides</label><input id="nombre_allergie_arachide" name="nombre_allergie_arachide" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_arachide', inscription ? inscription.nombreAllergieArachide : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_sans_lactose">Sans lactose</label><input id="nombre_sans_lactose" name="nombre_sans_lactose" type="number" min="0" value="{{ app.request.request.get('nombre_sans_lactose', inscription ? inscription.nombreSansLactose : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_sans_gluten">Sans gluten</label><input id="nombre_sans_gluten" name="nombre_sans_gluten" type="number" min="0" value="{{ app.request.request.get('nombre_sans_gluten', inscription ? inscription.nombreSansGluten : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
                 </div>
             </section>
 

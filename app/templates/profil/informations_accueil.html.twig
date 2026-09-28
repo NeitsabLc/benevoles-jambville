@@ -16,11 +16,11 @@
         {% if erreurs %}<div class="alerte alerte-erreur" role="alert">{% for erreur in erreurs %}<div>{{ erreur }}</div>{% endfor %}</div>{% endif %}
 
         <form method="post" class="formulaire-authentification">
-            <div class="champ"><label>Régime et allergies alimentaires</label></div>
+            <div class="champ"><label>Régimes et contraintes alimentaires</label></div>
             <div class="choix-profil">
-                <label><input type="checkbox" name="vegetarien" value="1" {{ app.request.request.getBoolean('vegetarien') ? 'checked' }}> Régime végétarien</label>
-                <label><input type="checkbox" name="allergie_oeuf" value="1" {{ app.request.request.getBoolean('allergie_oeuf') ? 'checked' }}> Allergie aux œufs</label>
-                <label><input type="checkbox" name="allergie_arachide" value="1" {{ app.request.request.getBoolean('allergie_arachide') ? 'checked' }}> Allergie aux arachides</label>
+                <label><input type="checkbox" name="vegetarien" value="1" {{ app.request.request.getBoolean('vegetarien') ? 'checked' }}> Végétarien</label>
+                <label><input type="checkbox" name="sans_lactose" value="1" {{ app.request.request.getBoolean('sans_lactose') ? 'checked' }}> Sans lactose</label>
+                <label><input type="checkbox" name="sans_gluten" value="1" {{ app.request.request.getBoolean('sans_gluten') ? 'checked' }}> Sans gluten</label>
             </div>
             <div class="champ">
                 <label for="regime-autre">Autre régime ou allergie alimentaire</label>

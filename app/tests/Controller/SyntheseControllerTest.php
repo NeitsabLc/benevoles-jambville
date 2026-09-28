@@ -135,8 +135,8 @@ final class SyntheseControllerTest extends WebTestCase
         $benevole->modifierProfil(
             $benevole->getTelephone(),
             $benevole->isVegetarien(),
-            $benevole->hasAllergieOeuf(),
-            $benevole->hasAllergieArachide(),
+            $benevole->isSansLactose(),
+            $benevole->isSansGluten(),
             $benevole->getRegimeAutre(),
             'Lit en rez-de-chaussée',
         );
@@ -164,8 +164,8 @@ final class SyntheseControllerTest extends WebTestCase
         $benevole->modifierProfil(
             $benevole->getTelephone(),
             $benevole->isVegetarien(),
-            $benevole->hasAllergieOeuf(),
-            $benevole->hasAllergieArachide(),
+            $benevole->isSansLactose(),
+            $benevole->isSansGluten(),
             $benevole->getRegimeAutre(),
             null,
         );

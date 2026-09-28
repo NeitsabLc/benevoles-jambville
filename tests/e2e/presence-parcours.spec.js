@@ -48,8 +48,8 @@ test('parcours compagnon visible dans le calendrier et la synthèse', async ({ p
   await choisirPeriode(page, '2094-02-10', '2094-02-11');
   await page.getByLabel('Couchage').selectOption('TENTE');
   await page.getByLabel('Végétariens').fill('2');
-  await page.getByLabel('Allergie aux œufs').fill('1');
-  await page.getByLabel('Allergie aux arachides').fill('1');
+  await page.getByLabel('Sans lactose').fill('1');
+  await page.getByLabel('Sans gluten').fill('1');
   await page.getByLabel(/Commentaire/).fill('Équipe compa contrôlée en E2E');
   await page.getByRole('button', { name: 'Ajouter la présence' }).click();
 
@@ -62,7 +62,8 @@ test('parcours compagnon visible dans le calendrier et la synthèse', async ({ p
   await expect(jour.locator('.repas-synthese strong')).toHaveText(['4', '4', '4']);
   await expect(jour.locator('.details-synthese h2', { hasText: 'En tente' })).toContainText('4');
   await expect(jour.locator('.regimes-synthese')).toContainText(/Végétariens\s*2/);
-  await expect(jour.locator('.regimes-synthese')).toContainText(/Allergie œuf\s*1/);
+  await expect(jour.locator('.regimes-synthese')).toContainText(/Sans lactose\s*1/);
+  await expect(jour.locator('.regimes-synthese')).toContainText(/Sans gluten\s*1/);
 
   await page.goto('/?mois=2094-02');
   await jourDuCalendrier(page, '2094-02-10').getByRole('button', { name: /Supprimer Compas Parcours E2E/ }).click();

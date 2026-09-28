@@ -93,21 +93,21 @@ final class PresenceController extends AbstractController
                 $nomEquipe = trim($request->request->getString('nom_equipe_compa'));
                 $nombrePersonnes = $request->request->getInt('nombre_personnes');
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
-                $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
-                $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
+                $nombreSansLactose = $request->request->getInt('nombre_sans_lactose');
+                $nombreSansGluten = $request->request->getInt('nombre_sans_gluten');
                 if ('' === $nomEquipe || mb_strlen($nomEquipe) > 150) {
                     $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';
                 }
-                foreach (['végétariens' => $nombreVegetariens, 'allergiques aux œufs' => $nombreAllergieOeuf, 'allergiques aux arachides' => $nombreAllergieArachide] as $libelle => $effectif) {
+                foreach (['végétariens' => $nombreVegetariens, 'sans lactose' => $nombreSansLactose, 'sans gluten' => $nombreSansGluten] as $libelle => $effectif) {
                     if ($effectif < 0 || $effectif > $nombrePersonnes) {
                         $erreurs[] = sprintf('Le nombre de personnes %s doit être compris entre 0 et l’effectif du groupe.', $libelle);
                     }
                 }
                 if ([] === $erreurs) {
-                    $inscription = Inscription::compagnon($utilisateur, $nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreAllergieOeuf, $nombreAllergieArachide, $commentaire);
+                    $inscription = Inscription::compagnon($utilisateur, $nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreSansLactose, $nombreSansGluten, $commentaire);
                 }
             }
 
@@ -209,21 +209,21 @@ final class PresenceController extends AbstractController
                 $nomEquipe = trim($request->request->getString('nom_equipe_compa'));
                 $nombrePersonnes = $request->request->getInt('nombre_personnes');
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
-                $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
-                $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
+                $nombreSansLactose = $request->request->getInt('nombre_sans_lactose');
+                $nombreSansGluten = $request->request->getInt('nombre_sans_gluten');
                 if ('' === $nomEquipe || mb_strlen($nomEquipe) > 150) {
                     $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';
                 }
-                foreach (['végétariens' => $nombreVegetariens, 'allergiques aux œufs' => $nombreAllergieOeuf, 'allergiques aux arachides' => $nombreAllergieArachide] as $libelle => $effectif) {
+                foreach (['végétariens' => $nombreVegetariens, 'sans lactose' => $nombreSansLactose, 'sans gluten' => $nombreSansGluten] as $libelle => $effectif) {
                     if ($effectif < 0 || $effectif > $nombrePersonnes) {
                         $erreurs[] = sprintf('Le nombre de personnes %s doit être compris entre 0 et l’effectif du groupe.', $libelle);
                     }
                 }
                 if ([] === $erreurs) {
-                    $inscription->modifierCompagnon($nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreAllergieOeuf, $nombreAllergieArachide, $commentaire, $utilisateur);
+                    $inscription->modifierCompagnon($nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreSansLactose, $nombreSansGluten, $commentaire, $utilisateur);
                 }
             }
 

@@ -46,7 +46,7 @@ final class EspacePriveController extends AbstractController
                 'repas' => ['PETIT_DEJEUNER' => 0, 'DEJEUNER' => 0, 'DINER' => 0],
                 'presences' => [],
                 'couchages' => ['DUR' => ['total' => 0, 'presences' => []], 'TENTE' => ['total' => 0, 'presences' => []]],
-                'regimes' => ['vegetariens' => 0, 'oeuf' => 0, 'arachide' => 0, 'commentaires' => []],
+                'regimes' => ['vegetariens' => 0, 'sans_lactose' => 0, 'sans_gluten' => 0, 'commentaires' => []],
             ];
         }
 
@@ -74,13 +74,13 @@ final class EspacePriveController extends AbstractController
 
                 if ('COMPAGNON' === $inscription->getType()) {
                     $jours[$cle]['regimes']['vegetariens'] += $inscription->getNombreVegetariens();
-                    $jours[$cle]['regimes']['oeuf'] += $inscription->getNombreAllergieOeuf();
-                    $jours[$cle]['regimes']['arachide'] += $inscription->getNombreAllergieArachide();
+                    $jours[$cle]['regimes']['sans_lactose'] += $inscription->getNombreSansLactose();
+                    $jours[$cle]['regimes']['sans_gluten'] += $inscription->getNombreSansGluten();
                 } else {
                     $utilisateur = $inscription->getUtilisateur();
                     $jours[$cle]['regimes']['vegetariens'] += (int) $utilisateur?->isVegetarien();
-                    $jours[$cle]['regimes']['oeuf'] += (int) $utilisateur?->hasAllergieOeuf();
-                    $jours[$cle]['regimes']['arachide'] += (int) $utilisateur?->hasAllergieArachide();
+                    $jours[$cle]['regimes']['sans_lactose'] += (int) $utilisateur?->isSansLactose();
+                    $jours[$cle]['regimes']['sans_gluten'] += (int) $utilisateur?->isSansGluten();
                     $regimeAutre = trim((string) $utilisateur?->getRegimeAutre());
                     if ('' !== $regimeAutre) {
                         if (!in_array($regimeAutre, $jours[$cle]['regimes']['commentaires'], true)) {
