@@ -131,6 +131,8 @@ final class RoomingController extends AbstractController
                 $presencesParJour[$cleJour][] = $presence;
 
                 if (null !== $affectation && isset($chambres[$affectation['chambre']])) {
+                    assert(isset($chambres[$affectation['chambre']]['occupation'][$cleJour]));
+                    assert(array_key_exists('disponible', $chambres[$affectation['chambre']]['occupation'][$cleJour]));
                     $chambres[$affectation['chambre']]['occupation'][$cleJour]['occupees'] += $affectation['nombre_places'];
                     if ($chambres[$affectation['chambre']]['occupation'][$cleJour]['disponible']) {
                         $chambres[$affectation['chambre']]['occupation'][$cleJour]['disponibles'] -= $affectation['nombre_places'];

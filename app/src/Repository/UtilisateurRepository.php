@@ -65,7 +65,7 @@ final class UtilisateurRepository extends ServiceEntityRepository implements Use
             $connexion->executeStatement("DELETE FROM benevole_jambville.inscription WHERE utilisateur_id IN ($condition)", $parametres);
             $connexion->executeStatement("UPDATE benevole_jambville.journal_audit SET objet_id = NULL WHERE type_objet = 'UTILISATEUR' AND objet_id IN ($condition)", $parametres);
 
-            return $connexion->executeStatement(
+            return (int) $connexion->executeStatement(
                 "DELETE FROM benevole_jambville.utilisateur WHERE id IN ($condition)",
                 $parametres,
             );

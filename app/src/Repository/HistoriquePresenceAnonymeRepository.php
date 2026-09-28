@@ -13,7 +13,12 @@ final class HistoriquePresenceAnonymeRepository
 
     public function __construct(ManagerRegistry $registry)
     {
-        $this->connexion = $registry->getConnection();
+        $connexion = $registry->getConnection();
+        if (!$connexion instanceof Connection) {
+            throw new \LogicException('La connexion Doctrine doit être une connexion DBAL.');
+        }
+
+        $this->connexion = $connexion;
     }
 
     /**
@@ -61,7 +66,7 @@ final class HistoriquePresenceAnonymeRepository
                 ON CONFLICT (date_journee, thematique) DO NOTHING
                 SQL, $parametres);
 
-            return $this->connexion->executeStatement(<<<'SQL'
+            return (int) $this->connexion->executeStatement(<<<'SQL'
                 DELETE FROM benevole_jambville.inscription
                 WHERE date_debut >= CAST(:debut AS date)
                   AND date_fin <= CAST(:fin AS date)
