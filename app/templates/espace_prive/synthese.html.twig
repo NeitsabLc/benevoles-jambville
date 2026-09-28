@@ -20,9 +20,10 @@
         <div class="liste-synthese">
             {% for jour in jours %}
                 {% set total = jour.presences|reduce((total, presence) => total + presence.effectif, 0) %}
+                {% set nombre_inscriptions = jour.presences|length %}
                 <article class="jour-synthese">
                     <header class="date-synthese">
-                        <time datetime="{{ jour.date|date('Y-m-d') }}"><strong>{{ jour.libelle_date }}</strong><span>{{ total }} personne{{ total > 1 ? 's' }}</span></time>
+                        <time datetime="{{ jour.date|date('Y-m-d') }}"><strong>{{ jour.libelle_date }}</strong><span>{{ total }} personne{{ total > 1 ? 's' }}{% if nombre_inscriptions > 0 %} · {{ nombre_inscriptions }} inscription{{ nombre_inscriptions > 1 ? 's' }}{% endif %}</span></time>
                     </header>
                     <section class="repas-synthese" aria-label="Repas">
                         <div><span>Petit-déjeuner</span><strong>{{ jour.repas.PETIT_DEJEUNER }}</strong></div>
@@ -30,9 +31,26 @@
                         <div><span>Dîner</span><strong>{{ jour.repas.DINER }}</strong></div>
                     </section>
                     <section class="details-synthese">
-                        <div><h2>Présences</h2>{% for presence in jour.presences %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucune présence</p>{% endfor %}</div>
+                        <div class="presences-synthese">
+                            <h2>Présences {% if nombre_inscriptions > 0 %}<b>{{ nombre_inscriptions }}</b>{% endif %}</h2>
+                            {% if nombre_inscriptions == 0 %}
+                                <p class="donnee-vide">Aucune présence</p>
+                            {% else %}
+                                {% if nombre_inscriptions > 5 %}
+                                    <div class="apercu-presences-synthese">
+                                        {% for presence in jour.presences|slice(0, 5) %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% endfor %}
+                                    </div>
+                                    <details class="details-presences-synthese">
+                                        <summary><span class="libelle-details-ferme">Voir les {{ nombre_inscriptions - 5 }} autre{{ nombre_inscriptions - 5 > 1 ? 's' : '' }} inscription{{ nombre_inscriptions - 5 > 1 ? 's' : '' }}</span><span class="libelle-details-ouvert">Replier le détail</span></summary>
+                                        {% include 'espace_prive/_table_presences_synthese.html.twig' with {presences: jour.presences} only %}
+                                    </details>
+                                {% else %}
+                                    {% include 'espace_prive/_table_presences_synthese.html.twig' with {presences: jour.presences} only %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
                         {% for type, couchage in jour.couchages %}
-                            <div><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2>{% for presence in couchage.presences %}<span class="pastille-presence pastille-couchage">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}{% if presence.besoin_couchage %}<span class="info-couchage" tabindex="0" role="img" aria-label="Besoin de couchage : {{ presence.besoin_couchage }}" data-info="{{ presence.besoin_couchage }}"></span>{% endif %}</span>{% else %}<p class="donnee-vide">Aucun couchage</p>{% endfor %}</div>
+                            <div class="resume-couchage-synthese"><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2><p>{{ couchage.presences|length }} inscription{{ couchage.presences|length > 1 ? 's' : '' }}</p></div>
                         {% endfor %}
                         <div class="regimes-synthese">
                             <h2>Régimes</h2>

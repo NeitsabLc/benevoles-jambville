@@ -58,19 +58,59 @@ final class SyntheseControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/synthese?debut=2095-07-10&fin=2095-07-10');
 
         self::assertResponseIsSuccessful();
-        $listes = $crawler->filter('.details-synthese > div')->each(
-            static fn ($bloc): array => $bloc->filter(':scope > .pastille-presence')->each(
-                static fn ($presence): string => trim($presence->text()),
-            ),
+        $identites = $crawler->filter('.table-presences-synthese tbody th')->each(
+            static fn ($presence): string => trim($presence->text()),
         );
-        self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $listes[0]);
-        self::assertSame(['Camille B.', 'Sasha A.'], $listes[1]);
-        self::assertSame(['Dominique P.'], $listes[2]);
+        self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $identites);
+        self::assertSelectorCount(1, '.table-presences-synthese');
 
         foreach ($inscriptionsCreees as $inscription) {
             $entityManager->remove($inscription);
         }
         $entityManager->flush();
+    }
+
+    public function testUneJourneeChargeeAfficheCinqPresencesPuisUnDetailUnique(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $inscriptions = [];
+
+        try {
+            for ($numero = 1; $numero <= 7; ++$numero) {
+                $inscription = Inscription::compagnon(
+                    $pilote,
+                    'Équipe synthèse '.$numero,
+                    $numero,
+                    new \DateTimeImmutable('2098-11-08'),
+                    new \DateTimeImmutable('2098-11-08'),
+                    0 === $numero % 2 ? 'DUR' : 'TENTE',
+                    0,
+                    0,
+                    0,
+                    null,
+                );
+                $inscriptions[] = $inscription;
+                $entityManager->persist($inscription);
+            }
+            $entityManager->flush();
+            $client->loginUser($pilote);
+
+            $client->request('GET', '/synthese?debut=2098-11-08&fin=2098-11-08');
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorCount(5, '.apercu-presences-synthese .pastille-presence');
+            self::assertSelectorTextContains('.details-presences-synthese summary', 'Voir les 2 autres inscriptions');
+            self::assertSelectorCount(7, '.details-presences-synthese .table-presences-synthese tbody tr');
+            self::assertSelectorTextContains('.date-synthese', '28 personnes · 7 inscriptions');
+        } finally {
+            foreach ($inscriptions as $inscription) {
+                $entityManager->remove($inscription);
+            }
+            $entityManager->flush();
+        }
     }
 
     public function testLaSyntheseCompteRepasCouchagesEtRegimesSansLesAssocierAuxIdentites(): void
@@ -112,9 +152,10 @@ final class SyntheseControllerTest extends WebTestCase
         self::assertSelectorTextContains('.jour-synthese', 'Camille B. + 2 enfants');
         self::assertSelectorTextSame('.repas-synthese div:nth-child(2) strong', '3');
         self::assertSelectorTextSame('.details-synthese > div:nth-child(2) h2 b', '3');
-        self::assertSelectorExists('.details-synthese > div:nth-child(2) .info-couchage[data-info="Lit en rez-de-chaussée"]');
-        self::assertSelectorExists('.info-couchage[aria-label="Besoin de couchage : Lit en rez-de-chaussée"]');
-        self::assertSelectorNotExists('.details-synthese > div:first-child .info-couchage');
+        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'Camille B.');
+        self::assertSelectorTextContains('.table-presences-synthese tbody tr', '3');
+        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'En dur');
+        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'Lit en rez-de-chaussée');
         self::assertSelectorTextContains('.regimes-synthese h2', 'Régimes');
         self::assertSelectorTextNotContains('.regimes-synthese', 'totaux anonymes');
         self::assertSelectorNotExists('.regimes-synthese .pastille-presence');

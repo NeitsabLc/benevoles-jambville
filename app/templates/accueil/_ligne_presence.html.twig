@@ -1,0 +1,19 @@
+{% set est_ma_presence = presence.type == 'INDIVIDUELLE' and presence.utilisateur.id == app.user.id %}
+{% set peut_gerer = is_granted('ROLE_EQUIPE_PILOTE') or (app.user.roleMetier == 'BENEVOLE' and est_ma_presence) %}
+<div class="ligne-presence {{ peut_gerer ? 'ligne-presence-cliquable' }} {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}"{% if peut_gerer %} data-modification-url="{{ path('app_presence_modifier', {id: presence.id}) }}" tabindex="0" role="link" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"{% endif %}>
+    <span class="identite-presence">
+        {% if presence.type == 'COMPAGNON' %}
+            <strong>{{ presence.nomEquipeCompa }}</strong>
+            <small>{{ presence.nombrePersonnes }} personne{{ presence.nombrePersonnes > 1 ? 's' }}</small>
+        {% else %}
+            <strong>{{ presence.utilisateur.prenom }} {{ presence.utilisateur.nom|first }}.</strong>
+            {% if presence.nombreEnfants > 0 %}<small>+ {{ presence.nombreEnfants }} enfant{{ presence.nombreEnfants > 1 ? 's' }}</small>{% endif %}
+        {% endif %}
+    </span>
+    {% if peut_gerer %}
+        <span class="actions-presence">
+            <a href="{{ path('app_presence_modifier', {id: presence.id}) }}" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}">✎</a>
+            <button type="button" aria-label="Supprimer {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}" data-suppression-presence data-presence-nom="{{ (presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet)|e('html_attr') }}" data-presence-periode="du {{ presence.dateDebut|date('d/m/Y') }} au {{ presence.dateFin|date('d/m/Y') }}" data-suppression-url="{{ path('app_presence_supprimer', {id: presence.id}) }}" data-suppression-token="{{ csrf_token('supprimer-presence-' ~ presence.id) }}"><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </span>
+    {% endif %}
+</div>

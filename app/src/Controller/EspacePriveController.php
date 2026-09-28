@@ -65,6 +65,7 @@ final class EspacePriveController extends AbstractController
                     'libelle' => $libelle,
                     'effectif' => $effectif,
                     'est_equipe' => 'COMPAGNON' === $inscription->getType(),
+                    'type_couchage' => $inscription->getTypeCouchage(),
                     'besoin_couchage' => '' !== $besoinCouchage ? $besoinCouchage : null,
                 ];
                 $jours[$cle]['presences'][] = $presence;

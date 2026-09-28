@@ -14,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class PresenceControllerTest extends WebTestCase
 {
-    public function testLesPresencesSontTrieesParPrenomPuisParNomChaqueJour(): void
+    public function testMaPresenceEstAfficheeAvantLesAutresTrieesParPrenomPuisParNom(): void
     {
         $client = self::createClient();
         $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
@@ -70,10 +70,54 @@ final class PresenceControllerTest extends WebTestCase
                 $noms = $crawler
                     ->filterXPath(sprintf('//article[contains(concat(" ", normalize-space(@class), " "), " jour-calendrier ")][.//time[@datetime="%s"]]//span[contains(concat(" ", normalize-space(@class), " "), " identite-presence ")]/strong', $date))
                     ->each(static fn ($noeud): string => trim($noeud->text()));
-                self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $noms);
+                self::assertSame(['Dominique P.', 'Camille B.', 'Sasha A.'], $noms);
             }
         } finally {
             $nettoyerInscriptionsDuTest();
+        }
+    }
+
+    public function testUneJourneeChargeeEstLimiteeATroisPresencesAvecUnDetailComplet(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $inscriptions = [];
+
+        try {
+            for ($numero = 1; $numero <= 5; ++$numero) {
+                $inscription = Inscription::compagnon(
+                    $pilote,
+                    'Équipe calendrier '.$numero,
+                    $numero,
+                    new \DateTimeImmutable('2098-10-14'),
+                    new \DateTimeImmutable('2098-10-14'),
+                    'TENTE',
+                    0,
+                    0,
+                    0,
+                    null,
+                );
+                $inscriptions[] = $inscription;
+                $entityManager->persist($inscription);
+            }
+            $entityManager->flush();
+            $client->loginUser($pilote);
+
+            $crawler = $client->request('GET', '/?mois=2098-10');
+            $jour = $crawler->filterXPath('//article[contains(@class, "jour-calendrier")][.//time[@datetime="2098-10-14"]]');
+
+            self::assertResponseIsSuccessful();
+            self::assertCount(3, $jour->filter('.presence-apercu .ligne-presence'));
+            self::assertStringContainsString('Voir les 2 autres', $jour->filter('.bouton-details-jour-bureau')->text());
+            self::assertSelectorCount(5, '#details-jour-2098-10-14 .liste-details-jour .ligne-presence');
+            self::assertSelectorTextContains('#details-jour-2098-10-14 .entete-details-jour', '15 personnes · 5 inscriptions');
+        } finally {
+            foreach ($inscriptions as $inscription) {
+                $entityManager->remove($inscription);
+            }
+            $entityManager->flush();
         }
     }
 

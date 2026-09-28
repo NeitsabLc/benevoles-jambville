@@ -217,6 +217,21 @@ const initialiserSuppressionPresence = () => {
     });
 };
 
+const initialiserDetailsJour = () => {
+    document.querySelectorAll('[data-dialog-details-jour]').forEach((dialog) => {
+        if (dialog.dataset.initialise === 'true') return;
+        dialog.dataset.initialise = 'true';
+        dialog.querySelector('[data-fermer-details-jour]')?.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    });
+
+    document.querySelectorAll('[data-ouvrir-details-jour]').forEach((bouton) => {
+        if (bouton.dataset.initialise === 'true') return;
+        bouton.dataset.initialise = 'true';
+        bouton.addEventListener('click', () => document.getElementById(bouton.dataset.ouvrirDetailsJour)?.showModal());
+    });
+};
+
 const initialiserDesactivationCompte = () => {
     const dialog = document.querySelector('[data-dialog-desactivation]');
     if (!dialog || dialog.dataset.initialise === 'true') return;
@@ -430,6 +445,7 @@ const initialiserPage = () => {
     initialiserSelecteursDate();
     initialiserFormulairePresence();
     initialiserSuppressionPresence();
+    initialiserDetailsJour();
     initialiserDesactivationCompte();
     initialiserMenuMobile();
     initialiserLignesPresence();

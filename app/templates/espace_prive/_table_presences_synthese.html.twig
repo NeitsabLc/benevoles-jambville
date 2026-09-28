@@ -1,0 +1,17 @@
+<div class="table-presences-synthese">
+    <table>
+        <thead>
+            <tr><th scope="col">Inscription</th><th scope="col">Effectif</th><th scope="col">Couchage</th><th scope="col">Besoin signalé</th></tr>
+        </thead>
+        <tbody>
+            {% for presence in presences %}
+                <tr>
+                    <th scope="row">{{ presence.libelle }}</th>
+                    <td>{{ presence.effectif }}</td>
+                    <td>{{ presence.type_couchage == 'DUR' ? 'En dur' : 'En tente' }}</td>
+                    <td>{{ presence.besoin_couchage ?: '—' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
