@@ -109,7 +109,7 @@ final class RoomingControllerTest extends WebTestCase
         self::assertNotNull($occupante);
         self::assertNotNull($thematique);
 
-        $occupation = Inscription::individuelle($occupante, $thematique, new \DateTimeImmutable('2097-04-14'), new \DateTimeImmutable('2097-04-14'), 'DUR', 2, null);
+        $occupation = Inscription::individuelle($occupante, $thematique, new \DateTimeImmutable('2097-04-14'), new \DateTimeImmutable('2097-04-15'), 'DUR', 2, null);
         $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2097-04-13'), new \DateTimeImmutable('2097-04-15'), 'DUR', 0, null);
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($occupation);
@@ -142,6 +142,45 @@ final class RoomingControllerTest extends WebTestCase
                 'occupation' => $occupation->getId(),
             ],
         );
+    }
+
+    public function testUnePresenceLimiteeAUneJourneeNestPasProposeeDansLeRooming(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE-2']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Accueil']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+
+        $inscription = Inscription::individuelle(
+            $benevole,
+            $thematique,
+            new \DateTimeImmutable('2097-08-18'),
+            new \DateTimeImmutable('2097-08-18'),
+            'DUR',
+            0,
+            null,
+        );
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->persist($inscription);
+        $entityManager->flush();
+        $client->loginUser($pilote);
+
+        try {
+            $client->request('GET', '/rooming?debut=2097-08-18&fin=2097-08-18');
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorTextNotContains('.tableau-planning-rooming', $benevole->getNomComplet());
+            self::assertSelectorNotExists(sprintf('option[value="%s"]', $inscription->getId()));
+        } finally {
+            self::getContainer()->get(Connection::class)->executeStatement(
+                'DELETE FROM benevole_jambville.inscription WHERE id = :id',
+                ['id' => $inscription->getId()],
+            );
+        }
     }
 
     public function testUneNouvelleChambrePeutEtreCreeeDansUnBatiment(): void

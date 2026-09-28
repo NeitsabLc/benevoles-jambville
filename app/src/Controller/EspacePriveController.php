@@ -68,8 +68,10 @@ final class EspacePriveController extends AbstractController
                     'besoin_couchage' => '' !== $besoinCouchage ? $besoinCouchage : null,
                 ];
                 $jours[$cle]['presences'][] = $presence;
-                $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['total'] += $effectif;
-                $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['presences'][] = $presence;
+                if ('AUCUN' !== $inscription->getTypeCouchage() && $inscription->getDateDebut() != $inscription->getDateFin()) {
+                    $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['total'] += $effectif;
+                    $jours[$cle]['couchages'][$inscription->getTypeCouchage()]['presences'][] = $presence;
+                }
 
                 if ('COMPAGNON' === $inscription->getType()) {
                     $jours[$cle]['regimes']['vegetariens'] += $inscription->getNombreVegetariens();

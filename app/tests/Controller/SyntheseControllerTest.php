@@ -44,7 +44,7 @@ final class SyntheseControllerTest extends WebTestCase
                 $utilisateur,
                 $thematique,
                 new \DateTimeImmutable('2095-07-10'),
-                new \DateTimeImmutable('2095-07-10'),
+                new \DateTimeImmutable('2095-07-11'),
                 $couchage,
                 0,
                 null,
@@ -100,7 +100,7 @@ final class SyntheseControllerTest extends WebTestCase
             $benevole->getRegimeAutre(),
             'Lit en rez-de-chaussée',
         );
-        $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2095-06-12'), new \DateTimeImmutable('2095-06-12'), 'DUR', 2, null);
+        $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2095-06-12'), new \DateTimeImmutable('2095-06-13'), 'DUR', 2, null);
         $inscription->definirRepasSelectionnes(['2095-06-12|DEJEUNER']);
         $entityManager->persist($inscription);
         $entityManager->flush();

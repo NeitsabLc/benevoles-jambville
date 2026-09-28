@@ -34,7 +34,10 @@ final class ValidationPresenceService
             $erreurs[] = 'La durée d’une présence est limitée à un an.';
         }
 
-        if (!in_array($typeCouchage, ['DUR', 'TENTE'], true)) {
+        $presenceJournee = null !== $dateDebut && null !== $dateFin && $dateDebut == $dateFin;
+        if ($presenceJournee) {
+            $typeCouchage = 'AUCUN';
+        } elseif (!in_array($typeCouchage, ['DUR', 'TENTE'], true)) {
             $erreurs[] = 'Choisissez un type de couchage.';
         }
 
