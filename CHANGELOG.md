@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.5.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.5.0...v1.5.1) (2026-09-28)
+
+
+### Corrections
+
+* embarquer les migrations Liquibase ([#59](https://github.com/NeitsabLc/benevoles-jambville/issues/59)) ([19f17f5](https://github.com/NeitsabLc/benevoles-jambville/commit/19f17f54f7e683bc14947bb96e9d1b331b0e4ed7))
+
 ## [1.5.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.4.0...v1.5.0) (2026-09-28)
 
 
