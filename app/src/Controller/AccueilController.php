@@ -209,12 +209,14 @@ final class AccueilController extends AbstractController
             return 'Le '.$dates[0]->format('j').' '.$this->nomMois($dates[0]);
         }
 
+        $derniereDate = $dates[count($dates) - 1];
+
         return sprintf(
             'Du %d %s au %d %s',
             (int) $dates[0]->format('j'),
             $this->nomMois($dates[0]),
-            (int) $dates[array_key_last($dates)]->format('j'),
-            $this->nomMois($dates[array_key_last($dates)]),
+            (int) $derniereDate->format('j'),
+            $this->nomMois($derniereDate),
         );
     }
 

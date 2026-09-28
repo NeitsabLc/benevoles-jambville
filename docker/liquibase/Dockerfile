@@ -15,4 +15,6 @@ RUN curl --fail --silent --show-error --location \
     && echo "${PGJDBC_SHA256}  /liquibase/lib/postgresql.jar" | sha256sum --check --strict \
     && rm -f /liquibase/bin/lpm
 
+COPY --chown=liquibase:liquibase database/changelog /liquibase/changelog
+
 USER liquibase:liquibase
