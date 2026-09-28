@@ -212,7 +212,7 @@ body {
 .presence-autre { color: #284f68; background: #e4eef4; }
 .identite-presence { min-width: 0; overflow: hidden; }
 .identite-presence strong, .identite-presence small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.identite-presence small { margin-top: .08rem; opacity: .76; font-size: .65rem; }
+.identite-presence small { margin-top: .08rem; font-size: .65rem; }
 .actions-presence { display: flex; flex: 0 0 auto; align-items: center; gap: .25rem; }
 .actions-presence form { margin: 0; }
 .actions-presence a, .actions-presence button { display: grid; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: .28rem; color: inherit; background: rgb(255 255 255 / 55%); font: inherit; font-size: .9rem; font-weight: 800; text-decoration: none; cursor: pointer; place-items: center; }
