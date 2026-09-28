@@ -140,15 +140,18 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          docker run --rm --volume "$GITHUB_WORKSPACE:/src" \
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:/src" \
             ghcr.io/betterleaks/betterleaks:v1.7.2@sha256:1eb5e0920b47afe43f76671bc678c9fd4fd40c2d0c9b88a16f28021fd12d2347 \
             git /src --log-opts="${BASE_SHA}..${HEAD_SHA}" \
-            --report-path /src/betterleaks.sarif --report-format sarif
+            --report-path /src/betterleaks.sarif --report-format sarif --redact
+          rm -rf .betterleaks-worktree
           mkdir .betterleaks-worktree
           git archive "$HEAD_SHA" | tar -x -C .betterleaks-worktree
-          docker run --rm --volume "$GITHUB_WORKSPACE/.betterleaks-worktree:/src:ro" \
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE/.betterleaks-worktree:/src:ro" \
             ghcr.io/betterleaks/betterleaks:v1.7.2@sha256:1eb5e0920b47afe43f76671bc678c9fd4fd40c2d0c9b88a16f28021fd12d2347 \
-            dir /src
+            dir /src --redact
 
       - name: Conserver le rapport Betterleaks
         if: always()
