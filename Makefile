@@ -42,7 +42,7 @@ prod-up: ## Démarrer les services avec la configuration de production
 prod-ps: ## Afficher l'état des services de production
 	$(DOCKER_COMPOSE_PROD) ps
 
-release-config: ## Valider la configuration de livraison utilisant le registre GitLab
+release-config: ## Valider la configuration de livraison utilisant GHCR
 	@$(DOCKER_COMPOSE_RELEASE) config --quiet
 
 release-verify: ## Vérifier les digests et signatures Sigstore
@@ -60,10 +60,10 @@ release-db-status: release-pull ## Contrôler les migrations avec l'image Liquib
 release-db-update: release-pull ## Appliquer les migrations avec l'image Liquibase livrée
 	$(DOCKER_COMPOSE_RELEASE) --profile outils run --rm liquibase update
 
-release-up: release-pull ## Démarrer manuellement les services persistants depuis les images du registre GitLab
+release-up: release-pull ## Démarrer manuellement les services persistants depuis les images GHCR
 	$(DOCKER_COMPOSE_RELEASE) up -d --no-build --wait --wait-timeout 120 database php nginx
 
-release-ps: ## Afficher l'état des conteneurs issus des images du registre GitLab
+release-ps: ## Afficher l'état des conteneurs issus des images GHCR
 	$(DOCKER_COMPOSE_RELEASE) ps
 
 release-maintenance-now: release-pull ## Exécuter un cycle de maintenance avec l'image PHP livrée

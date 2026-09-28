@@ -1,12 +1,7 @@
 #!/bin/sh
 set -eu
 
-if [ -n "${CI_PROJECT_DIR:-}" ]; then
-    # /builds est partage avec le service Docker-in-Docker de GitLab.
-    repertoire_temporaire=$(mktemp -d "$CI_PROJECT_DIR/.ci-backup.XXXXXX")
-else
-    repertoire_temporaire=$(mktemp -d)
-fi
+repertoire_temporaire=$(mktemp -d)
 repertoire_sauvegardes="$repertoire_temporaire/backups"
 fichier_identite="$repertoire_temporaire/identity.txt"
 mkdir -m 0777 "$repertoire_sauvegardes"

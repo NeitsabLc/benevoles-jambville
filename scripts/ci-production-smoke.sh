@@ -52,12 +52,7 @@ assert_container_hardened() {
 : "${TRUSTED_HOST_PATTERN:=^(localhost|127[.]0[.]0[.]1)$}"
 : "${TRUSTED_PROXIES:=127.0.0.1}"
 
-if [ -n "${CI_PROJECT_DIR:-}" ]; then
-    # /builds est partage avec le service Docker-in-Docker de GitLab.
-    repertoire_temporaire=$(mktemp -d "$CI_PROJECT_DIR/.ci-smoke.XXXXXX")
-else
-    repertoire_temporaire=$(mktemp -d)
-fi
+repertoire_temporaire=$(mktemp -d)
 export BACKUP_DIR="$repertoire_temporaire/backups"
 export BACKUP_AGE_RECIPIENT=age1configuration-temporaire-remplacee-avant-sauvegarde
 export NGINX_HOST_PORT POSTGRES_HOST_PORT POSTGRES_DB POSTGRES_USER
