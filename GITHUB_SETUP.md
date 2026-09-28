@@ -39,7 +39,7 @@ préfixe `v`. La production reste déclenchée manuellement depuis le workflow
 
 - Protéger `main` et exiger les contrôles `Qualite et tests` et
   `Configuration de production` avant fusion.
-- Interdire les poussées directes et exiger au moins une revue.
+- Interdire les poussées directes, conserver zéro approbation obligatoire tant que le dépôt repose sur un mainteneur unique et imposer au mainteneur une relecture du diff final avant fusion.
 - Activer le squash des pull requests et conserver leur titre Conventional
   Commits comme titre du commit.
 - Conserver les permissions Actions en lecture par défaut ; les workflows
