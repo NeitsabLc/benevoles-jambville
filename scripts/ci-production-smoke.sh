@@ -179,7 +179,7 @@ assert_container_hardened maintenance www-data 268435456 500000000 64 aucun
 test "$(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$(compose ps --quiet --all maintenance)")" = "no"
 assert_container_hardened backup postgres 536870912 1000000000 128
 test "$(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$(compose --profile backup ps --quiet --all backup)")" = "no"
-assert_container_hardened liquibase liquibase:liquibase 536870912 1000000000 128
+assert_container_hardened liquibase liquibase:liquibase 536870912 1000000000 128 aucun
 
 compose exec --no-TTY database sh -ec '
     hba_file=$(PGPASSWORD="$POSTGRES_HEALTHCHECK_PASSWORD" psql --host=127.0.0.1 \
