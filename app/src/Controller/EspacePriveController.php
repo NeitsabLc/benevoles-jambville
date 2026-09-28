@@ -46,7 +46,8 @@ final class EspacePriveController extends AbstractController
                 'repas' => ['PETIT_DEJEUNER' => 0, 'DEJEUNER' => 0, 'DINER' => 0],
                 'presences' => [],
                 'couchages' => ['DUR' => ['total' => 0, 'presences' => []], 'TENTE' => ['total' => 0, 'presences' => []]],
-                'regimes' => ['vegetariens' => 0, 'oeuf' => 0, 'arachide' => 0, 'commentaires' => []],
+                'transports' => [],
+                'regimes' => ['vegetariens' => 0, 'sans_lactose' => 0, 'sans_gluten' => 0, 'commentaires' => []],
             ];
         }
 
@@ -55,6 +56,17 @@ final class EspacePriveController extends AbstractController
             $libelle = $this->libellePresence($inscription);
             $premierJour = max($debut, $inscription->getDateDebut());
             $dernierJour = min($fin, $inscription->getDateFin());
+            $heureTransportMeulan = $inscription->getHeureTransportMeulan();
+            $cleArrivee = $inscription->getDateDebut()->format('Y-m-d');
+
+            if (null !== $heureTransportMeulan && isset($jours[$cleArrivee])) {
+                $jours[$cleArrivee]['transports'][] = [
+                    'libelle' => $libelle,
+                    'effectif' => $effectif,
+                    'est_equipe' => 'COMPAGNON' === $inscription->getType(),
+                    'heure' => $heureTransportMeulan,
+                ];
+            }
 
             for ($date = $premierJour; $date <= $dernierJour; $date = $date->modify('+1 day')) {
                 $cle = $date->format('Y-m-d');
@@ -65,6 +77,7 @@ final class EspacePriveController extends AbstractController
                     'libelle' => $libelle,
                     'effectif' => $effectif,
                     'est_equipe' => 'COMPAGNON' === $inscription->getType(),
+                    'type_couchage' => $inscription->getTypeCouchage(),
                     'besoin_couchage' => '' !== $besoinCouchage ? $besoinCouchage : null,
                 ];
                 $jours[$cle]['presences'][] = $presence;
@@ -75,13 +88,13 @@ final class EspacePriveController extends AbstractController
 
                 if ('COMPAGNON' === $inscription->getType()) {
                     $jours[$cle]['regimes']['vegetariens'] += $inscription->getNombreVegetariens();
-                    $jours[$cle]['regimes']['oeuf'] += $inscription->getNombreAllergieOeuf();
-                    $jours[$cle]['regimes']['arachide'] += $inscription->getNombreAllergieArachide();
+                    $jours[$cle]['regimes']['sans_lactose'] += $inscription->getNombreSansLactose();
+                    $jours[$cle]['regimes']['sans_gluten'] += $inscription->getNombreSansGluten();
                 } else {
                     $utilisateur = $inscription->getUtilisateur();
                     $jours[$cle]['regimes']['vegetariens'] += (int) $utilisateur?->isVegetarien();
-                    $jours[$cle]['regimes']['oeuf'] += (int) $utilisateur?->hasAllergieOeuf();
-                    $jours[$cle]['regimes']['arachide'] += (int) $utilisateur?->hasAllergieArachide();
+                    $jours[$cle]['regimes']['sans_lactose'] += (int) $utilisateur?->isSansLactose();
+                    $jours[$cle]['regimes']['sans_gluten'] += (int) $utilisateur?->isSansGluten();
                     $regimeAutre = trim((string) $utilisateur?->getRegimeAutre());
                     if ('' !== $regimeAutre) {
                         if (!in_array($regimeAutre, $jours[$cle]['regimes']['commentaires'], true)) {

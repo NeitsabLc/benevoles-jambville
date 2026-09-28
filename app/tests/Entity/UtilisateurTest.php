@@ -35,7 +35,7 @@ final class UtilisateurTest extends TestCase
         self::assertFalse($utilisateur->activationEstValideA(new \DateTimeImmutable()));
     }
 
-    public function testLaDesactivationSupprimeLesAllergiesEtLeCommentaireAlimentaire(): void
+    public function testLaDesactivationSupprimeLesContraintesEtLeCommentaireAlimentaire(): void
     {
         $utilisateur = new Utilisateur();
         $utilisateur->modifierProfil(
@@ -43,7 +43,7 @@ final class UtilisateurTest extends TestCase
             true,
             true,
             true,
-            'Allergie au lait',
+            'Allergie au soja',
             'Lit en rez-de-chaussée',
         );
 
@@ -52,8 +52,8 @@ final class UtilisateurTest extends TestCase
 
         self::assertFalse($utilisateur->isActif());
         self::assertSame($dateDesactivation, $utilisateur->getDesactiveLe());
-        self::assertFalse($utilisateur->hasAllergieOeuf());
-        self::assertFalse($utilisateur->hasAllergieArachide());
+        self::assertFalse($utilisateur->isSansLactose());
+        self::assertFalse($utilisateur->isSansGluten());
         self::assertNull($utilisateur->getRegimeAutre());
         self::assertTrue($utilisateur->isVegetarien());
         self::assertSame('Lit en rez-de-chaussée', $utilisateur->getBesoinCouchage());
@@ -62,8 +62,8 @@ final class UtilisateurTest extends TestCase
 
         self::assertTrue($utilisateur->isActif());
         self::assertNull($utilisateur->getDesactiveLe());
-        self::assertFalse($utilisateur->hasAllergieOeuf());
-        self::assertFalse($utilisateur->hasAllergieArachide());
+        self::assertFalse($utilisateur->isSansLactose());
+        self::assertFalse($utilisateur->isSansGluten());
         self::assertNull($utilisateur->getRegimeAutre());
     }
 }

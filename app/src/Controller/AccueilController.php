@@ -53,24 +53,35 @@ final class AccueilController extends AbstractController
             $journeesParDate[$journee->getDateJournee()->format('Y-m-d')] = $journee;
         }
 
+        $utilisateur = $this->getUser();
         $jours = [];
         $nombrePresences = 0;
         for ($date = $debutGrille; $date <= $finGrille; $date = $date->modify('+1 day')) {
             $cle = $date->format('Y-m-d');
+            $presences = $presencesParJour[$cle] ?? [];
+            if ($utilisateur instanceof Utilisateur) {
+                usort($presences, static function (Inscription $a, Inscription $b) use ($utilisateur): int {
+                    $aEstUtilisateur = 'INDIVIDUELLE' === $a->getType() && $a->getUtilisateur()?->getId() === $utilisateur->getId();
+                    $bEstUtilisateur = 'INDIVIDUELLE' === $b->getType() && $b->getUtilisateur()?->getId() === $utilisateur->getId();
+
+                    return $bEstUtilisateur <=> $aEstUtilisateur;
+                });
+            }
             if ($date >= $debutMois && $date <= $finMois) {
-                $nombrePresences += count($presencesParJour[$cle] ?? []);
+                $nombrePresences += count($presences);
             }
             $jours[] = [
                 'date' => $date,
                 'dans_mois' => $date->format('m') === $debutMois->format('m'),
-                'presences' => $presencesParJour[$cle] ?? [],
+                'presences' => $presences,
+                'nombre_inscriptions' => count($presences),
+                'effectif_total' => array_sum(array_map($this->effectif(...), $presences)),
                 'journee' => $journeesParDate[$cle] ?? null,
             ];
         }
 
         $nomsMois = [1 => 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
         $prochainSejour = null;
-        $utilisateur = $this->getUser();
         if ($utilisateur instanceof Utilisateur) {
             $dateReference = new \DateTimeImmutable('today');
             $inscription = $inscriptions->findProchainePourUtilisateur($utilisateur, $dateReference);
@@ -232,6 +243,13 @@ final class AccueilController extends AbstractController
         }
 
         return new \DateTimeImmutable('first day of this month');
+    }
+
+    private function effectif(Inscription $inscription): int
+    {
+        return 'COMPAGNON' === $inscription->getType()
+            ? (int) $inscription->getNombrePersonnes()
+            : 1 + $inscription->getNombreEnfants();
     }
 
     /** @return array<string, string> */

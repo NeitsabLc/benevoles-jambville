@@ -33,7 +33,7 @@ final class UtilisateurRepositoryTest extends KernelTestCase
             $connexion->executeStatement(<<<'SQL'
                 INSERT INTO benevole_jambville.inscription
                     (id, type, utilisateur_id, thematique_id, date_debut, date_fin, type_couchage,
-                     nombre_enfants, nombre_vegetariens, nombre_allergie_oeuf, nombre_allergie_arachide,
+                     nombre_enfants, nombre_vegetariens, nombre_sans_lactose, nombre_sans_gluten,
                      actif, cree_par_id, modifie_par_id)
                 SELECT :id, 'INDIVIDUELLE', :utilisateur, id, '2091-01-01', '2091-01-01', 'DUR',
                        0, 0, 0, 0, TRUE, :utilisateur, :utilisateur
@@ -42,7 +42,7 @@ final class UtilisateurRepositoryTest extends KernelTestCase
             $connexion->executeStatement(<<<'SQL'
                 INSERT INTO benevole_jambville.inscription
                     (id, type, nom_equipe_compa, nombre_personnes, date_debut, date_fin, type_couchage,
-                     nombre_enfants, nombre_vegetariens, nombre_allergie_oeuf, nombre_allergie_arachide,
+                     nombre_enfants, nombre_vegetariens, nombre_sans_lactose, nombre_sans_gluten,
                      actif, cree_par_id, modifie_par_id)
                 VALUES (:id, 'COMPAGNON', 'Équipe conservée', 4, '2091-02-01', '2091-02-01', 'TENTE',
                         0, 0, 0, 0, TRUE, :utilisateur, :utilisateur)

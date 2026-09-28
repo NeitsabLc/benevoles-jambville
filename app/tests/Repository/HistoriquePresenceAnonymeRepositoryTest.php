@@ -27,7 +27,7 @@ final class HistoriquePresenceAnonymeRepositoryTest extends KernelTestCase
                 $connexion->executeStatement(<<<'SQL'
                     INSERT INTO benevole_jambville.inscription
                         (id, type, nom_equipe_compa, nombre_personnes, date_debut, date_fin, type_couchage,
-                         nombre_enfants, nombre_vegetariens, nombre_allergie_oeuf, nombre_allergie_arachide,
+                         nombre_enfants, nombre_vegetariens, nombre_sans_lactose, nombre_sans_gluten,
                          actif, cree_par_id, modifie_par_id)
                     VALUES (:id, 'COMPAGNON', 'Équipe test', :effectif, '2099-09-15', '2099-09-15', 'TENTE',
                             0, 0, 0, 0, TRUE, :utilisateur, :utilisateur)
@@ -71,7 +71,7 @@ final class HistoriquePresenceAnonymeRepositoryTest extends KernelTestCase
                 $connexion->executeStatement(<<<'SQL'
                     INSERT INTO benevole_jambville.inscription
                         (id, type, nom_equipe_compa, nombre_personnes, date_debut, date_fin, type_couchage,
-                         nombre_enfants, nombre_vegetariens, nombre_allergie_oeuf, nombre_allergie_arachide,
+                         nombre_enfants, nombre_vegetariens, nombre_sans_lactose, nombre_sans_gluten,
                          actif, cree_par_id, modifie_par_id)
                     VALUES (:id, 'COMPAGNON', 'Frontière test', 2, :debut, :fin, 'TENTE',
                             0, 0, 0, 0, TRUE, :utilisateur, :utilisateur)

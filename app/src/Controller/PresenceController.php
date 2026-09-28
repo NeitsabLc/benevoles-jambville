@@ -61,6 +61,7 @@ final class PresenceController extends AbstractController
             $dateFin = $accueil['date_fin'];
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
+            $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
             $inscription = null;
             if ('benevole' === $mode) {
                 $benevole = $utilisateur;
@@ -93,25 +94,26 @@ final class PresenceController extends AbstractController
                 $nomEquipe = trim($request->request->getString('nom_equipe_compa'));
                 $nombrePersonnes = $request->request->getInt('nombre_personnes');
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
-                $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
-                $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
+                $nombreSansLactose = $request->request->getInt('nombre_sans_lactose');
+                $nombreSansGluten = $request->request->getInt('nombre_sans_gluten');
                 if ('' === $nomEquipe || mb_strlen($nomEquipe) > 150) {
                     $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';
                 }
-                foreach (['végétariens' => $nombreVegetariens, 'allergiques aux œufs' => $nombreAllergieOeuf, 'allergiques aux arachides' => $nombreAllergieArachide] as $libelle => $effectif) {
+                foreach (['végétariens' => $nombreVegetariens, 'sans lactose' => $nombreSansLactose, 'sans gluten' => $nombreSansGluten] as $libelle => $effectif) {
                     if ($effectif < 0 || $effectif > $nombrePersonnes) {
                         $erreurs[] = sprintf('Le nombre de personnes %s doit être compris entre 0 et l’effectif du groupe.', $libelle);
                     }
                 }
                 if ([] === $erreurs) {
-                    $inscription = Inscription::compagnon($utilisateur, $nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreAllergieOeuf, $nombreAllergieArachide, $commentaire);
+                    $inscription = Inscription::compagnon($utilisateur, $nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreSansLactose, $nombreSansGluten, $commentaire);
                 }
             }
 
             if (null !== $inscription) {
+                $inscription->definirTransportDepuisMeulan($heureTransportMeulan);
                 if ($request->request->has('repas_configures')) {
                     $inscription->definirRepasSelectionnes($this->lireRepasSelectionnes($request));
                 }
@@ -177,6 +179,7 @@ final class PresenceController extends AbstractController
             $dateFin = $accueil['date_fin'];
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
+            $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
 
             if ('benevole' === $mode) {
                 $benevole = $inscription->getUtilisateur();
@@ -209,25 +212,26 @@ final class PresenceController extends AbstractController
                 $nomEquipe = trim($request->request->getString('nom_equipe_compa'));
                 $nombrePersonnes = $request->request->getInt('nombre_personnes');
                 $nombreVegetariens = $request->request->getInt('nombre_vegetariens');
-                $nombreAllergieOeuf = $request->request->getInt('nombre_allergie_oeuf');
-                $nombreAllergieArachide = $request->request->getInt('nombre_allergie_arachide');
+                $nombreSansLactose = $request->request->getInt('nombre_sans_lactose');
+                $nombreSansGluten = $request->request->getInt('nombre_sans_gluten');
                 if ('' === $nomEquipe || mb_strlen($nomEquipe) > 150) {
                     $erreurs[] = 'Le nom de l’équipe compa est obligatoire et limité à 150 caractères.';
                 }
                 if ($nombrePersonnes < 1) {
                     $erreurs[] = 'Le nombre de personnes doit être supérieur à zéro.';
                 }
-                foreach (['végétariens' => $nombreVegetariens, 'allergiques aux œufs' => $nombreAllergieOeuf, 'allergiques aux arachides' => $nombreAllergieArachide] as $libelle => $effectif) {
+                foreach (['végétariens' => $nombreVegetariens, 'sans lactose' => $nombreSansLactose, 'sans gluten' => $nombreSansGluten] as $libelle => $effectif) {
                     if ($effectif < 0 || $effectif > $nombrePersonnes) {
                         $erreurs[] = sprintf('Le nombre de personnes %s doit être compris entre 0 et l’effectif du groupe.', $libelle);
                     }
                 }
                 if ([] === $erreurs) {
-                    $inscription->modifierCompagnon($nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreAllergieOeuf, $nombreAllergieArachide, $commentaire, $utilisateur);
+                    $inscription->modifierCompagnon($nomEquipe, $nombrePersonnes, $dateDebut, $dateFin, $typeCouchage, $nombreVegetariens, $nombreSansLactose, $nombreSansGluten, $commentaire, $utilisateur);
                 }
             }
 
             if ([] === $erreurs) {
+                $inscription->definirTransportDepuisMeulan($heureTransportMeulan);
                 if ($request->request->has('repas_configures')) {
                     $inscription->definirRepasSelectionnes($this->lireRepasSelectionnes($request));
                 }
@@ -319,5 +323,26 @@ final class PresenceController extends AbstractController
         }
 
         return array_values(array_unique($selectionnes));
+    }
+
+    /** @param list<string> $erreurs */
+    private function lireHeureTransportMeulan(Request $request, array &$erreurs): ?\DateTimeImmutable
+    {
+        if (!$request->request->getBoolean('transport_meulan')) {
+            return null;
+        }
+
+        $heureSaisie = trim($request->request->getString('heure_transport_meulan'));
+        $heure = \DateTimeImmutable::createFromFormat('!H:i', $heureSaisie);
+        $erreursHeure = \DateTimeImmutable::getLastErrors();
+        if (false === $heure
+            || (is_array($erreursHeure) && (0 !== $erreursHeure['warning_count'] || 0 !== $erreursHeure['error_count']))
+            || $heure->format('H:i') !== $heureSaisie) {
+            $erreurs[] = 'Indiquez une heure valide pour le transport depuis Meulan.';
+
+            return null;
+        }
+
+        return $heure;
     }
 }
