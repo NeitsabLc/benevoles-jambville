@@ -9,9 +9,9 @@ test('modification du profil et du mot de passe avec reconnexion', async ({ page
   await page.goto('/mon-profil');
 
   await page.getByLabel('Téléphone').fill('06 98 76 54 32');
-  await page.getByLabel('Régime végétarien').check();
-  await page.getByLabel('Allergie aux œufs').check();
-  await page.getByLabel('Autre régime ou allergie alimentaire').fill('Sans lactose E2E');
+  await page.getByLabel('Végétarien').check();
+  await page.getByLabel('Sans lactose').check();
+  await page.getByLabel('Autre régime ou allergie alimentaire').fill('Sans porc E2E');
   await page.getByLabel('Besoin spécifique de couchage').fill('Chambre au rez-de-chaussée E2E');
   await page.getByLabel('Mot de passe actuel').fill(motDePasse);
   await page.getByLabel('Nouveau mot de passe', { exact: true }).fill(nouveauMotDePasse);
@@ -20,8 +20,9 @@ test('modification du profil et du mot de passe avec reconnexion', async ({ page
 
   await expect(page.locator('.alerte-succes')).toContainText('profil a bien été mis à jour');
   await expect(page.getByLabel('Téléphone')).toHaveValue('06 98 76 54 32');
-  await expect(page.getByLabel('Régime végétarien')).toBeChecked();
-  await expect(page.getByLabel('Autre régime ou allergie alimentaire')).toHaveValue('Sans lactose E2E');
+  await expect(page.getByLabel('Végétarien')).toBeChecked();
+  await expect(page.getByLabel('Sans lactose')).toBeChecked();
+  await expect(page.getByLabel('Autre régime ou allergie alimentaire')).toHaveValue('Sans porc E2E');
 
   await seDeconnecter(page);
   await seConnecter(page, comptes.benevole, nouveauMotDePasse);
@@ -41,7 +42,7 @@ test('première connexion puis collecte séparée des informations pratiques', a
   await page.goto('/premiere-connexion/activation-e2e-parcours-premiere-connexion');
 
   await expect(page.getByRole('heading', { name: /Bienvenue, Alice Activation/ })).toBeVisible();
-  await expect(page.getByLabel('Régime végétarien')).toHaveCount(0);
+  await expect(page.getByLabel('Végétarien')).toHaveCount(0);
   await page.getByLabel('Créer un mot de passe').fill(motDePasseActivation);
   await page.getByLabel('Confirmer le mot de passe').fill(motDePasseActivation);
   await page.getByRole('button', { name: 'Activer mon espace' }).click();
@@ -51,8 +52,8 @@ test('première connexion puis collecte séparée des informations pratiques', a
   await seConnecter(page, { email: 'e2e.activation@jambville.test' }, motDePasseActivation);
   await expect(page).toHaveURL(/\/bienvenue\/informations-pratiques$/);
   await expect(page.getByRole('heading', { name: 'Préparons votre accueil' })).toBeVisible();
-  await page.getByLabel('Régime végétarien').check();
-  await page.getByLabel('Allergie aux arachides').check();
+  await page.getByLabel('Végétarien').check();
+  await page.getByLabel('Sans gluten').check();
   await page.getByLabel('Autre régime ou allergie alimentaire').fill('Régime activation E2E');
   await page.getByLabel('Information particulière de couchage').fill('Besoin activation E2E');
   await page.getByRole('button', { name: 'Enregistrer et continuer' }).click();
@@ -60,7 +61,7 @@ test('première connexion puis collecte séparée des informations pratiques', a
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator('.alerte-succes')).toContainText('informations pratiques');
   await page.goto('/mon-profil');
-  await expect(page.getByLabel('Régime végétarien')).toBeChecked();
-  await expect(page.getByLabel('Allergie aux arachides')).toBeChecked();
+  await expect(page.getByLabel('Végétarien')).toBeChecked();
+  await expect(page.getByLabel('Sans gluten')).toBeChecked();
   await expect(page.getByLabel('Autre régime ou allergie alimentaire')).toHaveValue('Régime activation E2E');
 });

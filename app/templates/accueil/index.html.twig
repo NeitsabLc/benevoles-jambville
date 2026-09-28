@@ -117,30 +117,41 @@
                         </header>
                         {% if jour.journee and jour.journee.commentaire %}<p class="commentaire-jour" title="{{ jour.journee.commentaire }}">{{ jour.journee.commentaire }}</p>{% endif %}
                         <div class="presences-jour">
-                            {% for presence in jour.presences %}
-                                {% set est_ma_presence = presence.type == 'INDIVIDUELLE' and presence.utilisateur.id == app.user.id %}
-                                {% set peut_gerer = is_granted('ROLE_EQUIPE_PILOTE') or (app.user.roleMetier == 'BENEVOLE' and est_ma_presence) %}
-                                <div class="ligne-presence {{ peut_gerer ? 'ligne-presence-cliquable' }} {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}"{% if peut_gerer %} data-modification-url="{{ path('app_presence_modifier', {id: presence.id}) }}" tabindex="0" role="link" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"{% endif %}>
-                                    <span class="identite-presence">
-                                        {% if presence.type == 'COMPAGNON' %}
-                                            <strong>{{ presence.nomEquipeCompa }}</strong>
-                                        {% else %}
-                                            <strong>{{ presence.utilisateur.prenom }} {{ presence.utilisateur.nom|first }}.</strong>
-                                        {% endif %}
-                                    </span>
-                                    {% if peut_gerer %}
-                                        <span class="actions-presence">
-                                            <a href="{{ path('app_presence_modifier', {id: presence.id}) }}" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}">✎</a>
-                                            <button type="button" aria-label="Supprimer {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}" data-suppression-presence data-presence-nom="{{ (presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet)|e('html_attr') }}" data-presence-periode="du {{ presence.dateDebut|date('d/m/Y') }} au {{ presence.dateFin|date('d/m/Y') }}" data-suppression-url="{{ path('app_presence_supprimer', {id: presence.id}) }}" data-suppression-token="{{ csrf_token('supprimer-presence-' ~ presence.id) }}"><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><path d="M5 7h14M9 7V4h6v3m2 0-1 13H8L7 7m3 4v5m4-5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                                        </span>
-                                    {% endif %}
+                            {% for presence in jour.presences|slice(0, 3) %}
+                                <div class="presence-apercu {{ loop.index == 3 ? 'presence-apercu-troisieme' }}">
+                                    {% include 'accueil/_ligne_presence.html.twig' with {presence: presence} only %}
                                 </div>
                             {% endfor %}
+                            {% if jour.nombre_inscriptions > 3 %}
+                                <button class="bouton-details-jour bouton-details-jour-bureau" type="button" aria-haspopup="dialog" aria-controls="details-jour-{{ jour.date|date('Y-m-d') }}" data-ouvrir-details-jour="details-jour-{{ jour.date|date('Y-m-d') }}">Voir les {{ jour.nombre_inscriptions - 3 }} autre{{ jour.nombre_inscriptions - 3 > 1 ? 's' : '' }}</button>
+                            {% endif %}
+                            {% if jour.nombre_inscriptions > 2 %}
+                                <button class="bouton-details-jour bouton-details-jour-mobile" type="button" aria-haspopup="dialog" aria-controls="details-jour-{{ jour.date|date('Y-m-d') }}" data-ouvrir-details-jour="details-jour-{{ jour.date|date('Y-m-d') }}">Voir les {{ jour.nombre_inscriptions - 2 }} autre{{ jour.nombre_inscriptions - 2 > 1 ? 's' : '' }}</button>
+                            {% endif %}
                         </div>
                     </article>
                 {% endfor %}
             </div>
         </section>
+
+        {% for jour in jours|filter(jour => jour.nombre_inscriptions > 2) %}
+            <dialog class="dialog-details-jour" id="details-jour-{{ jour.date|date('Y-m-d') }}" data-dialog-details-jour>
+                <section aria-labelledby="titre-details-jour-{{ jour.date|date('Y-m-d') }}">
+                    <header class="entete-details-jour">
+                        <div>
+                            <h2 id="titre-details-jour-{{ jour.date|date('Y-m-d') }}">Présences du {{ jour.date|date('d/m/Y') }}</h2>
+                            <p>{{ jour.effectif_total }} personne{{ jour.effectif_total > 1 ? 's' : '' }} · {{ jour.nombre_inscriptions }} inscription{{ jour.nombre_inscriptions > 1 ? 's' : '' }}</p>
+                        </div>
+                        <button type="button" class="fermer-details-jour" aria-label="Fermer le détail des présences" data-fermer-details-jour>×</button>
+                    </header>
+                    <div class="liste-details-jour">
+                        {% for presence in jour.presences %}
+                            {% include 'accueil/_ligne_presence.html.twig' with {presence: presence} only %}
+                        {% endfor %}
+                    </div>
+                </section>
+            </dialog>
+        {% endfor %}
 
         <dialog class="dialog-suppression-presence" data-dialog-suppression-presence>
             <section aria-labelledby="titre-suppression-presence">

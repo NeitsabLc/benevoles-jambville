@@ -206,16 +206,30 @@ body {
 .entete-jour strong { overflow: hidden; color: #087b67; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .commentaire-jour { overflow: hidden; margin: 0 0 .45rem; padding: .25rem .35rem; border-left: 3px solid var(--bleu-sgdf); color: var(--texte-secondaire); background: #f1f5f7; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
 .ligne-presence { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: .25rem; margin: .25rem 0; padding: .28rem .32rem .28rem .42rem; border-radius: .35rem; font-size: .72rem; }
+.presence-apercu { min-width: 0; }
 .ligne-presence-cliquable { cursor: pointer; }
 .presence-moi { color: #075d4b; background: #dff5ec; }
 .presence-autre { color: #284f68; background: #e4eef4; }
 .identite-presence { min-width: 0; overflow: hidden; }
 .identite-presence strong, .identite-presence small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.identite-presence small { margin-top: .08rem; opacity: .76; font-size: .65rem; }
+.identite-presence small { margin-top: .08rem; font-size: .65rem; }
 .actions-presence { display: flex; flex: 0 0 auto; align-items: center; gap: .25rem; }
 .actions-presence form { margin: 0; }
 .actions-presence a, .actions-presence button { display: grid; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: .28rem; color: inherit; background: rgb(255 255 255 / 55%); font: inherit; font-size: .9rem; font-weight: 800; text-decoration: none; cursor: pointer; place-items: center; }
 .actions-presence button { color: #a12b24; }
+.bouton-details-jour { width: 100%; min-height: 1.8rem; margin-top: .3rem; padding: .25rem .4rem; border: 1px dashed #9eb2bc; border-radius: .35rem; color: var(--bleu-sgdf); background: #f7fafb; font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
+.bouton-details-jour:hover { border-color: var(--menthe-sgdf); background: #eef8f5; }
+.bouton-details-jour-mobile { display: none; }
+.dialog-details-jour { width: min(100% - 2rem, 38rem); max-height: min(82vh, 46rem); padding: 0; border: 0; border-radius: .65rem; color: var(--bleu-sgdf); background: #fff; box-shadow: 0 24px 70px rgb(0 30 50 / 30%); }
+.dialog-details-jour::backdrop { background: rgb(0 30 50 / 58%); backdrop-filter: blur(2px); }
+.dialog-details-jour > section { display: flex; max-height: min(82vh, 46rem); flex-direction: column; }
+.entete-details-jour { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid #d8e2e6; }
+.entete-details-jour h2 { margin: 0; font-size: 1.2rem; }
+.entete-details-jour p { margin: .3rem 0 0; color: var(--texte-secondaire); font-size: .78rem; }
+.fermer-details-jour { display: grid; width: 2.3rem; height: 2.3rem; flex: 0 0 auto; padding: 0; border: 1px solid #c7d2d8; border-radius: .4rem; color: var(--bleu-sgdf); background: #fff; font: inherit; font-size: 1.45rem; cursor: pointer; place-items: center; }
+.liste-details-jour { overflow-y: auto; padding: .9rem 1.1rem 1.1rem; }
+.liste-details-jour .ligne-presence { min-height: 2.65rem; margin: .35rem 0; padding: .5rem .55rem .5rem .7rem; font-size: .82rem; }
+.liste-details-jour .identite-presence small { font-size: .7rem; }
 .dialog-suppression-presence { width: min(100% - 2rem, 30rem); padding: 0; border: 0; border-radius: .55rem; color: var(--bleu-sgdf); background: #fff; box-shadow: 0 24px 70px rgb(0 30 50 / 30%); }
 .dialog-suppression-presence::backdrop { background: rgb(0 30 50 / 58%); backdrop-filter: blur(2px); }
 .dialog-suppression-presence > section { padding: 2rem; text-align: center; }
@@ -250,6 +264,16 @@ body {
 .champs-presence[hidden] { display: none; }
 .champs-presence > .champ { align-self: start; align-content: start; }
 .carte-presence > .champs-presence { margin-bottom: 1rem; }
+.transport-meulan-formulaire { display: grid; grid-template-columns: minmax(0, 1fr) minmax(12rem, .45fr); align-items: center; gap: 1.25rem; margin: .15rem 0 1.15rem; padding: 1rem 1.1rem; border: 1px solid #d8e2e6; border-radius: .65rem; background: #f7fafb; }
+.choix-transport-meulan { display: flex; align-items: start; gap: .7rem; cursor: pointer; }
+.choix-transport-meulan input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; accent-color: var(--menthe-sgdf); }
+.choix-transport-meulan span, .choix-transport-meulan small { display: block; }
+.choix-transport-meulan strong { line-height: 1.35; }
+.choix-transport-meulan small { margin-top: .25rem; color: var(--texte-secondaire); font-size: .78rem; font-weight: 400; line-height: 1.4; }
+.heure-transport-meulan { width: 100%; max-width: 18rem; justify-self: end; }
+.heure-transport-meulan input { width: 100%; }
+.heure-transport-meulan-inactive { opacity: .62; }
+.heure-transport-meulan input:disabled { color: #667b86; background: #eef3f5; cursor: not-allowed; }
 .champ-large { grid-column: 1 / -1; }
 .champ textarea, .champ select { width: 100%; padding: .75rem .9rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: #173f53; background: #fff; font: inherit; outline: none; }
 .champ textarea:focus, .champ select:focus { border-color: var(--menthe-sgdf); box-shadow: 0 0 0 3px rgb(72 185 148 / 18%); }
@@ -557,9 +581,10 @@ body {
 .repas-synthese span, .repas-synthese strong { display: block; }
 .repas-synthese span { min-height: 2.2rem; color: var(--texte-secondaire); font-size: .7rem; line-height: 1.15; }
 .repas-synthese strong { font-size: 1.75rem; }
-.details-synthese { display: grid; grid-template-columns: repeat(4, minmax(8rem, 1fr)); gap: 1rem; padding: 1rem 1.2rem; }
+.details-synthese { display: grid; min-width: 0; grid-template-columns: repeat(5, minmax(7rem, 1fr)); align-items: start; gap: 1rem; padding: 1rem 1.2rem; }
 .details-synthese h2 { margin: 0 0 .6rem; font-size: .82rem; }
 .details-synthese h2 b { margin-left: .25rem; padding: .08rem .4rem; border-radius: 2rem; color: #087b67; background: #e5f6f0; font-size: .72rem; }
+.presences-synthese { min-width: 0; }
 .pastille-presence { display: block; overflow: hidden; margin: .22rem 0; color: #284f68; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
 .pastille-presence::before { color: var(--menthe-sgdf); content: "• "; }
 .pastille-couchage:has(.info-couchage) { overflow: visible; }
@@ -570,6 +595,8 @@ body {
 .info-couchage:hover::after, .info-couchage:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 .info-couchage:focus-visible { outline: 2px solid var(--bleu-sgdf); outline-offset: 2px; }
 .donnee-vide { margin: 0; color: var(--texte-secondaire); font-size: .74rem; font-style: italic; }
+.transport-synthese { display: block; margin: .22rem 0; color: #284f68; font-size: .74rem; line-height: 1.35; }
+.transport-synthese strong { color: #087b67; }
 .regimes-synthese h2 small { display: block; margin-top: .15rem; color: var(--texte-secondaire); font-size: .62rem; font-weight: 500; }
 .regimes-synthese dl { margin: 0; }
 .regimes-synthese dl div { display: flex; justify-content: space-between; gap: .5rem; padding: .12rem 0; font-size: .72rem; }
@@ -578,7 +605,6 @@ body {
 .commentaires-regimes { margin-top: .65rem; padding-top: .55rem; border-top: 1px solid #d8e2e6; }
 .commentaires-regimes h3 { margin: 0 0 .3rem; color: var(--texte-secondaire); font-size: .68rem; }
 .commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
-
 /* Rooming */
 .page-rooming { width: min(100%, 96rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
 .entete-rooming { margin-bottom: 1.5rem; }
@@ -690,7 +716,7 @@ body {
 
 @media (max-width: 1400px) and (min-width: 761px) {
     .jour-synthese { grid-template-columns: 10.5rem minmax(0, 1fr); }
-    .details-synthese { grid-column: 1 / -1; border-top: 1px solid #e0e7ea; }
+    .details-synthese { grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid #e0e7ea; }
     .repas-synthese { border-right: 0; }
     .formulaire-creation-chambre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .formulaire-creation-chambre .bouton-principal { grid-column: 1 / -1; }
@@ -783,6 +809,8 @@ body {
     .date-synthese span { margin: 0; }
     .repas-synthese { border-right: 0; border-bottom: 1px solid #e0e7ea; }
     .details-synthese { grid-template-columns: 1fr 1fr; }
+    .presences-synthese { grid-column: 1 / -1; }
+    .regimes-synthese { grid-column: 1 / -1; }
     .navigation-date-rooming { align-items: stretch; }
     .navigation-date-rooming > form { min-width: 0; flex: 1; align-items: stretch; flex-direction: column; }
     .navigation-date-rooming .champ { min-width: 0; }
@@ -829,9 +857,17 @@ body {
     .jour-calendrier:nth-child(7n) { border-right: 1px solid #d8e2e6; }
     .jour-calendrier:nth-child(3n) { border-right: 0; }
     .ligne-presence { padding: .3rem .38rem; font-size: .68rem; }
+    .presence-apercu-troisieme, .bouton-details-jour-bureau { display: none; }
+    .bouton-details-jour-mobile { display: block; }
     .actions-presence { display: none; }
+    .dialog-details-jour { width: calc(100% - 1.4rem); max-height: calc(100dvh - 5.9rem); margin: auto .7rem .7rem; }
+    .dialog-details-jour > section { max-height: calc(100dvh - 5.9rem); }
+    .entete-details-jour { padding: 1rem; }
+    .liste-details-jour { padding: .65rem .8rem .9rem; }
     .commentaire-jour, .entete-jour strong { font-size: .62rem; }
     .champs-presence { grid-template-columns: 1fr; }
+    .transport-meulan-formulaire { grid-template-columns: 1fr; gap: .85rem; }
+    .heure-transport-meulan { max-width: none; justify-self: stretch; }
     .actions-formulaire { align-items: stretch; flex-direction: column; }
     .actions-formulaire .bouton-secondaire { justify-content: center; }
     .actions-formulaire-presence { align-items: stretch; flex-direction: column-reverse; }

@@ -73,6 +73,48 @@ final class SyntheseControllerTest extends WebTestCase
         $entityManager->flush();
     }
 
+    public function testUneJourneeChargeeAfficheToutesLesPresencesSansVoletDeDetail(): void
+    {
+        $client = self::createClient();
+        $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        self::assertNotNull($pilote);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $inscriptions = [];
+
+        try {
+            for ($numero = 1; $numero <= 7; ++$numero) {
+                $inscription = Inscription::compagnon(
+                    $pilote,
+                    'Équipe synthèse '.$numero,
+                    $numero,
+                    new \DateTimeImmutable('2098-11-08'),
+                    new \DateTimeImmutable('2098-11-08'),
+                    0 === $numero % 2 ? 'DUR' : 'TENTE',
+                    0,
+                    0,
+                    0,
+                    null,
+                );
+                $inscriptions[] = $inscription;
+                $entityManager->persist($inscription);
+            }
+            $entityManager->flush();
+            $client->loginUser($pilote);
+
+            $client->request('GET', '/synthese?debut=2098-11-08&fin=2098-11-08');
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorCount(7, '.presences-synthese > .pastille-presence');
+            self::assertSelectorNotExists('.details-presences-synthese');
+            self::assertSelectorTextContains('.date-synthese', '28 personnes · 7 inscriptions');
+        } finally {
+            foreach ($inscriptions as $inscription) {
+                $entityManager->remove($inscription);
+            }
+            $entityManager->flush();
+        }
+    }
+
     public function testLaSyntheseCompteRepasCouchagesEtRegimesSansLesAssocierAuxIdentites(): void
     {
         $client = self::createClient();
@@ -95,8 +137,8 @@ final class SyntheseControllerTest extends WebTestCase
         $benevole->modifierProfil(
             $benevole->getTelephone(),
             $benevole->isVegetarien(),
-            $benevole->hasAllergieOeuf(),
-            $benevole->hasAllergieArachide(),
+            $benevole->isSansLactose(),
+            $benevole->isSansGluten(),
             $benevole->getRegimeAutre(),
             'Lit en rez-de-chaussée',
         );
@@ -123,11 +165,49 @@ final class SyntheseControllerTest extends WebTestCase
         $benevole->modifierProfil(
             $benevole->getTelephone(),
             $benevole->isVegetarien(),
-            $benevole->hasAllergieOeuf(),
-            $benevole->hasAllergieArachide(),
+            $benevole->isSansLactose(),
+            $benevole->isSansGluten(),
             $benevole->getRegimeAutre(),
             null,
         );
+        $entityManager->flush();
+    }
+
+    public function testLeTransportDepuisMeulanEstAfficheSurLaCarteDuJourDArrivee(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Accueil']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        foreach (self::getContainer()->get(\App\Repository\InscriptionRepository::class)->findPourCalendrier(new \DateTimeImmutable('2095-08-10'), new \DateTimeImmutable('2095-08-11'), null) as $ancienneInscription) {
+            if ($ancienneInscription->getUtilisateur()?->getId() === $benevole->getId()) {
+                $entityManager->remove($ancienneInscription);
+            }
+        }
+        $entityManager->flush();
+
+        $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2095-08-10'), new \DateTimeImmutable('2095-08-11'), 'DUR', 0, null);
+        $inscription->definirTransportDepuisMeulan(new \DateTimeImmutable('08:45'));
+        $entityManager->persist($inscription);
+        $entityManager->flush();
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/synthese?debut=2095-08-10&fin=2095-08-11');
+
+        self::assertResponseIsSuccessful();
+        $jourArrivee = $crawler->filterXPath('//article[contains(@class, "jour-synthese")][.//time[@datetime="2095-08-10"]]');
+        $jourSuivant = $crawler->filterXPath('//article[contains(@class, "jour-synthese")][.//time[@datetime="2095-08-11"]]');
+        self::assertStringContainsString('08:45 · Camille B.', $jourArrivee->filter('.transport-synthese')->text());
+        self::assertCount(0, $jourSuivant->filter('.transport-synthese'));
+        self::assertStringContainsString('Aucun transport', $jourSuivant->filter('.transports-synthese')->text());
+
+        $entityManager->remove($inscription);
         $entityManager->flush();
     }
 

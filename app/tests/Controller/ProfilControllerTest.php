@@ -67,15 +67,15 @@ final class ProfilControllerTest extends WebTestCase
         $client->clickLink($utilisateur->getNomComplet());
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Mon profil');
-        self::assertSelectorTextContains('#alimentation-titre', 'Régime et allergies alimentaires');
+        self::assertSelectorTextContains('#alimentation-titre', 'Régimes et contraintes alimentaires');
         self::assertSelectorTextContains('label[for="regime_autre"]', 'Autre régime ou allergie alimentaire');
         self::assertSelectorNotExists('input[value="DEV-BENEVOLE"]');
         self::assertSelectorExists('input[name="telephone"]');
         self::assertSelectorExists('input[name="telephone"][data-telephone-francais]');
         self::assertSelectorExists('[data-erreur-telephone][hidden]');
         self::assertSelectorExists('input[name="vegetarien"]');
-        self::assertSelectorExists('input[name="allergie_oeuf"]');
-        self::assertSelectorExists('input[name="allergie_arachide"]');
+        self::assertSelectorExists('input[name="sans_lactose"]');
+        self::assertSelectorExists('input[name="sans_gluten"]');
         self::assertSelectorExists('textarea[name="regime_autre"]');
         self::assertSelectorExists('textarea[name="besoin_couchage"]');
         self::assertSelectorExists('textarea[name="regime_autre"][maxlength="1000"]');
@@ -103,7 +103,7 @@ final class ProfilControllerTest extends WebTestCase
             '_csrf_token' => $jeton,
             'telephone' => '06 12 34 56 78',
             'vegetarien' => '1',
-            'allergie_oeuf' => '1',
+            'sans_lactose' => '1',
             'regime_autre' => 'Test sans lactose',
             'besoin_couchage' => 'Test lit bas',
             'foulard_remis' => '1',
@@ -115,7 +115,7 @@ final class ProfilControllerTest extends WebTestCase
         self::assertNotNull($utilisateur);
         self::assertSame('06 12 34 56 78', $utilisateur->getTelephone());
         self::assertTrue($utilisateur->isVegetarien());
-        self::assertTrue($utilisateur->hasAllergieOeuf());
+        self::assertTrue($utilisateur->isSansLactose());
         self::assertFalse($utilisateur->isFoulardRemis());
         self::assertFalse($utilisateur->isTenueRemise());
 
@@ -149,8 +149,8 @@ final class ProfilControllerTest extends WebTestCase
         $utilisateur->modifierProfil(
             $telephoneInitial,
             $utilisateur->isVegetarien(),
-            $utilisateur->hasAllergieOeuf(),
-            $utilisateur->hasAllergieArachide(),
+            $utilisateur->isSansLactose(),
+            $utilisateur->isSansGluten(),
             $utilisateur->getRegimeAutre(),
             $utilisateur->getBesoinCouchage(),
         );

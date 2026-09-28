@@ -141,8 +141,8 @@ final class SecuriteControllerTest extends WebTestCase
         $ancienProfil = [
             $utilisateur->getTelephone(),
             $utilisateur->isVegetarien(),
-            $utilisateur->hasAllergieOeuf(),
-            $utilisateur->hasAllergieArachide(),
+            $utilisateur->isSansLactose(),
+            $utilisateur->isSansGluten(),
             $utilisateur->getRegimeAutre(),
             $utilisateur->getBesoinCouchage(),
         ];
@@ -174,13 +174,13 @@ final class SecuriteControllerTest extends WebTestCase
 
             $crawler = $client->followRedirect();
             self::assertSelectorTextContains('h1', 'Préparons votre accueil');
-            self::assertSelectorExists('input[name="allergie_oeuf"]');
+            self::assertSelectorExists('input[name="sans_lactose"]');
             self::assertSelectorExists('textarea[name="besoin_couchage"]');
             self::assertSelectorTextContains('.note-authentification', 'modifiées à tout moment depuis votre profil');
             $client->submit($crawler->selectButton('Enregistrer et continuer')->form([
                 'vegetarien' => true,
-                'allergie_oeuf' => true,
-                'regime_autre' => 'Sans lactose',
+                'sans_lactose' => true,
+                'regime_autre' => 'Sans porc',
                 'besoin_couchage' => 'Lit proche des sanitaires',
             ]));
             self::assertResponseRedirects('/');
@@ -189,9 +189,9 @@ final class SecuriteControllerTest extends WebTestCase
             $utilisateur = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
             self::assertNotNull($utilisateur);
             self::assertTrue($utilisateur->isVegetarien());
-            self::assertTrue($utilisateur->hasAllergieOeuf());
-            self::assertFalse($utilisateur->hasAllergieArachide());
-            self::assertSame('Sans lactose', $utilisateur->getRegimeAutre());
+            self::assertTrue($utilisateur->isSansLactose());
+            self::assertFalse($utilisateur->isSansGluten());
+            self::assertSame('Sans porc', $utilisateur->getRegimeAutre());
             self::assertSame('Lit proche des sanitaires', $utilisateur->getBesoinCouchage());
             self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($utilisateur, 'Une phrase secrète suffisamment longue'));
         } finally {

@@ -61,8 +61,8 @@ final class ProfilController extends AbstractController
                 $utilisateur->modifierProfil(
                     $profil['telephone'],
                     $request->request->getBoolean('vegetarien'),
-                    $request->request->getBoolean('allergie_oeuf'),
-                    $request->request->getBoolean('allergie_arachide'),
+                    $request->request->getBoolean('sans_lactose'),
+                    $request->request->getBoolean('sans_gluten'),
                     $profil['regime_autre'],
                     $profil['besoin_couchage'],
                 );
@@ -119,8 +119,8 @@ final class ProfilController extends AbstractController
                 $utilisateur->modifierProfil(
                     $profil['telephone'],
                     $request->request->getBoolean('vegetarien'),
-                    $request->request->getBoolean('allergie_oeuf'),
-                    $request->request->getBoolean('allergie_arachide'),
+                    $request->request->getBoolean('sans_lactose'),
+                    $request->request->getBoolean('sans_gluten'),
                     $profil['regime_autre'],
                     $profil['besoin_couchage'],
                 );

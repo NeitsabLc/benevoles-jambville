@@ -59,6 +59,19 @@
                 <div class="champ"><label for="date_fin">Au</label><input id="date_fin" name="date_fin" type="date" value="{{ date_fin }}" required></div>
             </div>
 
+            {% set transport_meulan = app.request.request.has('transport_meulan') or (not app.request.isMethod('POST') and inscription and inscription.heureTransportMeulan) %}
+            {% set heure_transport_meulan = app.request.request.get('heure_transport_meulan', inscription and inscription.heureTransportMeulan ? inscription.heureTransportMeulan|date('H:i') : '') %}
+            <section class="transport-meulan-formulaire" data-transport-meulan>
+                <label class="choix-transport-meulan" for="transport_meulan">
+                    <input id="transport_meulan" name="transport_meulan" type="checkbox" value="1" {{ transport_meulan ? 'checked' }}>
+                    <span><strong>J’ai besoin d’un transport depuis Meulan</strong><small>Le transport est prévu le jour de mon arrivée.</small></span>
+                </label>
+                <div class="champ heure-transport-meulan" data-heure-transport-meulan>
+                    <label for="heure_transport_meulan">Heure de prise en charge</label>
+                    <input id="heure_transport_meulan" name="heure_transport_meulan" type="time" step="300" value="{{ heure_transport_meulan }}" {{ not transport_meulan ? 'disabled' }} {{ transport_meulan ? 'required' }}>
+                </div>
+            </section>
+
             <div class="champs-presence">
                 <div class="champ" data-mode-detail="benevole" {{ mode != 'benevole' ? 'hidden' }}>
                     <label for="thematique">Thématique</label>
@@ -90,11 +103,11 @@
             </section>
 
             <section class="alimentation-compa" data-mode-detail="compa" {{ mode != 'compa' ? 'hidden' }}>
-                <header><h2>Régimes et allergènes</h2><p>Indiquez le nombre de personnes concernées dans l’équipe.</p></header>
+                <header><h2>Régimes et contraintes alimentaires</h2><p>Indiquez le nombre de personnes concernées dans l’équipe.</p></header>
                 <div class="champs-alimentation-compa">
                     <div class="champ"><label for="nombre_vegetariens">Végétariens</label><input id="nombre_vegetariens" name="nombre_vegetariens" type="number" min="0" value="{{ app.request.request.get('nombre_vegetariens', inscription ? inscription.nombreVegetariens : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
-                    <div class="champ"><label for="nombre_allergie_oeuf">Allergie aux œufs</label><input id="nombre_allergie_oeuf" name="nombre_allergie_oeuf" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_oeuf', inscription ? inscription.nombreAllergieOeuf : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
-                    <div class="champ"><label for="nombre_allergie_arachide">Allergie aux arachides</label><input id="nombre_allergie_arachide" name="nombre_allergie_arachide" type="number" min="0" value="{{ app.request.request.get('nombre_allergie_arachide', inscription ? inscription.nombreAllergieArachide : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_sans_lactose">Sans lactose</label><input id="nombre_sans_lactose" name="nombre_sans_lactose" type="number" min="0" value="{{ app.request.request.get('nombre_sans_lactose', inscription ? inscription.nombreSansLactose : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
+                    <div class="champ"><label for="nombre_sans_gluten">Sans gluten</label><input id="nombre_sans_gluten" name="nombre_sans_gluten" type="number" min="0" value="{{ app.request.request.get('nombre_sans_gluten', inscription ? inscription.nombreSansGluten : 0) }}" {{ mode != 'compa' ? 'disabled' }}></div>
                 </div>
             </section>
 
