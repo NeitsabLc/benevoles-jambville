@@ -33,25 +33,19 @@
                     <section class="details-synthese">
                         <div class="presences-synthese">
                             <h2>Présences {% if nombre_inscriptions > 0 %}<b>{{ nombre_inscriptions }}</b>{% endif %}</h2>
-                            {% if nombre_inscriptions == 0 %}
-                                <p class="donnee-vide">Aucune présence</p>
-                            {% else %}
-                                {% if nombre_inscriptions > 5 %}
-                                    <div class="apercu-presences-synthese">
-                                        {% for presence in jour.presences|slice(0, 5) %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% endfor %}
-                                    </div>
-                                    <details class="details-presences-synthese">
-                                        <summary><span class="libelle-details-ferme">Voir les {{ nombre_inscriptions - 5 }} autre{{ nombre_inscriptions - 5 > 1 ? 's' : '' }} inscription{{ nombre_inscriptions - 5 > 1 ? 's' : '' }}</span><span class="libelle-details-ouvert">Replier le détail</span></summary>
-                                        {% include 'espace_prive/_table_presences_synthese.html.twig' with {presences: jour.presences} only %}
-                                    </details>
-                                {% else %}
-                                    {% include 'espace_prive/_table_presences_synthese.html.twig' with {presences: jour.presences} only %}
-                                {% endif %}
-                            {% endif %}
+                            {% for presence in jour.presences %}<span class="pastille-presence">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}</span>{% else %}<p class="donnee-vide">Aucune présence</p>{% endfor %}
                         </div>
                         {% for type, couchage in jour.couchages %}
-                            <div class="resume-couchage-synthese"><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2><p>{{ couchage.presences|length }} inscription{{ couchage.presences|length > 1 ? 's' : '' }}</p></div>
+                            <div><h2>{{ type == 'DUR' ? 'En dur' : 'En tente' }} <b>{{ couchage.total }}</b></h2>{% for presence in couchage.presences %}<span class="pastille-presence pastille-couchage">{{ presence.libelle }}{% if presence.est_equipe %} · {{ presence.effectif }}{% endif %}{% if presence.besoin_couchage %}<span class="info-couchage" tabindex="0" role="img" aria-label="Besoin de couchage : {{ presence.besoin_couchage }}" data-info="{{ presence.besoin_couchage }}"></span>{% endif %}</span>{% else %}<p class="donnee-vide">Aucun couchage</p>{% endfor %}</div>
                         {% endfor %}
+                        <div class="transports-synthese">
+                            <h2>Depuis Meulan</h2>
+                            {% for transport in jour.transports %}
+                                <span class="transport-synthese"><strong>{{ transport.heure|date('H:i') }}</strong> · {{ transport.libelle }}{% if transport.est_equipe %} · {{ transport.effectif }}{% endif %}</span>
+                            {% else %}
+                                <p class="donnee-vide">Aucun transport</p>
+                            {% endfor %}
+                        </div>
                         <div class="regimes-synthese">
                             <h2>Régimes</h2>
                             <dl><div><dt>Végétariens</dt><dd>{{ jour.regimes.vegetariens }}</dd></div><div><dt>Sans lactose</dt><dd>{{ jour.regimes.sans_lactose }}</dd></div><div><dt>Sans gluten</dt><dd>{{ jour.regimes.sans_gluten }}</dd></div></dl>

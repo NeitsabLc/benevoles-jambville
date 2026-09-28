@@ -264,6 +264,16 @@ body {
 .champs-presence[hidden] { display: none; }
 .champs-presence > .champ { align-self: start; align-content: start; }
 .carte-presence > .champs-presence { margin-bottom: 1rem; }
+.transport-meulan-formulaire { display: grid; grid-template-columns: minmax(0, 1fr) minmax(12rem, .45fr); align-items: center; gap: 1.25rem; margin: .15rem 0 1.15rem; padding: 1rem 1.1rem; border: 1px solid #d8e2e6; border-radius: .65rem; background: #f7fafb; }
+.choix-transport-meulan { display: flex; align-items: start; gap: .7rem; cursor: pointer; }
+.choix-transport-meulan input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; accent-color: var(--menthe-sgdf); }
+.choix-transport-meulan span, .choix-transport-meulan small { display: block; }
+.choix-transport-meulan strong { line-height: 1.35; }
+.choix-transport-meulan small { margin-top: .25rem; color: var(--texte-secondaire); font-size: .78rem; font-weight: 400; line-height: 1.4; }
+.heure-transport-meulan { width: 100%; max-width: 18rem; justify-self: end; }
+.heure-transport-meulan input { width: 100%; }
+.heure-transport-meulan-inactive { opacity: .62; }
+.heure-transport-meulan input:disabled { color: #667b86; background: #eef3f5; cursor: not-allowed; }
 .champ-large { grid-column: 1 / -1; }
 .champ textarea, .champ select { width: 100%; padding: .75rem .9rem; border: 1px solid #c7d2d8; border-radius: .55rem; color: #173f53; background: #fff; font: inherit; outline: none; }
 .champ textarea:focus, .champ select:focus { border-color: var(--menthe-sgdf); box-shadow: 0 0 0 3px rgb(72 185 148 / 18%); }
@@ -571,19 +581,10 @@ body {
 .repas-synthese span, .repas-synthese strong { display: block; }
 .repas-synthese span { min-height: 2.2rem; color: var(--texte-secondaire); font-size: .7rem; line-height: 1.15; }
 .repas-synthese strong { font-size: 1.75rem; }
-.details-synthese { display: grid; min-width: 0; grid-template-columns: repeat(3, minmax(8rem, 1fr)); gap: 1rem; padding: 1rem 1.2rem; }
+.details-synthese { display: grid; min-width: 0; grid-template-columns: repeat(5, minmax(7rem, 1fr)); align-items: start; gap: 1rem; padding: 1rem 1.2rem; }
 .details-synthese h2 { margin: 0 0 .6rem; font-size: .82rem; }
 .details-synthese h2 b { margin-left: .25rem; padding: .08rem .4rem; border-radius: 2rem; color: #087b67; background: #e5f6f0; font-size: .72rem; }
-.presences-synthese { min-width: 0; grid-column: 1 / -1; order: 2; padding-top: .85rem; border-top: 1px solid #e0e7ea; }
-.apercu-presences-synthese { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .25rem .8rem; }
-.details-presences-synthese { margin-top: .65rem; }
-.details-presences-synthese summary { width: fit-content; color: var(--bleu-sgdf); font-size: .74rem; font-weight: 800; cursor: pointer; }
-.details-presences-synthese .libelle-details-ouvert { display: none; }
-.details-presences-synthese[open] .libelle-details-ferme { display: none; }
-.details-presences-synthese[open] .libelle-details-ouvert { display: inline; }
-.presences-synthese:has(.details-presences-synthese[open]) .apercu-presences-synthese { display: none; }
-.resume-couchage-synthese { order: 1; }
-.resume-couchage-synthese p { margin: 0; color: var(--texte-secondaire); font-size: .72rem; }
+.presences-synthese { min-width: 0; }
 .pastille-presence { display: block; overflow: hidden; margin: .22rem 0; color: #284f68; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
 .pastille-presence::before { color: var(--menthe-sgdf); content: "• "; }
 .pastille-couchage:has(.info-couchage) { overflow: visible; }
@@ -594,6 +595,8 @@ body {
 .info-couchage:hover::after, .info-couchage:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 .info-couchage:focus-visible { outline: 2px solid var(--bleu-sgdf); outline-offset: 2px; }
 .donnee-vide { margin: 0; color: var(--texte-secondaire); font-size: .74rem; font-style: italic; }
+.transport-synthese { display: block; margin: .22rem 0; color: #284f68; font-size: .74rem; line-height: 1.35; }
+.transport-synthese strong { color: #087b67; }
 .regimes-synthese h2 small { display: block; margin-top: .15rem; color: var(--texte-secondaire); font-size: .62rem; font-weight: 500; }
 .regimes-synthese dl { margin: 0; }
 .regimes-synthese dl div { display: flex; justify-content: space-between; gap: .5rem; padding: .12rem 0; font-size: .72rem; }
@@ -602,15 +605,6 @@ body {
 .commentaires-regimes { margin-top: .65rem; padding-top: .55rem; border-top: 1px solid #d8e2e6; }
 .commentaires-regimes h3 { margin: 0 0 .3rem; color: var(--texte-secondaire); font-size: .68rem; }
 .commentaires-regimes ul { margin: 0; padding-left: 1rem; color: #284f68; font-size: .7rem; line-height: 1.35; }
-.table-presences-synthese { overflow-x: auto; margin-top: .55rem; }
-.table-presences-synthese table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: .72rem; }
-.table-presences-synthese th, .table-presences-synthese td { padding: .45rem .55rem; border-top: 1px solid #e0e7ea; text-align: left; vertical-align: top; }
-.table-presences-synthese thead th { color: var(--texte-secondaire); background: #f7fafb; font-size: .66rem; text-transform: uppercase; }
-.table-presences-synthese tbody th { color: #284f68; font-weight: 700; }
-.table-presences-synthese td:nth-child(2) { width: 5rem; text-align: center; }
-.table-presences-synthese td:nth-child(3) { width: 6rem; }
-.regimes-synthese { order: 1; }
-
 /* Rooming */
 .page-rooming { width: min(100%, 96rem); margin: auto; padding: clamp(1.5rem, 4vw, 3rem); }
 .entete-rooming { margin-bottom: 1.5rem; }
@@ -722,7 +716,7 @@ body {
 
 @media (max-width: 1400px) and (min-width: 761px) {
     .jour-synthese { grid-template-columns: 10.5rem minmax(0, 1fr); }
-    .details-synthese { grid-column: 1 / -1; border-top: 1px solid #e0e7ea; }
+    .details-synthese { grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid #e0e7ea; }
     .repas-synthese { border-right: 0; }
     .formulaire-creation-chambre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .formulaire-creation-chambre .bouton-principal { grid-column: 1 / -1; }
@@ -816,7 +810,6 @@ body {
     .repas-synthese { border-right: 0; border-bottom: 1px solid #e0e7ea; }
     .details-synthese { grid-template-columns: 1fr 1fr; }
     .presences-synthese { grid-column: 1 / -1; }
-    .apercu-presences-synthese { grid-template-columns: 1fr 1fr; }
     .regimes-synthese { grid-column: 1 / -1; }
     .navigation-date-rooming { align-items: stretch; }
     .navigation-date-rooming > form { min-width: 0; flex: 1; align-items: stretch; flex-direction: column; }
@@ -873,6 +866,8 @@ body {
     .liste-details-jour { padding: .65rem .8rem .9rem; }
     .commentaire-jour, .entete-jour strong { font-size: .62rem; }
     .champs-presence { grid-template-columns: 1fr; }
+    .transport-meulan-formulaire { grid-template-columns: 1fr; gap: .85rem; }
+    .heure-transport-meulan { max-width: none; justify-self: stretch; }
     .actions-formulaire { align-items: stretch; flex-direction: column; }
     .actions-formulaire .bouton-secondaire { justify-content: center; }
     .actions-formulaire-presence { align-items: stretch; flex-direction: column-reverse; }

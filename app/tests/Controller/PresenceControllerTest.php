@@ -161,6 +161,89 @@ final class PresenceControllerTest extends WebTestCase
         self::assertSelectorNotExists('select[data-controller="searchable-select"]');
         self::assertSelectorExists('label[for="nombre_enfants"]');
         self::assertSelectorExists('input#nombre_enfants[name="nombre_enfants"][type="number"][min="0"]:not([disabled])');
+        self::assertSelectorExists('input#transport_meulan[name="transport_meulan"][type="checkbox"]');
+        self::assertSelectorExists('[data-heure-transport-meulan]:not([hidden])');
+        self::assertSelectorExists('input#heure_transport_meulan[name="heure_transport_meulan"][type="time"][disabled]');
+    }
+
+    public function testUnBesoinDeTransportDepuisMeulanEstEnregistreAvecSonHeure(): void
+    {
+        $client = self::createClient();
+        $benevole = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Chantier']);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+        $client->loginUser($benevole);
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        foreach (self::getContainer()->get(InscriptionRepository::class)->findPourCalendrier(new \DateTimeImmutable('2096-08-17'), new \DateTimeImmutable('2096-08-17'), null) as $ancienneInscription) {
+            if ($ancienneInscription->getUtilisateur()?->getId() === $benevole->getId()) {
+                $entityManager->remove($ancienneInscription);
+            }
+        }
+        $entityManager->flush();
+
+        $crawler = $client->request('GET', '/presences/ajouter');
+        $jeton = $crawler->filter('.formulaire-presence input[name="_csrf_token"]')->attr('value');
+        self::assertNotNull($jeton);
+        $client->request('POST', '/presences/ajouter', [
+            '_csrf_token' => $jeton,
+            'mode' => 'benevole',
+            'thematique' => $thematique->getId(),
+            'nombre_enfants' => 0,
+            'date_debut' => '2096-08-17',
+            'date_fin' => '2096-08-17',
+            'type_couchage' => 'DUR',
+            'transport_meulan' => '1',
+            'heure_transport_meulan' => '09:35',
+        ]);
+
+        self::assertResponseRedirects('/?mois=2096-08');
+        $inscriptions = self::getContainer()->get(InscriptionRepository::class)->findPourCalendrier(new \DateTimeImmutable('2096-08-17'), new \DateTimeImmutable('2096-08-17'), null);
+        $inscription = array_find($inscriptions, static fn ($item) => $item->getUtilisateur()?->getId() === $benevole->getId());
+        self::assertNotNull($inscription);
+        self::assertSame('09:35', $inscription->getHeureTransportMeulan()?->format('H:i'));
+
+        $client->request('GET', '/presences/'.$inscription->getId().'/modifier');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('input#transport_meulan[checked]');
+        self::assertSelectorExists('input#heure_transport_meulan[value="09:35"]:not([disabled])');
+
+        $inscriptionGeree = self::getContainer()->get(InscriptionRepository::class)->find($inscription->getId());
+        self::assertNotNull($inscriptionGeree);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->remove($inscriptionGeree);
+        $entityManager->flush();
+    }
+
+    public function testUneHeureEstObligatoireQuandLeTransportDepuisMeulanEstDemande(): void
+    {
+        $client = self::createClient();
+        $benevole = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Chantier']);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+        $client->loginUser($benevole);
+
+        $crawler = $client->request('GET', '/presences/ajouter');
+        $jeton = $crawler->filter('.formulaire-presence input[name="_csrf_token"]')->attr('value');
+        self::assertNotNull($jeton);
+        $client->request('POST', '/presences/ajouter', [
+            '_csrf_token' => $jeton,
+            'mode' => 'benevole',
+            'thematique' => $thematique->getId(),
+            'nombre_enfants' => 0,
+            'date_debut' => '2096-08-18',
+            'date_fin' => '2096-08-18',
+            'type_couchage' => 'DUR',
+            'transport_meulan' => '1',
+            'heure_transport_meulan' => '',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('.alerte-erreur', 'heure valide pour le transport depuis Meulan');
+        self::assertSelectorExists('input#transport_meulan[checked]');
+        self::assertSelectorExists('input#heure_transport_meulan[required]:not([disabled])');
     }
 
     public function testLeFiltreCompaEstSelectionneEtExpliqueUnMoisVide(): void

@@ -73,6 +73,20 @@ const initialiserFormulairePresence = () => {
         formulaire.dataset.initialise = 'true';
 
         const selectionRepas = formulaire.querySelector('[data-selection-repas]');
+        const transportMeulan = formulaire.querySelector('[data-transport-meulan]');
+        if (transportMeulan) {
+            const caseTransport = transportMeulan.querySelector('input[name="transport_meulan"]');
+            const conteneurHeure = transportMeulan.querySelector('[data-heure-transport-meulan]');
+            const champHeure = transportMeulan.querySelector('input[name="heure_transport_meulan"]');
+            const actualiserTransport = () => {
+                const transportDemande = caseTransport.checked;
+                conteneurHeure.classList.toggle('heure-transport-meulan-inactive', !transportDemande);
+                champHeure.disabled = !transportDemande;
+                champHeure.required = transportDemande;
+            };
+            caseTransport.addEventListener('change', actualiserTransport);
+            actualiserTransport();
+        }
         const selectThematique = formulaire.querySelector('select[name="thematique"]');
         const dateDebutThematique = formulaire.querySelector('#date_debut');
         const dateFinThematique = formulaire.querySelector('#date_fin');

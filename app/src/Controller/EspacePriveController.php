@@ -46,6 +46,7 @@ final class EspacePriveController extends AbstractController
                 'repas' => ['PETIT_DEJEUNER' => 0, 'DEJEUNER' => 0, 'DINER' => 0],
                 'presences' => [],
                 'couchages' => ['DUR' => ['total' => 0, 'presences' => []], 'TENTE' => ['total' => 0, 'presences' => []]],
+                'transports' => [],
                 'regimes' => ['vegetariens' => 0, 'sans_lactose' => 0, 'sans_gluten' => 0, 'commentaires' => []],
             ];
         }
@@ -55,6 +56,17 @@ final class EspacePriveController extends AbstractController
             $libelle = $this->libellePresence($inscription);
             $premierJour = max($debut, $inscription->getDateDebut());
             $dernierJour = min($fin, $inscription->getDateFin());
+            $heureTransportMeulan = $inscription->getHeureTransportMeulan();
+            $cleArrivee = $inscription->getDateDebut()->format('Y-m-d');
+
+            if (null !== $heureTransportMeulan && isset($jours[$cleArrivee])) {
+                $jours[$cleArrivee]['transports'][] = [
+                    'libelle' => $libelle,
+                    'effectif' => $effectif,
+                    'est_equipe' => 'COMPAGNON' === $inscription->getType(),
+                    'heure' => $heureTransportMeulan,
+                ];
+            }
 
             for ($date = $premierJour; $date <= $dernierJour; $date = $date->modify('+1 day')) {
                 $cle = $date->format('Y-m-d');

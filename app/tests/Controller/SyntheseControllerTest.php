@@ -58,11 +58,14 @@ final class SyntheseControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/synthese?debut=2095-07-10&fin=2095-07-10');
 
         self::assertResponseIsSuccessful();
-        $identites = $crawler->filter('.table-presences-synthese tbody th')->each(
-            static fn ($presence): string => trim($presence->text()),
+        $listes = $crawler->filter('.details-synthese > div')->each(
+            static fn ($bloc): array => $bloc->filter(':scope > .pastille-presence')->each(
+                static fn ($presence): string => trim($presence->text()),
+            ),
         );
-        self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $identites);
-        self::assertSelectorCount(1, '.table-presences-synthese');
+        self::assertSame(['Camille B.', 'Dominique P.', 'Sasha A.'], $listes[0]);
+        self::assertSame(['Camille B.', 'Sasha A.'], $listes[1]);
+        self::assertSame(['Dominique P.'], $listes[2]);
 
         foreach ($inscriptionsCreees as $inscription) {
             $entityManager->remove($inscription);
@@ -70,7 +73,7 @@ final class SyntheseControllerTest extends WebTestCase
         $entityManager->flush();
     }
 
-    public function testUneJourneeChargeeAfficheCinqPresencesPuisUnDetailUnique(): void
+    public function testUneJourneeChargeeAfficheToutesLesPresencesSansVoletDeDetail(): void
     {
         $client = self::createClient();
         $pilote = self::getContainer()->get(UtilisateurRepository::class)->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
@@ -101,9 +104,8 @@ final class SyntheseControllerTest extends WebTestCase
             $client->request('GET', '/synthese?debut=2098-11-08&fin=2098-11-08');
 
             self::assertResponseIsSuccessful();
-            self::assertSelectorCount(5, '.apercu-presences-synthese .pastille-presence');
-            self::assertSelectorTextContains('.details-presences-synthese summary', 'Voir les 2 autres inscriptions');
-            self::assertSelectorCount(7, '.details-presences-synthese .table-presences-synthese tbody tr');
+            self::assertSelectorCount(7, '.presences-synthese > .pastille-presence');
+            self::assertSelectorNotExists('.details-presences-synthese');
             self::assertSelectorTextContains('.date-synthese', '28 personnes · 7 inscriptions');
         } finally {
             foreach ($inscriptions as $inscription) {
@@ -152,10 +154,9 @@ final class SyntheseControllerTest extends WebTestCase
         self::assertSelectorTextContains('.jour-synthese', 'Camille B. + 2 enfants');
         self::assertSelectorTextSame('.repas-synthese div:nth-child(2) strong', '3');
         self::assertSelectorTextSame('.details-synthese > div:nth-child(2) h2 b', '3');
-        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'Camille B.');
-        self::assertSelectorTextContains('.table-presences-synthese tbody tr', '3');
-        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'En dur');
-        self::assertSelectorTextContains('.table-presences-synthese tbody tr', 'Lit en rez-de-chaussée');
+        self::assertSelectorExists('.details-synthese > div:nth-child(2) .info-couchage[data-info="Lit en rez-de-chaussée"]');
+        self::assertSelectorExists('.info-couchage[aria-label="Besoin de couchage : Lit en rez-de-chaussée"]');
+        self::assertSelectorNotExists('.details-synthese > div:first-child .info-couchage');
         self::assertSelectorTextContains('.regimes-synthese h2', 'Régimes');
         self::assertSelectorTextNotContains('.regimes-synthese', 'totaux anonymes');
         self::assertSelectorNotExists('.regimes-synthese .pastille-presence');
@@ -169,6 +170,44 @@ final class SyntheseControllerTest extends WebTestCase
             $benevole->getRegimeAutre(),
             null,
         );
+        $entityManager->flush();
+    }
+
+    public function testLeTransportDepuisMeulanEstAfficheSurLaCarteDuJourDArrivee(): void
+    {
+        $client = self::createClient();
+        $utilisateurs = self::getContainer()->get(UtilisateurRepository::class);
+        $pilote = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-PILOTE']);
+        $benevole = $utilisateurs->findOneBy(['codeAdherent' => 'DEV-BENEVOLE']);
+        $thematique = self::getContainer()->get(ThematiqueRepository::class)->findOneBy(['nom' => 'Accueil']);
+        self::assertNotNull($pilote);
+        self::assertNotNull($benevole);
+        self::assertNotNull($thematique);
+
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        foreach (self::getContainer()->get(\App\Repository\InscriptionRepository::class)->findPourCalendrier(new \DateTimeImmutable('2095-08-10'), new \DateTimeImmutable('2095-08-11'), null) as $ancienneInscription) {
+            if ($ancienneInscription->getUtilisateur()?->getId() === $benevole->getId()) {
+                $entityManager->remove($ancienneInscription);
+            }
+        }
+        $entityManager->flush();
+
+        $inscription = Inscription::individuelle($benevole, $thematique, new \DateTimeImmutable('2095-08-10'), new \DateTimeImmutable('2095-08-11'), 'DUR', 0, null);
+        $inscription->definirTransportDepuisMeulan(new \DateTimeImmutable('08:45'));
+        $entityManager->persist($inscription);
+        $entityManager->flush();
+        $client->loginUser($pilote);
+
+        $crawler = $client->request('GET', '/synthese?debut=2095-08-10&fin=2095-08-11');
+
+        self::assertResponseIsSuccessful();
+        $jourArrivee = $crawler->filterXPath('//article[contains(@class, "jour-synthese")][.//time[@datetime="2095-08-10"]]');
+        $jourSuivant = $crawler->filterXPath('//article[contains(@class, "jour-synthese")][.//time[@datetime="2095-08-11"]]');
+        self::assertStringContainsString('08:45 · Camille B.', $jourArrivee->filter('.transport-synthese')->text());
+        self::assertCount(0, $jourSuivant->filter('.transport-synthese'));
+        self::assertStringContainsString('Aucun transport', $jourSuivant->filter('.transports-synthese')->text());
+
+        $entityManager->remove($inscription);
         $entityManager->flush();
     }
 

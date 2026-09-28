@@ -61,6 +61,7 @@ final class PresenceController extends AbstractController
             $dateFin = $accueil['date_fin'];
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
+            $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
             $inscription = null;
             if ('benevole' === $mode) {
                 $benevole = $utilisateur;
@@ -112,6 +113,7 @@ final class PresenceController extends AbstractController
             }
 
             if (null !== $inscription) {
+                $inscription->definirTransportDepuisMeulan($heureTransportMeulan);
                 if ($request->request->has('repas_configures')) {
                     $inscription->definirRepasSelectionnes($this->lireRepasSelectionnes($request));
                 }
@@ -177,6 +179,7 @@ final class PresenceController extends AbstractController
             $dateFin = $accueil['date_fin'];
             $typeCouchage = $accueil['type_couchage'];
             $commentaire = $accueil['commentaire'];
+            $heureTransportMeulan = $this->lireHeureTransportMeulan($request, $erreurs);
 
             if ('benevole' === $mode) {
                 $benevole = $inscription->getUtilisateur();
@@ -228,6 +231,7 @@ final class PresenceController extends AbstractController
             }
 
             if ([] === $erreurs) {
+                $inscription->definirTransportDepuisMeulan($heureTransportMeulan);
                 if ($request->request->has('repas_configures')) {
                     $inscription->definirRepasSelectionnes($this->lireRepasSelectionnes($request));
                 }
@@ -319,5 +323,26 @@ final class PresenceController extends AbstractController
         }
 
         return array_values(array_unique($selectionnes));
+    }
+
+    /** @param list<string> $erreurs */
+    private function lireHeureTransportMeulan(Request $request, array &$erreurs): ?\DateTimeImmutable
+    {
+        if (!$request->request->getBoolean('transport_meulan')) {
+            return null;
+        }
+
+        $heureSaisie = trim($request->request->getString('heure_transport_meulan'));
+        $heure = \DateTimeImmutable::createFromFormat('!H:i', $heureSaisie);
+        $erreursHeure = \DateTimeImmutable::getLastErrors();
+        if (false === $heure
+            || (is_array($erreursHeure) && (0 !== $erreursHeure['warning_count'] || 0 !== $erreursHeure['error_count']))
+            || $heure->format('H:i') !== $heureSaisie) {
+            $erreurs[] = 'Indiquez une heure valide pour le transport depuis Meulan.';
+
+            return null;
+        }
+
+        return $heure;
     }
 }

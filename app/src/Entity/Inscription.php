@@ -59,6 +59,9 @@ final class Inscription
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
 
+    #[ORM\Column(name: 'heure_transport_meulan', type: 'time_immutable', nullable: true)]
+    private ?\DateTimeImmutable $heureTransportMeulan = null;
+
     #[ORM\Column]
     private bool $actif = true;
 
@@ -198,6 +201,11 @@ final class Inscription
         }
     }
 
+    public function definirTransportDepuisMeulan(?\DateTimeImmutable $heure): void
+    {
+        $this->heureTransportMeulan = $heure;
+    }
+
     /** @return list<string> */
     public function getRepasSelectionnes(): array
     {
@@ -279,6 +287,11 @@ final class Inscription
     public function getCommentaire(): ?string
     {
         return $this->commentaire;
+    }
+
+    public function getHeureTransportMeulan(): ?\DateTimeImmutable
+    {
+        return $this->heureTransportMeulan;
     }
 
     public function isActif(): bool
