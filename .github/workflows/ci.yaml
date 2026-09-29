@@ -43,6 +43,9 @@ jobs:
     name: Qualite rapide
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Recuperer le code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -79,15 +82,24 @@ jobs:
 
       - name: Rechercher des secrets dans les fichiers versionnes
         run: |
-          mkdir -p .cache/trivy
+          mkdir -p .cache/trivy .sarif
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/src:ro" \
             --volume "$GITHUB_WORKSPACE/.cache/trivy:/trivy-cache" \
+            --volume "$GITHUB_WORKSPACE/.sarif:/reports" \
             ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
             --cache-dir /trivy-cache \
             filesystem --scanners secret --skip-dirs /src/.git \
+            --format sarif --output /reports/trivy-secrets.sarif \
             --exit-code 1 --no-progress /src
+
+      - name: Publier les secrets Trivy dans GitHub Security
+        if: ${{ always() && hashFiles('.sarif/trivy-secrets.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        with:
+          sarif_file: .sarif/trivy-secrets.sarif
+          category: trivy-secrets
 
       - name: Preparer la configuration de CI
         run: ./scripts/ci-prepare-env.sh
@@ -115,20 +127,34 @@ jobs:
 
       - name: Auditer les dependances npm avec Trivy
         run: |
+          mkdir -p .sarif
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume "$PWD:/src:ro" \
             --volume "$GITHUB_WORKSPACE/.cache/trivy:/trivy-cache" \
+            --volume "$GITHUB_WORKSPACE/.sarif:/reports" \
             ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
             --cache-dir /trivy-cache \
             filesystem --scanners vuln --include-dev-deps \
-            --severity HIGH,CRITICAL --exit-code 1 --no-progress \
+            --severity HIGH,CRITICAL --format sarif \
+            --output /reports/trivy-dependencies.sarif \
+            --exit-code 1 --no-progress \
             /src/package-lock.json
+
+      - name: Publier les vulnérabilités Trivy dans GitHub Security
+        if: ${{ always() && hashFiles('.sarif/trivy-dependencies.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        with:
+          sarif_file: .sarif/trivy-dependencies.sarif
+          category: trivy-dependencies
 
   historique-secrets:
     name: Secrets dans les changements
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Recuperer tout l'historique Git
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -152,6 +178,13 @@ jobs:
             --volume "$GITHUB_WORKSPACE/.betterleaks-worktree:/src:ro" \
             ghcr.io/betterleaks/betterleaks:v1.7.2@sha256:1eb5e0920b47afe43f76671bc678c9fd4fd40c2d0c9b88a16f28021fd12d2347 \
             dir /src --redact
+
+      - name: Publier le rapport Betterleaks dans GitHub Security
+        if: ${{ always() && hashFiles('betterleaks.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        with:
+          sarif_file: betterleaks.sarif
+          category: betterleaks
 
       - name: Conserver le rapport Betterleaks
         if: always()
@@ -315,6 +348,9 @@ jobs:
     name: Image ${{ matrix.image }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
@@ -372,15 +408,17 @@ jobs:
 
       - name: Analyser les vulnerabilites de l'image
         env:
+          IMAGE_NAME: ${{ matrix.image }}
           IMAGE_TAG: ${{ matrix.tag }}
         run: |
-          mkdir -p .cache/trivy
+          mkdir -p .cache/trivy .sarif
           docker save "$IMAGE_TAG" --output /tmp/image.tar
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume /tmp:/scan:ro \
             --volume "$GITHUB_WORKSPACE:/src:ro" \
             --volume "$GITHUB_WORKSPACE/.cache/trivy:/trivy-cache" \
+            --volume "$GITHUB_WORKSPACE/.sarif:/reports" \
             ghcr.io/aquasecurity/trivy:0.73.0@sha256:7cced7cae583819fc7806d4cbc0dbbc7cad18b99f7d3e235192e6da8c091045c \
             --cache-dir /trivy-cache \
             image --input /scan/image.tar \
@@ -388,7 +426,16 @@ jobs:
             --severity HIGH,CRITICAL \
             --ignorefile /src/.trivyignore.yaml \
             --ignore-unfixed \
+            --format sarif \
+            --output "/reports/trivy-image-$IMAGE_NAME.sarif" \
             --exit-code 1
+
+      - name: Publier le rapport Trivy dans GitHub Security
+        if: ${{ always() && hashFiles(format('.sarif/trivy-image-{0}.sarif', matrix.image)) != '' }}
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        with:
+          sarif_file: .sarif/trivy-image-${{ matrix.image }}.sarif
+          category: trivy-image-${{ matrix.image }}
 
   resultat-ci:
     name: Qualite et tests
