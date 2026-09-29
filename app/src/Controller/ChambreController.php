@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
-use App\Service\RoomingService;
+use App\Service\RoomingConfigurationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ChambreController extends AbstractController
 {
     #[Route('/administration/chambres', name: 'app_admin_chambres', methods: ['GET', 'POST'])]
-    public function __invoke(Request $request, RoomingService $rooming): Response
+    public function __invoke(Request $request, RoomingConfigurationService $rooming): Response
     {
         $this->garantirAccesEquipe();
         $utilisateur = $this->getUser();
