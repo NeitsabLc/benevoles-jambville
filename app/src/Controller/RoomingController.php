@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Inscription;
 use App\Entity\Utilisateur;
 use App\Repository\InscriptionRepository;
+use App\Service\RoomingConfigurationService;
 use App\Service\RoomingService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,8 +17,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class RoomingController extends AbstractController
 {
     #[Route('/rooming', name: 'app_rooming', methods: ['GET', 'POST'])]
-    public function index(Request $request, InscriptionRepository $inscriptions, RoomingService $rooming): Response
-    {
+    public function index(
+        Request $request,
+        InscriptionRepository $inscriptions,
+        RoomingService $rooming,
+        RoomingConfigurationService $configurationRooming,
+    ): Response {
         $this->garantirAccesEquipe();
         $aujourdhui = new \DateTimeImmutable('today');
         $debutParDefaut = $aujourdhui->modify('monday this week');
@@ -82,7 +87,7 @@ final class RoomingController extends AbstractController
 
         $inscriptionsPeriode = $inscriptions->findPourRooming($debut, $fin);
         $affectations = $rooming->trouverAffectations($debut, $fin);
-        $disponibilites = $rooming->trouverDisponibilites($debut, $fin);
+        $disponibilites = $configurationRooming->trouverDisponibilites($debut, $fin);
         $jours = [];
         $presencesParJour = [];
         $sansChambreParJour = [];
@@ -99,7 +104,7 @@ final class RoomingController extends AbstractController
         }
 
         $chambres = [];
-        foreach ($rooming->getChambres() as $code => $chambre) {
+        foreach ($configurationRooming->getChambres() as $code => $chambre) {
             $occupation = [];
             foreach ($jours as $jour) {
                 $cleJour = $jour['date']->format('Y-m-d');
