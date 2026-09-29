@@ -333,7 +333,6 @@ final class PresenceControllerTest extends WebTestCase
             'nombre_enfants' => 0,
             'date_debut' => '2097-03-20',
             'date_fin' => '2097-03-20',
-            'type_couchage' => 'DUR',
         ]);
         $client->submit($formulaire);
 
@@ -341,9 +340,17 @@ final class PresenceControllerTest extends WebTestCase
         $inscriptions = self::getContainer()->get(InscriptionRepository::class)->findPourCalendrier(new \DateTimeImmutable('2097-03-20'), new \DateTimeImmutable('2097-03-20'), null);
         $inscription = array_find($inscriptions, static fn ($item) => $item->getUtilisateur()?->getId() === $benevole->getId());
         self::assertNotNull($inscription);
+        self::assertSame('AUCUN', $inscription->getTypeCouchage());
+
+        $client->request('GET', '/presences/'.$inscription->getId().'/modifier');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-champ-couchage][hidden]');
+        self::assertSelectorExists('select[name="type_couchage"][disabled]');
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->remove($inscription);
+        $inscriptionGeree = self::getContainer()->get(InscriptionRepository::class)->find($inscription->getId());
+        self::assertNotNull($inscriptionGeree);
+        $entityManager->remove($inscriptionGeree);
         $entityManager->flush();
     }
 

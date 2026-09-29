@@ -90,6 +90,18 @@ const initialiserFormulairePresence = () => {
         const selectThematique = formulaire.querySelector('select[name="thematique"]');
         const dateDebutThematique = formulaire.querySelector('#date_debut');
         const dateFinThematique = formulaire.querySelector('#date_fin');
+        const champCouchage = formulaire.querySelector('[data-champ-couchage]');
+        const typeCouchage = champCouchage?.querySelector('select[name="type_couchage"]');
+        if (dateDebutThematique && dateFinThematique && champCouchage && typeCouchage) {
+            const actualiserCouchage = () => {
+                const presenceJournee = dateDebutThematique.value !== '' && dateDebutThematique.value === dateFinThematique.value;
+                champCouchage.hidden = presenceJournee;
+                typeCouchage.disabled = presenceJournee;
+            };
+            dateDebutThematique.addEventListener('change', actualiserCouchage);
+            dateFinThematique.addEventListener('change', actualiserCouchage);
+            actualiserCouchage();
+        }
         if (selectThematique && dateDebutThematique && dateFinThematique) {
             const invitation = selectThematique.options[0];
             const options = [...selectThematique.options].slice(1);

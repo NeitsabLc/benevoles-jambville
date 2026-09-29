@@ -72,6 +72,7 @@ final class InscriptionRepository extends ServiceEntityRepository
             ->andWhere('i.actif = true')
             ->andWhere('i.type = :type')
             ->andWhere('i.typeCouchage = :couchage')
+            ->andWhere('i.dateDebut < i.dateFin')
             ->andWhere('i.dateDebut <= :fin AND i.dateFin >= :debut')
             ->setParameter('type', 'INDIVIDUELLE')
             ->setParameter('couchage', 'DUR')

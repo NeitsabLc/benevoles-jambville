@@ -349,6 +349,7 @@ final class RoomingService
                 WHERE i.actif = TRUE
                   AND i.type = 'INDIVIDUELLE'
                   AND i.type_couchage = 'DUR'
+                  AND i.date_debut < i.date_fin
                   AND a.date_nuit BETWEEN :debut AND :fin
                   AND i.date_debut <= a.date_nuit
                   AND i.date_fin >= a.date_nuit
@@ -692,7 +693,8 @@ final class RoomingService
     {
         if (!$inscription->isActif()
             || 'INDIVIDUELLE' !== $inscription->getType()
-            || 'DUR' !== $inscription->getTypeCouchage()) {
+            || 'DUR' !== $inscription->getTypeCouchage()
+            || $inscription->getDateDebut() == $inscription->getDateFin()) {
             throw new \DomainException('Cette présence ne nécessite pas de chambre.');
         }
     }

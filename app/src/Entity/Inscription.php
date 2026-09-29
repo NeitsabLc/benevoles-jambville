@@ -84,7 +84,7 @@ final class Inscription
         $this->modifiePar = $auteur;
         $this->dateDebut = $dateDebut;
         $this->dateFin = $dateFin;
-        $this->typeCouchage = $typeCouchage;
+        $this->typeCouchage = self::normaliserTypeCouchage($dateDebut, $dateFin, $typeCouchage);
         $this->commentaire = $commentaire;
         $this->repas = new ArrayCollection();
     }
@@ -154,7 +154,7 @@ final class Inscription
     {
         $this->dateDebut = $dateDebut;
         $this->dateFin = $dateFin;
-        $this->typeCouchage = $typeCouchage;
+        $this->typeCouchage = self::normaliserTypeCouchage($dateDebut, $dateFin, $typeCouchage);
         $this->commentaire = $commentaire;
         $this->modifiePar = $auteur;
         $this->synchroniserRepas();
@@ -184,6 +184,11 @@ final class Inscription
                 $this->repas->add(new RepasInscription($this, $date, $typeRepas));
             }
         }
+    }
+
+    private static function normaliserTypeCouchage(\DateTimeImmutable $dateDebut, \DateTimeImmutable $dateFin, string $typeCouchage): string
+    {
+        return $dateDebut == $dateFin ? 'AUCUN' : $typeCouchage;
     }
 
     public function supprimer(Utilisateur $auteur): void

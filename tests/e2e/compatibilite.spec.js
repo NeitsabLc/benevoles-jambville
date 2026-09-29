@@ -9,4 +9,12 @@ test('@compatibilite connexion et JavaScript métier fonctionnent sur le navigat
   await expect(page.locator('[data-repas-lignes] tr')).toHaveCount(3);
   await expect(page.locator('[data-repas-lignes] input[type="checkbox"]')).toHaveCount(9);
   await expect(page.getByLabel('Thématique').locator('option', { hasText: 'Événement E2E standard' })).toHaveCount(1);
+
+  await choisirPeriode(page, '2091-07-11', '2091-07-11');
+  await expect(page.locator('[data-champ-couchage]')).toBeHidden();
+  await expect(page.getByLabel('Couchage')).toBeDisabled();
+
+  await choisirPeriode(page, '2091-07-11', '2091-07-12');
+  await expect(page.locator('[data-champ-couchage]')).toBeVisible();
+  await expect(page.getByLabel('Couchage')).toBeEnabled();
 });
