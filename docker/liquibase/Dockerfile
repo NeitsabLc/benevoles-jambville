@@ -7,9 +7,14 @@ FROM liquibase/liquibase:${LIQUIBASE_VERSION}@${LIQUIBASE_IMAGE_DIGEST} AS liqui
 
 ARG PGJDBC_VERSION
 ARG PGJDBC_SHA256
+ARG OS_PACKAGE_REFRESH=manual
 
 USER root
-RUN curl --fail --silent --show-error --location \
+RUN test -n "$OS_PACKAGE_REFRESH" \
+    && apt-get update \
+    && apt-get upgrade --yes --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --fail --silent --show-error --location \
         --output /liquibase/lib/postgresql.jar \
         "https://repo.maven.apache.org/maven2/org/postgresql/postgresql/${PGJDBC_VERSION}/postgresql-${PGJDBC_VERSION}.jar" \
     && echo "${PGJDBC_SHA256}  /liquibase/lib/postgresql.jar" | sha256sum --check --strict \
