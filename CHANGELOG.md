@@ -1,5 +1,28 @@
 # Historique des versions
 
+## [1.6.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.5.1...v1.6.0) (2026-09-30)
+
+
+### Fonctionnalités
+
+* **rooming:** exclure les présences à la journée ([#57](https://github.com/NeitsabLc/benevoles-jambville/issues/57)) ([549c4fb](https://github.com/NeitsabLc/benevoles-jambville/commit/549c4fbd48b3382ff50ef0d8d7afe01e3807f89b))
+
+
+### Corrections
+
+* actualiser la documentation et sécuriser Liquibase ([#66](https://github.com/NeitsabLc/benevoles-jambville/issues/66)) ([4bb3eba](https://github.com/NeitsabLc/benevoles-jambville/commit/4bb3ebaf923d28b5ff8bd47105cf5a8ce69cf2f1))
+
+
+### Refactorisation
+
+* renforcer la sûreté des types ([#61](https://github.com/NeitsabLc/benevoles-jambville/issues/61)) ([4d61bbb](https://github.com/NeitsabLc/benevoles-jambville/commit/4d61bbbd79c4b9db62cc08e2c46a7381aaa19d62))
+* séparer la configuration du rooming ([#64](https://github.com/NeitsabLc/benevoles-jambville/issues/64)) ([7481dea](https://github.com/NeitsabLc/benevoles-jambville/commit/7481dea92532db7a9dc6899cfe3154e8b4a08ba4))
+
+
+### Documentation
+
+* formaliser la revue par le mainteneur unique ([#62](https://github.com/NeitsabLc/benevoles-jambville/issues/62)) ([c1e6ceb](https://github.com/NeitsabLc/benevoles-jambville/commit/c1e6ceb0f64be07a777797ba2c2a2b367b7965c6))
+
 ## [1.5.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.5.0...v1.5.1) (2026-09-28)
 
 
