@@ -44,7 +44,7 @@ L’équipe pilote gère les utilisateurs, les règles d’attribution de rôles
 - PHP 8.4 et Symfony 8.1 pour l’application ;
 - PostgreSQL 18 pour les données ;
 - Doctrine ORM 3.6 pour le mapping ;
-- Liquibase 5.0.1 comme source de vérité du schéma ;
+- Liquibase 5.0.4 comme source de vérité du schéma ;
 - Nginx 1.30.4 comme frontal HTTP ;
 - Docker Compose pour l’exécution locale et les déploiements ;
 - Node.js 22 au minimum, Playwright et Axe pour les tests navigateur et accessibilité.
