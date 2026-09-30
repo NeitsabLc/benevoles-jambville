@@ -15,10 +15,10 @@ utilisé par Cosign. Aucun secret de registre supplémentaire n’est nécessair
 
 ## Cycle de release
 
-La préparation reste volontairement manuelle : depuis l’onglet **Actions**, lancer
-le workflow **Préparer ou publier une version** sur `main`. Release Please crée ou
-actualise une pull request qui regroupe les changements conventionnels depuis le
-dernier tag et calcule la prochaine version.
+Après chaque fusion dans `main`, le workflow **Préparer ou publier une version**
+crée ou actualise automatiquement une pull request qui regroupe les changements
+conventionnels depuis le dernier tag et calcule la prochaine version. Il reste
+possible de relancer ce workflow manuellement depuis l’onglet **Actions**.
 
 La fusion de cette pull request relance le même workflow, qui crée le tag
 `vX.Y.Z` et la GitHub Release. Sa publication déclenche automatiquement :
@@ -42,8 +42,8 @@ préfixe `v`. La production reste déclenchée manuellement depuis le workflow
 - Interdire les poussées directes, conserver zéro approbation obligatoire tant que le dépôt repose sur un mainteneur unique et imposer au mainteneur une relecture du diff final avant fusion.
 - Activer le squash des pull requests et conserver leur titre Conventional
   Commits comme titre du commit.
-- Conserver les permissions Actions en lecture par défaut ; les workflows
-  élèvent explicitement `packages` et `id-token` uniquement pour la publication.
+- Conserver les permissions Actions en lecture par défaut ; chaque workflow
+  déclare explicitement les droits supplémentaires dont il a besoin.
 - Conserver Dependabot actif pour Composer, npm, GitHub Actions et les images
   Docker.
 
