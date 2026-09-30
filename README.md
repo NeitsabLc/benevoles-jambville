@@ -19,8 +19,9 @@ L’application repose sur Symfony, PostgreSQL, Liquibase, Nginx et Docker Compo
 - gestion des profils et des rôles métier ;
 - inscriptions individuelles et inscriptions d’équipes compagnons ;
 - calendrier des présences et gestion des permanences ;
-- synthèse anonymisée des repas, couchages et régimes alimentaires ;
-- rooming quotidien des bénévoles en couchage dur, avec contrôle des capacités et prise en compte des enfants ;
+- synthèse opérationnelle des repas, couchages et transports, avec totaux alimentaires non nominatifs ;
+- suivi de l’arrivée depuis Meulan pour organiser le transport jusqu’à Jambville ;
+- rooming quotidien des bénévoles qui dorment sur place, avec exclusion des présences à la journée, contrôle des capacités et prise en compte des enfants ;
 - gestion des thématiques et des bénévoles ;
 - import CSV avec prévisualisation des modifications ;
 - purge et anonymisation des données arrivées à échéance.
@@ -32,7 +33,7 @@ L’application repose sur Symfony, PostgreSQL, Liquibase, Nginx et Docker Compo
 - Git ;
 - Docker avec Docker Compose v2 ;
 - GNU Make ;
-- Node.js 20 ou supérieur et npm pour les tests navigateur.
+- Node.js 22 ou supérieur et npm pour les tests navigateur.
 
 PHP, Composer, PostgreSQL, Liquibase et Nginx sont fournis par les conteneurs.
 
