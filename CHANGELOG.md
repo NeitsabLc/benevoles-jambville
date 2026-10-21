@@ -1,5 +1,18 @@
 # Historique des versions
 
+## [1.6.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.0...v1.6.1) (2026-10-21)
+
+
+### Corrections
+
+* **deps:** corriger Symfony, les images et les tests Dependabot ([#72](https://github.com/NeitsabLc/benevoles-jambville/issues/72)) ([09f5ee1](https://github.com/NeitsabLc/benevoles-jambville/commit/09f5ee1a9e13420c10022fe799e8d846f73bdd90))
+* **security:** préparer les images PHP 8.4.27 ([#75](https://github.com/NeitsabLc/benevoles-jambville/issues/75)) ([de919ff](https://github.com/NeitsabLc/benevoles-jambville/commit/de919ff825cfd954f24fb008c4a42f779b478a37))
+
+
+### Dépendances
+
+* **deps:** bump github/codeql-action/upload-sarif ([#74](https://github.com/NeitsabLc/benevoles-jambville/issues/74)) ([4211bd2](https://github.com/NeitsabLc/benevoles-jambville/commit/4211bd26e71fa28cc3445f213f250cba7e568448))
+
 ## [1.6.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.5.1...v1.6.0) (2026-09-30)
 
 
