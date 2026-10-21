@@ -1,12 +1,16 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.4.27
 ARG NGINX_VERSION=1.30.6-alpine-slim
-ARG PHP_IMAGE_DIGEST=sha256:9467f10bf42897dec0abb73ee20c747ebd45463ec9d6fcc4044cb83eba6dade7
+# À renseigner uniquement après vérification de l’image officielle linux/amd64.
+ARG PHP_IMAGE_DIGEST=sha256:64aff665308e23ba8804a6c43f75837e9bcdcc31735fc0f74af8899fe5304b07
 ARG COMPOSER_IMAGE_DIGEST=sha256:4d71c3c2109c61d5415544264b59ad4087e4c5b7244481723664138fd36d5040
 ARG NGINX_IMAGE_DIGEST=sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6
 
 FROM composer:2@${COMPOSER_IMAGE_DIGEST} AS composer-bin
 
 FROM php:${PHP_VERSION}-fpm@${PHP_IMAGE_DIGEST} AS php-base
+
+COPY --chmod=0755 docker/php/verify-php-security.sh /usr/local/bin/verify-php-security
+RUN verify-php-security
 
 ARG OS_PACKAGE_REFRESH=manual
 
