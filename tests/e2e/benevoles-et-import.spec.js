@@ -18,13 +18,13 @@ test('création puis désactivation et réactivation d’un bénévole', async (
 
   await expect(page).toHaveURL(/\/administration\/benevoles$/, { timeout: 15_000 });
   await expect(page.locator('.alerte-succes, .alerte-erreur')).toContainText('compte de Cécile Création E2E a été créé');
-  await expect(page.getByRole('link', { name: 'Voir le profil de Cécile Création E2E' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Création E2E.*Cécile/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Désactiver Cécile Création E2E' }).click();
   await expect(page.getByRole('dialog')).toContainText('Cécile Création E2E');
   await page.getByRole('dialog').getByRole('button', { name: 'Désactiver le compte' }).click();
   await expect(page.locator('.alerte-succes')).toContainText('désactivé');
-  await expect(page.getByRole('link', { name: 'Voir le profil de Cécile Création E2E' })).toContainText('Inactif');
+  await expect(page.getByRole('link', { name: /Création E2E.*Cécile/ })).toContainText('Inactif');
 
   await page.getByRole('button', { name: 'Réactiver Cécile Création E2E' }).click();
   await expect(page.locator('.alerte-succes')).toContainText('réactivé');
@@ -56,5 +56,5 @@ test('prévisualisation, confirmation et application d’un import CSV', async (
   await expect(page.locator('.carte-resultat-import')).toContainText('Import appliqué');
   await expect(page.locator('.carte-resultat-import')).toContainText('1 création');
   await page.getByRole('link', { name: 'Voir les bénévoles' }).click();
-  await expect(page.getByRole('link', { name: 'Voir le profil de Zoé Importé E2E' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Importé E2E.*Zoé/ })).toBeVisible();
 });

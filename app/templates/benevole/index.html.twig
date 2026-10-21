@@ -38,7 +38,7 @@
                     {% for benevole in benevoles %}
                         <div class="conteneur-ligne-benevole {{ not benevole.actif ? 'inactive' }}" data-glissiere-benevole>
                             {% if benevole.id != app.user.id %}<form class="action-glissee-benevole {{ not benevole.actif ? 'reactiver' }}" method="post" action="{{ path('app_admin_benevole_activation', {id: benevole.id}) }}"{% if benevole.actif %} data-confirmation-desactivation data-benevole-nom="{{ benevole.nomComplet }}"{% endif %}><input type="hidden" name="_csrf_token" value="{{ csrf_token('activation-benevole-' ~ benevole.id) }}"><button type="submit">{{ benevole.actif ? 'Désactiver' : 'Réactiver' }}</button></form>{% endif %}
-                            <a class="ligne-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" aria-label="Voir le profil de {{ benevole.nomComplet }}">
+                            <a class="ligne-benevole" href="{{ path('app_admin_benevole_profil', {id: benevole.id}) }}" title="Voir le profil de {{ benevole.nomComplet }}">
                                 <strong>{{ benevole.nom }}{% if not benevole.actif %}<small>Inactif</small>{% endif %}</strong>
                                 <span>{{ benevole.prenom }}</span>
                                 <span class="telephone-benevole">{{ benevole.telephone ?: '—' }}</span>
