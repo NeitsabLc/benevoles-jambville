@@ -14,7 +14,7 @@ concurrency:
 
 env:
   COMPOSE_PROJECT_NAME: benevole-jambville-ci-${{ github.run_id }}-${{ github.run_attempt }}
-  PLAYWRIGHT_IMAGE: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+  PLAYWRIGHT_IMAGE: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
   npm_config_fetch_retries: 3
   npm_config_fetch_retry_mintimeout: 10000
   npm_config_fetch_retry_maxtimeout: 60000
@@ -49,7 +49,7 @@ jobs:
             app/src/VersionApplication.php
 
       - name: Installer Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -82,7 +82,7 @@ jobs:
 
       - name: Publier les secrets Trivy dans GitHub Security
         if: ${{ always() && hashFiles('.sarif/trivy-secrets.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4
         with:
           sarif_file: .sarif/trivy-secrets.sarif
           category: trivy-secrets
@@ -129,7 +129,7 @@ jobs:
 
       - name: Publier les vulnérabilités Trivy dans GitHub Security
         if: ${{ always() && hashFiles('.sarif/trivy-dependencies.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4
         with:
           sarif_file: .sarif/trivy-dependencies.sarif
           category: trivy-dependencies
@@ -158,7 +158,7 @@ jobs:
         run: ./scripts/ci-prepare-env.sh
 
       - name: Installer Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -272,7 +272,7 @@ jobs:
 
       - name: Conserver les resultats Playwright en cas d'echec
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: test-results
@@ -391,7 +391,7 @@ jobs:
 
       - name: Publier le rapport Trivy dans GitHub Security
         if: ${{ always() && hashFiles(format('.sarif/trivy-image-{0}.sarif', matrix.image)) != '' }}
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4
         with:
           sarif_file: .sarif/trivy-image-${{ matrix.image }}.sarif
           category: trivy-image-${{ matrix.image }}

@@ -2,7 +2,7 @@
 <header class="barre-application">
     {% include 'securite/_identite.html.twig' %}
     <div class="utilisateur-connecte">
-        <a class="lien-profil" href="{{ path('app_profil') }}" aria-label="Voir mon profil">
+        <a class="lien-profil" href="{{ path('app_profil') }}" title="Voir mon profil">
             <span class="avatar">{{ app.user.prenom|first }}{{ app.user.nomComplet|split(' ')|last|first }}</span>
             <span class="nom-utilisateur">{{ app.user.nomComplet }}</span>
         </a>

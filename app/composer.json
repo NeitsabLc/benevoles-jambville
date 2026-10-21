@@ -26,7 +26,7 @@
         "symfony/twig-bundle": "8.1.*",
         "symfony/ux-turbo": "^3.3",
         "symfony/validator": "8.1.*",
-        "symfony/yaml": "8.1.*",
+        "symfony/yaml": ">=8.1.9 <8.2",
         "twig/twig": "^3.0"
     },
     "require-dev": {

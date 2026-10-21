@@ -1,6 +1,6 @@
 {% set est_ma_presence = presence.type == 'INDIVIDUELLE' and presence.utilisateur.id == app.user.id %}
 {% set peut_gerer = is_granted('ROLE_EQUIPE_PILOTE') or (app.user.roleMetier == 'BENEVOLE' and est_ma_presence) %}
-<div class="ligne-presence {{ peut_gerer ? 'ligne-presence-cliquable' }} {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}"{% if peut_gerer %} data-modification-url="{{ path('app_presence_modifier', {id: presence.id}) }}" tabindex="0" role="link" aria-label="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"{% endif %}>
+<div class="ligne-presence {{ peut_gerer ? 'ligne-presence-cliquable' }} {{ est_ma_presence ? 'presence-moi' : 'presence-autre' }}"{% if peut_gerer %} data-modification-url="{{ path('app_presence_modifier', {id: presence.id}) }}" tabindex="0" role="link" title="Modifier {{ presence.type == 'COMPAGNON' ? presence.nomEquipeCompa : presence.utilisateur.nomComplet }}"{% endif %}>
     <span class="identite-presence">
         {% if presence.type == 'COMPAGNON' %}
             <strong>{{ presence.nomEquipeCompa }}</strong>

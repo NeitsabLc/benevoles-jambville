@@ -1,8 +1,8 @@
 ARG PHP_VERSION=8.4
-ARG NGINX_VERSION=1.30.4-alpine-slim
+ARG NGINX_VERSION=1.30.6-alpine-slim
 ARG PHP_IMAGE_DIGEST=sha256:9467f10bf42897dec0abb73ee20c747ebd45463ec9d6fcc4044cb83eba6dade7
 ARG COMPOSER_IMAGE_DIGEST=sha256:4d71c3c2109c61d5415544264b59ad4087e4c5b7244481723664138fd36d5040
-ARG NGINX_IMAGE_DIGEST=sha256:77da26c31397bf6694b4bf93275f5b40b0b120ba1b8f114264b603e592c561d6
+ARG NGINX_IMAGE_DIGEST=sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6
 
 FROM composer:2@${COMPOSER_IMAGE_DIGEST} AS composer-bin
 
@@ -97,6 +97,11 @@ ENTRYPOINT ["docker-php-entrypoint"]
 CMD ["php-fpm"]
 
 FROM nginx:${NGINX_VERSION}@${NGINX_IMAGE_DIGEST} AS nginx-production
+
+ARG OS_PACKAGE_REFRESH=2026-10-21
+
+RUN test -n "$OS_PACKAGE_REFRESH" \
+    && apk upgrade --no-cache
 
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=app-builder /var/www/app/public /var/www/app/public

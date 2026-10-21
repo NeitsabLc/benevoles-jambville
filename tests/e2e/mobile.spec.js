@@ -24,7 +24,7 @@ test('@mobile menu adaptatif et interactions tactiles', async ({ page }) => {
   await expect(carteThematique.locator('..').getByRole('button', { name: 'Désactiver' })).toBeVisible();
 
   await page.goto('/administration/benevoles');
-  const ligneBenevole = page.getByRole('link', { name: `Voir le profil de ${comptes.session.nom}` });
+  const ligneBenevole = page.getByRole('link').filter({ hasText: comptes.session.email });
   await glisserVersLaGauche(ligneBenevole);
   await expect(ligneBenevole.locator('..')).toHaveClass(/ouverte/);
   await expect(ligneBenevole.locator('..').getByRole('button', { name: 'Désactiver' })).toBeVisible();
