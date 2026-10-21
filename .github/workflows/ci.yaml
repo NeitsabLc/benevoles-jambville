@@ -87,6 +87,9 @@ jobs:
           sarif_file: .sarif/trivy-secrets.sarif
           category: trivy-secrets
 
+      - name: Vérifier le refus des versions PHP vulnérables
+        run: python3 tests/infrastructure/test_php_security.py
+
       - name: Preparer la configuration de CI
         run: ./scripts/ci-prepare-env.sh
 

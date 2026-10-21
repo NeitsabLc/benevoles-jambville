@@ -57,8 +57,8 @@ services:
       dockerfile: docker/php/Dockerfile
       target: php-production
       args:
-        PHP_VERSION: "${PHP_VERSION}"
-        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST:-sha256:9467f10bf42897dec0abb73ee20c747ebd45463ec9d6fcc4044cb83eba6dade7}"
+        PHP_VERSION: "${PHP_VERSION:-8.4.27}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST:-sha256:64aff665308e23ba8804a6c43f75837e9bcdcc31735fc0f74af8899fe5304b07}"
         COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST:-sha256:4d71c3c2109c61d5415544264b59ad4087e4c5b7244481723664138fd36d5040}"
         NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST:-sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6}"
     working_dir: /var/www/app
@@ -104,9 +104,9 @@ services:
       dockerfile: docker/php/Dockerfile
       target: nginx-production
       args:
-        PHP_VERSION: "${PHP_VERSION}"
+        PHP_VERSION: "${PHP_VERSION:-8.4.27}"
         NGINX_VERSION: "${NGINX_VERSION}"
-        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST:-sha256:9467f10bf42897dec0abb73ee20c747ebd45463ec9d6fcc4044cb83eba6dade7}"
+        PHP_IMAGE_DIGEST: "${PHP_IMAGE_DIGEST:-sha256:64aff665308e23ba8804a6c43f75837e9bcdcc31735fc0f74af8899fe5304b07}"
         COMPOSER_IMAGE_DIGEST: "${COMPOSER_IMAGE_DIGEST:-sha256:4d71c3c2109c61d5415544264b59ad4087e4c5b7244481723664138fd36d5040}"
         NGINX_IMAGE_DIGEST: "${NGINX_IMAGE_DIGEST:-sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6}"
     restart: unless-stopped
