@@ -8,11 +8,4 @@
 - Release Please et les images signées par digest permettent une livraison traçable.
 - Les détails privés de production appartiennent au projet Infra Homelab.
 
-## Règles spécifiques
-
-- Une présence à la journée ne crée pas de couchage et reste exclue du rooming.
-- Les droits sont contrôlés côté serveur ; ne pas exposer les besoins alimentaires nominativement dans les totaux.
-- Conserver les règles de consentement, de désactivation et de purge décrites dans `docs/context/confidentialite.md`.
-- Le profil Liquibase et les cibles Make peuvent différer des deux autres applications.
-
 Toute nouvelle décision doit préciser son motif et remplacer explicitement un ancien choix si nécessaire.
