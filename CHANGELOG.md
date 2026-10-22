@@ -1,5 +1,13 @@
 # Historique des versions
 
+## [1.6.2](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.1...v1.6.2) (2026-10-22)
+
+
+### Documentation
+
+* partager les consignes des assistants et le contexte du projet ([#76](https://github.com/NeitsabLc/benevoles-jambville/issues/76)) ([7da3af5](https://github.com/NeitsabLc/benevoles-jambville/commit/7da3af54e91a3c85181dce212535f91f883efa5e))
+* structurer AGENTS.md, architecture, infra et design system ([#79](https://github.com/NeitsabLc/benevoles-jambville/issues/79)) ([26ec83b](https://github.com/NeitsabLc/benevoles-jambville/commit/26ec83bfc806104cc375362fda61cbd015705e69))
+
 ## [1.6.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.0...v1.6.1) (2026-10-21)
 
 
