@@ -23,3 +23,11 @@
 *.dump
 *.dump.age
 *.sql.gz
+
+# Réglages personnels des assistants et données privées
+.claude/settings.local.json
+.claude/settings.local.*.json
+.claude/.cache/
+
+# Mémoire de travail locale (non publiée)
+/docs/context/etat.md
