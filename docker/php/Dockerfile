@@ -12,7 +12,7 @@ FROM php:${PHP_VERSION}-fpm@${PHP_IMAGE_DIGEST} AS php-base
 COPY --chmod=0755 docker/php/verify-php-security.sh /usr/local/bin/verify-php-security
 RUN verify-php-security
 
-ARG OS_PACKAGE_REFRESH=manual
+ARG OS_PACKAGE_REFRESH=2026-11-03
 
 RUN test -n "$OS_PACKAGE_REFRESH" \
     && apt-get update \
