@@ -1,5 +1,21 @@
 # Historique des versions
 
+## [1.6.2](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.1...v1.6.2) (2026-11-03)
+
+
+### Corrections
+
+* **deps:** corriger CVE-2026-45070 en mettant symfony/mime à jour ([#83](https://github.com/NeitsabLc/benevoles-jambville/issues/83)) ([fe0346d](https://github.com/NeitsabLc/benevoles-jambville/commit/fe0346db70525ba8378d94c51bd03808608119aa))
+* **security:** passer l'image PostgreSQL en 18.6 ([#84](https://github.com/NeitsabLc/benevoles-jambville/issues/84)) ([8335b33](https://github.com/NeitsabLc/benevoles-jambville/commit/8335b33b3d502e56026eb3366abbb0ea610d3667))
+* **security:** rafraîchir les paquets Debian des images php et liquibase ([#85](https://github.com/NeitsabLc/benevoles-jambville/issues/85)) ([dbc9ef2](https://github.com/NeitsabLc/benevoles-jambville/commit/dbc9ef266287f7266072950ff7d03a03a3365b72))
+
+
+### Documentation
+
+* aligner les fichiers de contexte sur les gabarits communs ([#82](https://github.com/NeitsabLc/benevoles-jambville/issues/82)) ([0637093](https://github.com/NeitsabLc/benevoles-jambville/commit/06370933cdc2738be9f8710f2f4b1d81474d3b81))
+* partager les consignes des assistants et le contexte du projet ([#76](https://github.com/NeitsabLc/benevoles-jambville/issues/76)) ([7da3af5](https://github.com/NeitsabLc/benevoles-jambville/commit/7da3af54e91a3c85181dce212535f91f883efa5e))
+* structurer AGENTS.md, architecture, infra et design system ([#79](https://github.com/NeitsabLc/benevoles-jambville/issues/79)) ([26ec83b](https://github.com/NeitsabLc/benevoles-jambville/commit/26ec83bfc806104cc375362fda61cbd015705e69))
+
 ## [1.6.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.0...v1.6.1) (2026-10-21)
 
 
