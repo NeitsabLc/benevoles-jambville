@@ -19,6 +19,7 @@
 | 2026-10-22 | Les détails privés de production appartiennent au projet Infra Homelab | Dépôt public |
 | 2026-10-28 | Pas de double authentification locale, par exception à la règle commune ; l'authentification basculera à terme sur le SSO SGDF | Éviter un second mécanisme appelé à disparaître |
 | 2026-10-28 | Code, tables et colonnes en français, par exception à la règle commune (code en anglais) | Vocabulaire métier SGDF entièrement français |
+| 2026-11-03 | Images PHP, PostgreSQL et Liquibase : paquets système rafraîchis via l'argument `OS_PACKAGE_REFRESH` à chaque correction de sécurité | Une image épinglée par digest n'embarque pas les correctifs Debian ou Alpine publiés après |
 
 ## 02 Leçons apprises
 
