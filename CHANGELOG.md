@@ -1,5 +1,17 @@
 # Historique des versions
 
+## [1.6.3](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.2...v1.6.3) (2026-11-10)
+
+
+### Corrections
+
+* **security:** mise à jour corrective des composants Symfony 8.1 ([#93](https://github.com/NeitsabLc/benevoles-jambville/issues/93)) ([190c362](https://github.com/NeitsabLc/benevoles-jambville/commit/190c362b5c744a952634f0555fd9a9dcf99e714d))
+
+
+### Documentation
+
+* **contexte:** ménage des fichiers de contexte au 10/11/2026 ([#92](https://github.com/NeitsabLc/benevoles-jambville/issues/92)) ([bbe5c41](https://github.com/NeitsabLc/benevoles-jambville/commit/bbe5c415cc2c42463c8a9ad7a4a3c45ddc42cf72))
+
 ## [1.6.2](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.1...v1.6.2) (2026-11-03)
 
 
