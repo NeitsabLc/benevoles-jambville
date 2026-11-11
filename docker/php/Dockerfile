@@ -12,7 +12,7 @@ FROM php:${PHP_VERSION}-fpm@${PHP_IMAGE_DIGEST} AS php-base
 COPY --chmod=0755 docker/php/verify-php-security.sh /usr/local/bin/verify-php-security
 RUN verify-php-security
 
-ARG OS_PACKAGE_REFRESH=2026-11-03
+ARG OS_PACKAGE_REFRESH=2026-11-11
 
 RUN test -n "$OS_PACKAGE_REFRESH" \
     && apt-get update \
@@ -102,7 +102,7 @@ CMD ["php-fpm"]
 
 FROM nginx:${NGINX_VERSION}@${NGINX_IMAGE_DIGEST} AS nginx-production
 
-ARG OS_PACKAGE_REFRESH=2026-10-21
+ARG OS_PACKAGE_REFRESH=2026-11-11
 
 RUN test -n "$OS_PACKAGE_REFRESH" \
     && apk upgrade --no-cache
