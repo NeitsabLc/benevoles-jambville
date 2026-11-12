@@ -62,7 +62,7 @@ benevole-jambville/
 │  └─ tests/                 PHPUnit
 ├─ database/changelog/       Liquibase : versioned/, repeatable/ (droits), dev/
 ├─ docker/                   images php, nginx, postgres, liquibase (+ maintenance.sh)
-├─ tests/                    Playwright : accessibility/, e2e/, infrastructure/
+├─ tests/                    Playwright : accessibility/, e2e/, infrastructure/, recette/
 ├─ scripts/                  scripts CI, smoke test et vérification des images
 ├─ compose*.yaml             dev, production, livraison par images (release)
 └─ Makefile                  point d'entrée des commandes

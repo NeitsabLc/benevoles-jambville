@@ -74,3 +74,11 @@ branche ──PR──▶ CI ──squash──▶ main ──▶ PR Release Ple
   le `GITHUB_TOKEN` natif publie les images. Détail et droits minimaux : `GITHUB_SETUP.md`.
 - Sauvegardes chiffrées avec une clé publique ; la clé privée reste hors des serveurs et des archives.
 - Ne documenter que des noms de variables, jamais de valeurs.
+
+## 07 Parcours sur la recette déployée
+
+- `make test-recette` (`npm run test:recette`, dossier `tests/recette/`) rejoue des parcours connectés sur la recette : lecture des pages d'un bénévole, puis création, modification et suppression d'une présence à la journée.
+- La suite **écrit puis nettoie** des données en recette : seules les présences du compte de contrôle en mars 2094 portant le repère « Contrôle recette automatique » sont supprimées, à la fin et même après un échec ; le nettoyage vérifie ensuite qu'il ne reste aucune présence du compte ce mois-là.
+- Variables obligatoires, sans valeur par défaut : `RECETTE_URL`, `RECETTE_EMAIL`, `RECETTE_MOT_DE_PASSE`. L'URL doit être en HTTPS et son nom d'hôte contenir `recette` ; la suite refuse aussi de démarrer si `CI` est défini.
+- Compte dédié `recette.controle@jambville.test` (rôle BENEVOLE). Il est créé à la main en recette (jamais via `changelog/dev`). Son mot de passe reste hors dépôt (trousseau macOS, service `benevole-jambville-recette-controle`).
+- Lancée à la main par `verificateur` en mode recette avant une promotion ; jamais en production, jamais en CI, hors `test:browser`.

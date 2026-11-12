@@ -5,6 +5,7 @@
   "scripts": {
     "test:accessibility": "playwright test --config=tests/accessibility/playwright.config.js",
     "test:e2e": "playwright test --config=tests/e2e/playwright.config.js",
+    "test:recette": "playwright test --config=tests/recette/playwright.config.js",
     "test:browser": "npm run test:accessibility && npm run test:e2e"
   },
   "devDependencies": {
