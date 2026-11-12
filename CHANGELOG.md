@@ -1,5 +1,22 @@
 # Historique des versions
 
+## [1.6.4](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.3...v1.6.4) (2026-11-11)
+
+
+### Corrections
+
+* **security:** rafraîchir les paquets système des images php, nginx, postgres et liquibase ([#100](https://github.com/NeitsabLc/benevoles-jambville/issues/100)) ([dbbb598](https://github.com/NeitsabLc/benevoles-jambville/commit/dbbb5988efaa1df3afb0bf6616301068bb4c821c))
+
+
+### Dépendances
+
+* **deps-dev:** bump phpstan/phpstan-doctrine in /app ([#89](https://github.com/NeitsabLc/benevoles-jambville/issues/89)) ([5733842](https://github.com/NeitsabLc/benevoles-jambville/commit/57338420a8b94bcd95d877d9a08d2f1b5a02b286))
+* **deps-dev:** bump the tests-navigateur group with 2 updates ([#98](https://github.com/NeitsabLc/benevoles-jambville/issues/98)) ([b4e3a4b](https://github.com/NeitsabLc/benevoles-jambville/commit/b4e3a4b9a12e4e31eb376e9ea7b6a6e3fbbf4f50))
+* **deps:** bump doctrine/doctrine-bundle from 3.3.2 to 3.3.4 in /app ([#87](https://github.com/NeitsabLc/benevoles-jambville/issues/87)) ([94f82b9](https://github.com/NeitsabLc/benevoles-jambville/commit/94f82b9aeea2f4522215085737db6c12626631b9))
+* **deps:** bump doctrine/orm from 3.6.8 to 3.7.6 in /app ([#90](https://github.com/NeitsabLc/benevoles-jambville/issues/90)) ([12ef2b4](https://github.com/NeitsabLc/benevoles-jambville/commit/12ef2b43dacdab4f819ea83549872a2ccd687fb7))
+* **deps:** bump symfony/monolog-bundle ([#95](https://github.com/NeitsabLc/benevoles-jambville/issues/95)) ([eeca5e0](https://github.com/NeitsabLc/benevoles-jambville/commit/eeca5e00b767326bf4e59c9ce365428ef912abd4))
+* **deps:** bump the actions-github group across 1 directory with 2 updates ([#97](https://github.com/NeitsabLc/benevoles-jambville/issues/97)) ([1139a22](https://github.com/NeitsabLc/benevoles-jambville/commit/1139a226a2315eed0063777291e061e565d77146))
+
 ## [1.6.3](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.2...v1.6.3) (2026-11-10)
 
 
