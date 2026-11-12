@@ -13,7 +13,7 @@ LIQUIBASE := $(DOCKER_COMPOSE) --profile outils run --rm liquibase
 	release-config release-verify release-pull release-backup-now release-db-status release-db-update release-up release-ps release-maintenance-now \
 	logs composer-install console \
 	db-validate db-status db-sql db-update db-prepare-roles db-verify-role-switch db-sync-role-passwords db-finalize-role-hardening db-dev-update db-shell \
-	test-db-reset test analyse-statique style style-fix assets-compile test-accessibility test-e2e test-browser \
+	test-db-reset test analyse-statique style style-fix assets-compile test-accessibility test-e2e test-browser test-recette \
 	backup-now backup-restore-test maintenance-now
 
 help: ## Afficher les commandes disponibles
@@ -139,6 +139,9 @@ test-e2e: db-dev-update assets-compile ## Exécuter les parcours métier Playwri
 
 test-browser: db-dev-update assets-compile ## Exécuter tous les contrôles navigateur
 	npm run test:browser
+
+test-recette: ## Parcours connectés sur la recette déployée (RECETTE_URL, RECETTE_EMAIL, RECETTE_MOT_DE_PASSE requis)
+	npm run test:recette
 
 backup-now: ## Créer immédiatement une sauvegarde ponctuelle
 	$(DOCKER_COMPOSE_PROD) --profile backup run --rm backup
