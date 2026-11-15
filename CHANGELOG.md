@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.6.5](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.4...v1.6.5) (2026-11-15)
+
+
+### Corrections
+
+* **security:** passer l'image PostgreSQL en 18.7 ([#102](https://github.com/NeitsabLc/benevoles-jambville/issues/102)) ([5944670](https://github.com/NeitsabLc/benevoles-jambville/commit/5944670ab3fe5369d570b2a3d741028c7982dfaf))
+
 ## [1.6.4](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.3...v1.6.4) (2026-11-11)
 
 
