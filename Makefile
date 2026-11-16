@@ -140,8 +140,8 @@ test-e2e: db-dev-update assets-compile ## Exécuter les parcours métier Playwri
 test-browser: db-dev-update assets-compile ## Exécuter tous les contrôles navigateur
 	npm run test:browser
 
-test-recette: ## Parcours connectés sur la recette déployée (RECETTE_URL, RECETTE_EMAIL, RECETTE_MOT_DE_PASSE requis)
-	npm run test:recette
+test-recette: ## Parcours connectés sur la recette déployée (adresses dans .local/recette.env, mot de passe dans le trousseau)
+	./scripts/test-recette.sh
 
 backup-now: ## Créer immédiatement une sauvegarde ponctuelle
 	$(DOCKER_COMPOSE_PROD) --profile backup run --rm backup
