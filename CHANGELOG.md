@@ -1,5 +1,18 @@
 # Historique des versions
 
+## [1.7.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.5...v1.7.0) (2026-11-18)
+
+
+### Fonctionnalités
+
+* **recette:** lanceur sans saisie pour la suite de recette ([#104](https://github.com/NeitsabLc/benevoles-jambville/issues/104)) ([1a08348](https://github.com/NeitsabLc/benevoles-jambville/commit/1a083485f729fada2256fa35b82afb3d5dba6fb4))
+
+
+### Documentation
+
+* **recette:** la suite de recette est lancée par verificateur après le déploiement en recette ([#112](https://github.com/NeitsabLc/benevoles-jambville/issues/112)) ([36bc4b5](https://github.com/NeitsabLc/benevoles-jambville/commit/36bc4b5debd15a24f5671c52c7e7f14a5cace769))
+* **recette:** retirer les détails de lancement de la documentation publique ([#113](https://github.com/NeitsabLc/benevoles-jambville/issues/113)) ([3b192b2](https://github.com/NeitsabLc/benevoles-jambville/commit/3b192b258dda0c89209729ac69f14d3495b19bb8))
+
 ## [1.6.5](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.4...v1.6.5) (2026-11-15)
 
 
