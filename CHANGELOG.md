@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.7.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.0...v1.7.1) (2026-11-19)
+
+
+### Corrections
+
+* **deps:** PHP 8.4.28 ([#115](https://github.com/NeitsabLc/benevoles-jambville/issues/115)) ([01f1af3](https://github.com/NeitsabLc/benevoles-jambville/commit/01f1af3f167a06e0f364bfd0f431647d90653bc1))
+
 ## [1.7.0](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.6.5...v1.7.0) (2026-11-18)
 
 
