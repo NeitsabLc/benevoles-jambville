@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.7.2](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.1...v1.7.2) (2026-11-23)
+
+
+### Corrections
+
+* **deps:** pgjdbc 42.7.15 ([#118](https://github.com/NeitsabLc/benevoles-jambville/issues/118)) ([2eeecf6](https://github.com/NeitsabLc/benevoles-jambville/commit/2eeecf62f52db19fb6371566ccb40c398f3cd2a2))
+
 ## [1.7.1](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.0...v1.7.1) (2026-11-19)
 
 
