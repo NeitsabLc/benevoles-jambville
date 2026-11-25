@@ -93,6 +93,9 @@ jobs:
       - name: Vérifier le lanceur de la suite de recette
         run: python3 tests/infrastructure/test_lanceur_recette.py
 
+      - name: Vérifier que la relance manuelle de la publication déclenche la recette
+        run: python3 tests/infrastructure/test_relance_publication.py
+
       - name: Preparer la configuration de CI
         run: ./scripts/ci-prepare-env.sh
 
