@@ -82,7 +82,7 @@ jobs:
 
       - name: Publier les secrets Trivy dans GitHub Security
         if: ${{ always() && hashFiles('.sarif/trivy-secrets.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4
         with:
           sarif_file: .sarif/trivy-secrets.sarif
           category: trivy-secrets
@@ -138,7 +138,7 @@ jobs:
 
       - name: Publier les vulnérabilités Trivy dans GitHub Security
         if: ${{ always() && hashFiles('.sarif/trivy-dependencies.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4
         with:
           sarif_file: .sarif/trivy-dependencies.sarif
           category: trivy-dependencies
@@ -400,7 +400,7 @@ jobs:
 
       - name: Publier le rapport Trivy dans GitHub Security
         if: ${{ always() && hashFiles(format('.sarif/trivy-image-{0}.sarif', matrix.image)) != '' }}
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4
         with:
           sarif_file: .sarif/trivy-image-${{ matrix.image }}.sarif
           category: trivy-image-${{ matrix.image }}
