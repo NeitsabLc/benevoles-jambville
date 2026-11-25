@@ -270,6 +270,10 @@ jobs:
 
   promouvoir-version:
     name: Promouvoir ${{ matrix.image }} sans reconstruire
+    if: >-
+      needs.valider-tag.result == 'success' &&
+      needs.tester-candidats.result == 'success' &&
+      !cancelled()
     needs:
       - valider-tag
       - tester-candidats
@@ -364,6 +368,11 @@ jobs:
 
   deployer-recette:
     name: Déclencher le déploiement en recette
+    if: >-
+      needs.valider-tag.result == 'success' &&
+      needs.tester-candidats.result == 'success' &&
+      needs.promouvoir-version.result == 'success' &&
+      !cancelled()
     needs:
       - valider-tag
       - tester-candidats
