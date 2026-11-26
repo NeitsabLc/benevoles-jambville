@@ -1,5 +1,12 @@
 # Historique des versions
 
+## [1.7.4](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.3...v1.7.4) (2026-11-26)
+
+
+### Corrections
+
+* **deps:** mise à jour de Symfony ([#125](https://github.com/NeitsabLc/benevoles-jambville/issues/125)) ([9e538a0](https://github.com/NeitsabLc/benevoles-jambville/commit/9e538a0fcc078c3d27470e5ae67e6d3d4e1d7d19))
+
 ## [1.7.3](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.2...v1.7.3) (2026-11-25)
 
 
