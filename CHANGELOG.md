@@ -1,5 +1,13 @@
 # Historique des versions
 
+## [1.7.3](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.2...v1.7.3) (2026-11-25)
+
+
+### Corrections
+
+* **ci:** la relance manuelle de la publication déclenche la recette ([#121](https://github.com/NeitsabLc/benevoles-jambville/issues/121)) ([2a1a0c8](https://github.com/NeitsabLc/benevoles-jambville/commit/2a1a0c81daddde73560a84e8348240abf4124b60))
+* **deps:** twig 3.31.1 ([#122](https://github.com/NeitsabLc/benevoles-jambville/issues/122)) ([11112ae](https://github.com/NeitsabLc/benevoles-jambville/commit/11112ae6e80f1149d01e0ae3c56e8f24daf51694))
+
 ## [1.7.2](https://github.com/NeitsabLc/benevoles-jambville/compare/v1.7.1...v1.7.2) (2026-11-23)
 
 
